@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+scipy = "*"
+pandas = "*"
+matplotlib = "*"
+dash = "*"
+plotly = "*"
+phylib = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
+
+[packages.1df320e]
+path = "/home/INT/losada.c/Documents/codes/EphysVibe"

@@ -1,0 +1,7 @@
+/home/INT/losada.c/Documents/data/Riesling/session_struct/v4/spikes/2023-03-14_10-33-51_Riesling_v4_e1_r1_sp.h5
+/home/INT/losada.c/Documents/data/Riesling/session_struct/v4/spikes/2023-03-16_10-20-01_Riesling_v4_e1_r1_sp.h5
+/home/INT/losada.c/Documents/data/Riesling/session_struct/v4/spikes/2023-03-17_10-11-51_Riesling_v4_e1_r1_sp.h5
+/home/INT/losada.c/Documents/data/Riesling/session_struct/v4/spikes/2023-03-20_10-39-08_Riesling_v4_e1_r1_sp.h5
+/home/INT/losada.c/Documents/data/Riesling/session_struct/v4/spikes/2023-03-21_10-40-02_Riesling_v4_e1_r1_sp.h5
+/home/INT/losada.c/Documents/data/Riesling/session_struct/v4/spikes/2023-03-22_10-34-47_Riesling_v4_e1_r1_sp.h5
+/home/INT/losada.c/Documents/data/Riesling/session_struct/v4/spikes/2023-03-30_10-36-53_Riesling_v4_e1_r1_sp.h5

@@ -1,0 +1,2 @@
+from phy.apps.template import template_gui
+template_gui("/envau/work/invibe/USERS/IBOS/openephys/Riesling/2023-02-27_10-50-03/Record Node 102/experiment1/recording1/continuous/Acquisition_Board-100.Rhythm Data/params.py")
