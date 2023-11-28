@@ -347,7 +347,7 @@ all_pfc_orient_p        =   np.array(all_pfc_orient_p)
 all_pfc_color_p         =   np.array(all_pfc_color_p) 
 all_pfc_neutral_p       =   np.array(all_pfc_neutral_p) 
 
-lat_pfc_orient, lat_pfc_color, lat_pfc_neutral  =   definelatencies(all_pfc_orient_p, all_pfc_color_p, all_pfc_neutral_p, win=75, threshold=75):
+lat_pfc_orient, lat_pfc_color, lat_pfc_neutral  =   definelatencies(all_pfc_orient_p, all_pfc_color_p, all_pfc_neutral_p, win=75, threshold=75)
 
 pfc_sample_ROC_values   =   ["ROC value neutral", all_pfc_neutral_value, "ROC value orient", all_pfc_orient_value, "ROC value color", all_pfc_color_value]
 pfc_sample_ROC_p        =   ["p value neutral", all_pfc_neutral_p, "p value orient", all_pfc_orient_p, "p value color", all_pfc_color_p]
@@ -419,7 +419,7 @@ all_v4_orient_p   = np.array(all_v4_orient_p)
 all_v4_color_p   = np.array(all_v4_color_p) 
 all_v4_neutral_p   = np.array(all_v4_neutral_p) 
 
-lat_v4_orient, lat_v4_color, lat_v4_neutral  =   definelatencies(all_v4_orient_p, all_v4_color_p, all_v4_neutral_p, win=75, threshold=75):
+lat_v4_orient, lat_v4_color, lat_v4_neutral  =   definelatencies(all_v4_orient_p, all_v4_color_p, all_v4_neutral_p, win=75, threshold=75)
 
 v4_sample_ROC_values   =   ["ROC value neutral", all_v4_neutral_value, "ROC value orient", all_v4_orient_value, "ROC value color", all_v4_color_value]
 v4_sample_ROC_p        =   ["p value neutral", all_v4_neutral_p, "p value orient", all_v4_orient_p, "p value color", all_v4_color_p]
