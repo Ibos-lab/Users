@@ -36,25 +36,15 @@ def scale_p(x, out_range=(-1, 1)):
     return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
 
 def compute_roc_auc(group1,group2):
-    #roc_score:Dict[str,list] = defaultdict(list)
-    # scaler = MinMaxScaler(feature_range=(-1,1))
-    # scaler.fit(np.arange(0,1,0.1).reshape(-1, 1))
     rng = np.random.default_rng(seed=seed)
-    #it_seed = rng.integers(low=1, high=2023, size=a.shape[1], dtype=int)
     roc_score = []
     p = []
     for n_win in np.arange(group1.shape[1]):
-        # if n_win == 316:
-        #     print(n_win)
         g1 = group1[:,n_win]
         g2 = group2[:,n_win]
-        # Wilcoxon rank-sum 
     
-        p.append(stats.ttest_ind(g1, g2)[1])#stats.ttest_ind
-        # min_fr, max_fr = np.concatenate([g1,g2]).min(),np.concatenate([g1,g2]).max()
-
-        thresholds = np.unique(np.concatenate([g1,g2]))#np.arange(min_fr,max_fr+0.01,0.01)
-
+        p.append(stats.ttest_ind(g1, g2)[1])
+        thresholds = np.unique(np.concatenate([g1,g2]))
         y_g1, y_g2 = np.ones(len(g1)),np.zeros(len(g2))
         score=0.5
         fpr,tpr=[],[]
@@ -70,13 +60,11 @@ def compute_roc_auc(group1,group2):
             fpr.append(fp/ (fp+tn) )
         if len(fpr) > 1:
             fpr,tpr=np.array(fpr),np.array(tpr)
-            #idx_sort=fpr.argsort()
             score = metrics.auc(fpr[fpr.argsort()],tpr[fpr.argsort()])
         roc_score.append(score)
-        # else:
-        #     roc_score.append(score)
+        
     roc_score = np.array(roc_score)
-    roc_score = scale_p(np.round(roc_score,2),out_range=[-1,1])#scaler.transform(np.round(roc_score,2).reshape(-1, 1)).squeeze()
+    roc_score = scale_p(np.round(roc_score,2),out_range=[-1,1])
     return roc_score,p
 
 
@@ -86,21 +74,15 @@ def get_mag_ang(data,bhv,i_neuron,in_out, date):
     
     year    =   int(date[:4])
     month   =   int(date[5:7])
-    day     =   int(date[8:10])
-
+    
     trials_b1 = np.where(np.logical_and(data.trial_error == 0, data.block == 1))[0]
     if np.any(np.isnan(data.neuron_cond)):
-            neuron_cond = np.ones(len(data.clustersgroup))
+        neuron_cond = np.ones(len(data.clustersgroup))
     else:
         neuron_cond = data.neuron_cond
             
     if year<2023:
-        shifts = data.code_samples[
-            trials_b1,
-            np.where(data.code_numbers[trials_b1] == task_constants.EVENTS_B1["sample_on"])[
-                1
-            ],
-        ]-t_before
+        shifts = data.code_samples[trials_b1,np.where(data.code_numbers[trials_b1] == task_constants.EVENTS_B1["sample_on"])[1]]-t_before
         
         task = def_task.create_task_frame(
             condition=bhv.condition[trials_b1],
@@ -137,46 +119,31 @@ def get_mag_ang(data,bhv,i_neuron,in_out, date):
             neuron_cond=neuron_cond,
             )      
  
-    elif month>=11:        
-        shifts = data.code_samples[
-            trials_b1,
-            np.where(data.code_numbers[trials_b1] == task_constants3.EVENTS_B1["sample_on"])[
-                1
-            ],
-        ]-t_before
-
+    elif month>=11:
+        shifts = data.code_samples[trials_b1,np.where(data.code_numbers[trials_b1] == task_constants3.EVENTS_B1["sample_on"])[1]]-t_before
         
         task = def_task3.create_task_frame(
             condition=bhv.condition[trials_b1],
             test_stimuli=bhv.test_stimuli[trials_b1],
             samples_cond=task_constants3.SAMPLES_COND,
-            neuron_cond=neuron_cond,
-            )     
+            neuron_cond=neuron_cond)     
         
     roll_sp = SpikeData.indep_roll(data.sp_samples[trials_b1,i_neuron], shifts=-shifts.astype(int), axis=1)[:,:t_after+t_before]
     
     task = task[(task['i_neuron']==i_neuron)&(task['in_out']==in_out)]
-
     o1_c1_trials = task[task['sample']=='o1_c1']['trial_idx'].values
     o1_c5_trials = task[task['sample']=='o1_c5']['trial_idx'].values
     o5_c1_trials = task[task['sample']=='o5_c1']['trial_idx'].values
     o5_c5_trials = task[task['sample']=='o5_c5']['trial_idx'].values
     o0_c0_trials = task[task['sample']=='o0_c0']['trial_idx'].values
-
     win = 100
     step = 1
     min_n_tr = np.min([len(o1_c1_trials),len(o1_c5_trials),len(o5_c1_trials),len(o5_c5_trials)])
     if min_n_tr < 3:
         nan_array = np.full(t_after+t_before-win,np.nan)
         return nan_array,nan_array,nan_array,nan_array,nan_array,nan_array,nan_array,nan_array,nan_array,nan_array
-    # rng = np.random.default_rng(seed=seed)
-    # o1_c1_trials = rng.choice(o1_c1_trials, size=min_n_tr, replace=False)
-    # o1_c5_trials = rng.choice(o1_c5_trials, size=min_n_tr, replace=False)
-    # o5_c1_trials = rng.choice(o5_c1_trials, size=min_n_tr, replace=False)
-    # o5_c5_trials = rng.choice(o5_c5_trials, size=min_n_tr, replace=False)
-
+    
     avg_sp = moving_average(data=roll_sp,win=win, step=step)[:,:-win]
-
     c1_sp = avg_sp[np.concatenate([o1_c1_trials,o5_c1_trials])] 
     c5_sp = avg_sp[np.concatenate([o5_c5_trials,o1_c5_trials])] 
     o1_sp = avg_sp[np.concatenate([o1_c1_trials,o1_c5_trials])] 
@@ -195,66 +162,51 @@ def get_mag_ang(data,bhv,i_neuron,in_out, date):
     mag = np.sqrt(x**2+y**2)
     ang = np.arctan2(y,x)*180/np.pi
     ang = np.where(ang >=0,ang,ang+360)
-
     return mag,ang,orient,color,sample_neutral,p_orient, p_color, p_sample_neutral, o1_sp,o5_sp, c1_sp,c5_sp,non_neutral_sp,neutral_sp
 
 def definelatencies(p_orient, p_color, p_neutral, win, threshold):
-# p_orient=all_lip_orient_p
-# p_color=all_lip_color_p
-# p_neutral=all_lip_neutral_p
-# step=1
-# win=75
-# threshold=75
-   latorient=[]
-   latcolor=[]
-   latneutral=[]
-
-   for i in np.arange(p_color.shape[0]):
-      
-      tmpO=[]
-      tmpC=[]
-      tmpN=[]
-
-      sigO=np.zeros(p_orient.shape[1])
-      sigO[np.where(p_orient[i,:]<0.01)]=1
-      
-
-      sigC=np.zeros(p_color.shape[1])
-      sigC[np.where(p_color[i,:]<0.01)]=1
-      
-      sigN=np.zeros(p_neutral.shape[1])
-      sigN[np.where(p_neutral[i,:]<0.01)]=1
-
-      for i_step in np.arange(sigO.shape[0]):
-         if sigO[i_step]==1 and np.sum(sigO[i_step:i_step+win])>=threshold:
-            tmpO.append(i_step)  
-      
-         if sigC[i_step]==1 and np.sum(sigC[i_step:i_step+win])>=threshold:
-            tmpC.append(i_step) 
+    latorient=[]
+    latcolor=[]
+    latneutral=[]
+    for i in np.arange(p_color.shape[0]):
+        tmpO=[]
+        tmpC=[]
+        tmpN=[]
+        
+        sigO=np.zeros(p_orient.shape[1])
+        sigO[np.where(p_orient[i,:]<0.01)]=1
+        
+        sigC=np.zeros(p_color.shape[1])
+        sigC[np.where(p_color[i,:]<0.01)]=1
+        sigN=np.zeros(p_neutral.shape[1])
+        sigN[np.where(p_neutral[i,:]<0.01)]=1
+        for i_step in np.arange(sigO.shape[0]):
+            if sigO[i_step]==1 and np.sum(sigO[i_step:i_step+win])>=threshold:
+                tmpO.append(i_step)
+            if sigC[i_step]==1 and np.sum(sigC[i_step:i_step+win])>=threshold:
+                tmpC.append(i_step) 
          
-         if sigN[i_step]==1 and np.sum(sigN[i_step:i_step+win])>=threshold:
-            tmpN.append(i_step) 
+            if sigN[i_step]==1 and np.sum(sigN[i_step:i_step+win])>=threshold:
+                tmpN.append(i_step) 
       
-      if not tmpO:
-         latorient.append(np.nan)  
-      else:
-         latorient.append(tmpO[0])  
+        if not tmpO:
+            latorient.append(np.nan)  
+        else:
+            latorient.append(tmpO[0])  
       
-      if not tmpC:
-         latcolor.append(np.nan)  
-      else:
-         latcolor.append(tmpC[0]) 
-
-      if not tmpN:
-         latneutral.append(np.nan)  
-      else:
-         latneutral.append(tmpN[0])  
-
-   latorient=np.array(latorient)
-   latcolor=np.array(latcolor)
-   latneutral=np.array(latneutral)
-
-   return latorient, latcolor, latneutral
+        if not tmpC:
+            latcolor.append(np.nan)  
+        else:
+            latcolor.append(tmpC[0])
+        if not tmpN:
+            latneutral.append(np.nan)
+        else:
+            latneutral.append(tmpN[0])
+    latorient=np.array(latorient)
+    latcolor=np.array(latcolor)
+    latneutral=np.array(latneutral)
+    
+    return latorient, latcolor, latneutral
 
 
 directory_b1    =   "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/session_struct/"
@@ -281,7 +233,6 @@ pfc_neuron=[]
 
 paths=spike_pfc_files
 for p in paths:
-    
     s_path = str(p).split(os.sep)[-1]
     date    =   s_path[:19]
     index   =   s_path.find('g_')
@@ -292,8 +243,6 @@ for p in paths:
     
     i_good, i_mua = 1, 1
     for i_neuron,cluster in enumerate(data.clustersgroup):
-
-
         if cluster == "good":
             i_cluster = i_good
             i_good += 1
@@ -342,10 +291,10 @@ pfc_sample_ROC_p        =   ["p value neutral", all_pfc_neutral_p, "p value orie
 pfc_sample_latencies    =   ["Neutral lat", lat_pfc_neutral, "orient lat", lat_pfc_orient, "color lat", lat_pfc_orient, ]
 
 pfc_sampe_ROC_analyses=[pfc_sample_ROC_values, pfc_sample_ROC_p, pfc_sample_latencies]
-with open("/envau/work/invibe/USERS/IBOS/data/Riesling/ROCanalayses/pfcsampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/pfcsampleROC", "wb") as fp: 
     pickle.dump(pfc_sampe_ROC_analyses, fp)
 
-## v4
+## V4
 all_v4_mag,all_v4_ang=[],[]
 all_v4_orient_value, all_v4_color_value, all_v4_neutral_value=[],[],[]
 all_v4_orient_p,all_v4_color_p,all_v4_neutral_p=[],[],[]
@@ -354,7 +303,6 @@ v4_neuron=[]
 
 paths=spike_v4_files
 for p in paths:
-    
     s_path = str(p).split(os.sep)[-1]
     date    =   s_path[:19]
     index   =   s_path.find('g_')
@@ -364,7 +312,6 @@ for p in paths:
     s_path = os.path.normpath(p).split(os.sep)
     
     i_good, i_mua = 1, 1
-    
     for i_neuron,cluster in enumerate(data.clustersgroup):
         if cluster == "good":
             i_cluster = i_good
@@ -376,7 +323,7 @@ for p in paths:
             i_mua += 1
 
         in_out = "in"
-        
+
         mag, ang, orient, color, sample_neutral, p_orient, p_color, p_sample_neutral, o1_sp, o5_sp, c1_sp,c5_sp,non_neutral_sp,neutral_sp  = get_mag_ang(data,bhv,i_neuron,in_out, date)
         
         all_v4_mag.append(mag)
@@ -385,7 +332,7 @@ for p in paths:
         all_v4_orient_value.append(orient)
         all_v4_color_value.append(color)
         all_v4_neutral_value.append(sample_neutral)
-        
+
         all_v4_orient_p.append(p_orient)
         all_v4_color_p.append(p_color)
         all_v4_neutral_p.append(p_sample_neutral)
@@ -397,15 +344,15 @@ for p in paths:
         
         v4_neuron.append(cluster+str(i_cluster)+'_'+s_path[-1][:-25])
 
-all_v4_mag     =   np.array(all_v4_mag)     
-all_v4_ang     =   np.array(all_v4_ang)     
-all_v4_orient_value   =   np.array(all_v4_orient_value) 
-all_v4_color_value  =   np.array(all_v4_color_value) 
-all_v4_neutral_value =   np.array(all_v4_neutral_value) 
-all_v4_orient_p=   np.array(all_v4_orient_p) 
-all_v4_orient_p   = np.array(all_v4_orient_p) 
-all_v4_color_p   = np.array(all_v4_color_p) 
-all_v4_neutral_p   = np.array(all_v4_neutral_p) 
+all_v4_mag             =   np.array(all_v4_mag)     
+all_v4_ang             =   np.array(all_v4_ang)     
+all_v4_orient_value    =   np.array(all_v4_orient_value) 
+all_v4_color_value     =   np.array(all_v4_color_value) 
+all_v4_neutral_value   =   np.array(all_v4_neutral_value) 
+all_v4_orient_p        =   np.array(all_v4_orient_p) 
+all_v4_orient_p        =   np.array(all_v4_orient_p) 
+all_v4_color_p         =   np.array(all_v4_color_p) 
+all_v4_neutral_p       =   np.array(all_v4_neutral_p) 
 
 lat_v4_orient, lat_v4_color, lat_v4_neutral  =   definelatencies(all_v4_orient_p, all_v4_color_p, all_v4_neutral_p, win=75, threshold=75)
 
@@ -414,10 +361,10 @@ v4_sample_ROC_p        =   ["p value neutral", all_v4_neutral_p, "p value orient
 v4_sample_latencies    =   ["Neutral lat", lat_v4_neutral, "orient lat", lat_v4_orient, "color lat", lat_v4_orient, ]
 
 v4_sampe_ROC_analyses=[v4_sample_ROC_values, v4_sample_ROC_p, v4_sample_latencies]
-with open("/envau/work/invibe/USERS/IBOS/data/Riesling/ROCanalayses/v4sampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/v4sampleROC", "wb") as fp: 
     pickle.dump(v4_sampe_ROC_analyses, fp)
 
-## lip
+## pfc
 all_lip_mag,all_lip_ang=[],[]
 all_lip_orient_value, all_lip_color_value, all_lip_neutral_value=[],[],[]
 all_lip_orient_p,all_lip_color_p,all_lip_neutral_p=[],[],[]
@@ -425,9 +372,7 @@ all_o1_lip_sp, all_o5_lip_sp, all_c1_lip_sp, all_c5_lip_sp=[],[],[],[]
 lip_neuron=[]
 
 paths=spike_lip_files
-
 for p in paths:
-    
     s_path = str(p).split(os.sep)[-1]
     date    =   s_path[:19]
     index   =   s_path.find('g_')
@@ -437,9 +382,7 @@ for p in paths:
     s_path = os.path.normpath(p).split(os.sep)
     
     i_good, i_mua = 1, 1
-    
     for i_neuron,cluster in enumerate(data.clustersgroup):
-
         if cluster == "good":
             i_cluster = i_good
             i_good += 1
@@ -448,8 +391,9 @@ for p in paths:
         else:
             i_cluster = i_mua
             i_mua += 1
-        
+
         in_out = "in"
+
         mag, ang, orient, color, sample_neutral, p_orient, p_color, p_sample_neutral, o1_sp, o5_sp, c1_sp,c5_sp,non_neutral_sp,neutral_sp  = get_mag_ang(data,bhv,i_neuron,in_out, date)
         
         all_lip_mag.append(mag)
@@ -458,7 +402,7 @@ for p in paths:
         all_lip_orient_value.append(orient)
         all_lip_color_value.append(color)
         all_lip_neutral_value.append(sample_neutral)
-  
+
         all_lip_orient_p.append(p_orient)
         all_lip_color_p.append(p_color)
         all_lip_neutral_p.append(p_sample_neutral)
@@ -470,14 +414,15 @@ for p in paths:
         
         lip_neuron.append(cluster+str(i_cluster)+'_'+s_path[-1][:-25])
 
-all_lip_mag     =   np.array(all_lip_mag)     
-all_lip_ang     =   np.array(all_lip_ang)     
-all_lip_orient_value   =   np.array(all_lip_orient_value) 
-all_lip_color_value  =   np.array(all_lip_color_value) 
-all_lip_neutral_value =   np.array(all_lip_neutral_value) 
-all_lip_orient_p=   np.array(all_lip_orient_p) 
-all_lip_color_p   = np.array(all_lip_color_p) 
-all_lip_neutral_p   = np.array(all_lip_neutral_p) 
+all_lip_mag             =   np.array(all_lip_mag)     
+all_lip_ang             =   np.array(all_lip_ang)     
+all_lip_orient_value    =   np.array(all_lip_orient_value) 
+all_lip_color_value     =   np.array(all_lip_color_value) 
+all_lip_neutral_value   =   np.array(all_lip_neutral_value) 
+all_lip_orient_p        =   np.array(all_lip_orient_p) 
+all_lip_orient_p        =   np.array(all_lip_orient_p) 
+all_lip_color_p         =   np.array(all_lip_color_p) 
+all_lip_neutral_p       =   np.array(all_lip_neutral_p) 
 
 lat_lip_orient, lat_lip_color, lat_lip_neutral  =   definelatencies(all_lip_orient_p, all_lip_color_p, all_lip_neutral_p, win=75, threshold=75)
 
@@ -486,7 +431,7 @@ lip_sample_ROC_p        =   ["p value neutral", all_lip_neutral_p, "p value orie
 lip_sample_latencies    =   ["Neutral lat", lat_lip_neutral, "orient lat", lat_lip_orient, "color lat", lat_lip_orient, ]
 
 lip_sampe_ROC_analyses=[lip_sample_ROC_values, lip_sample_ROC_p, lip_sample_latencies]
-with open("/envau/work/invibe/USERS/IBOS/data/Riesling/ROCanalayses/LIPsampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/lipsampleROC", "wb") as fp: 
     pickle.dump(lip_sampe_ROC_analyses, fp)
 
 
@@ -525,7 +470,7 @@ ax[2].spines['right'].set_visible(False)
 fig.colorbar(im2, ax=ax)
 
 
-plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/ROCanalayses/figures/ROC_pfc.pdf')  
+plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/figures/ROC_pfc.pdf')  
 
 
 # plot v4
@@ -563,7 +508,7 @@ ax[2].spines['right'].set_visible(False)
 fig.colorbar(im2, ax=ax)
 
 
-plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/ROCanalayses/figures/ROC_v4.pdf')  
+plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/figures/ROC_v4.pdf') 
 
 
 # plot LIP
@@ -601,23 +546,4 @@ ax[2].spines['right'].set_visible(False)
 fig.colorbar(im2, ax=ax)
 
 
-plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/ROCanalayses/figures/ROC_lip.pdf')  
-
-
-
-# count_lip_neutral, bins_count = np.histogram(lat_lip_neutral[np.logical_and(lat_lip_neutral>0, lat_lip_neutral< 1200)], bins=10) 
-# pdf_lip_neutral = count_lip_neutral / sum(count_lip_neutral) 
-# cdf_lip_neutral = np.cumsum(pdf_lip_neutral) 
-
-# count_lip_orient, bins_count = np.histogram(lat_lip_orient[np.logical_and(lat_lip_orient>0, lat_lip_orient< 1200)], bins=10) 
-# pdf_lip_orient = count_lip_orient / sum(count_lip_orient) 
-# cdf_lip_orient = np.cumsum(pdf_lip_orient) 
-
-# count_lip_color, bins_count = np.histogram(lat_lip_color[np.logical_and(lat_lip_color>0, lat_lip_color< 1200)], bins=10) 
-# pdf_lip_color = count_lip_color / sum(count_lip_color) 
-# cdf_lip_color = np.cumsum(pdf_lip_color) 
-
-# plt.plot(bins_count[1:]-400, cdf_lip_neutral, label="LIP neutral") 
-# plt.plot(bins_count[1:]-400, cdf_lip_orient, label="LIP orient") 
-# plt.plot(bins_count[1:]-400, cdf_lip_color, label="LIP color") 
-# plt.legend() 
+plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/figures/ROC_lip.pdf')
