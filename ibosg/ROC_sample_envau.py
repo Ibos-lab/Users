@@ -1,19 +1,6 @@
-
-from sklearn.model_selection import train_test_split, GridSearchCV,KFold,cross_val_score,StratifiedKFold
-from sklearn.svm import SVC,LinearSVC
-from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler
 from sklearn import metrics
-from statsmodels.stats.multitest import multipletests
-from sklearn.multiclass import OneVsRestClassifier
-from statsmodels import api as sm
-from statsmodels.formula.api import ols
-from bioinfokit. analys import stat as bk_stat
-from sklearn.metrics import roc_auc_score
-
-
 import numpy as np
 from matplotlib import pyplot as plt
-import seaborn as sns
 from scipy import signal,stats
 import pandas as pd
 from typing import Dict
@@ -29,6 +16,7 @@ import os
 from matplotlib import cm
 import glob
 import pickle
+seed = 2023
 seed = 2023
 
 def moving_average(data:np.ndarray,win:int, step:int=1)-> np.ndarray:
