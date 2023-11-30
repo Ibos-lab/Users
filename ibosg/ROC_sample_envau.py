@@ -17,7 +17,8 @@ from matplotlib import cm
 import glob
 import pickle
 seed = 2023
-seed = 2023
+
+print('loading functions')
 
 def moving_average(data:np.ndarray,win:int, step:int=1)-> np.ndarray:
     d_shape=data.shape
@@ -208,7 +209,7 @@ def definelatencies(p_orient, p_color, p_neutral, win, threshold):
     
     return latorient, latcolor, latneutral
 
-
+print('defining directories...')
 directory_b1    =   "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/session_struct/"
 bhv_directory   =   os.path.normpath(str(directory_b1) +  "/bhv/")
 
@@ -232,7 +233,11 @@ all_o1_pfc_sp, all_o5_pfc_sp, all_c1_pfc_sp, all_c5_pfc_sp=[],[],[],[]
 pfc_neuron=[]
 
 paths=spike_pfc_files
+print("computing PFC..")
+num=0
 for p in paths:
+    num+=1
+    print(['PFC', num])
     s_path = str(p).split(os.sep)[-1]
     date    =   s_path[:19]
     index   =   s_path.find('g_')
@@ -302,7 +307,11 @@ all_o1_v4_sp, all_o5_v4_sp, all_c1_v4_sp, all_c5_v4_sp=[],[],[],[]
 v4_neuron=[]
 
 paths=spike_v4_files
+print("computing V4...")
+num=0
 for p in paths:
+    num+=1
+    print(['V4', num])
     s_path = str(p).split(os.sep)[-1]
     date    =   s_path[:19]
     index   =   s_path.find('g_')
@@ -364,15 +373,18 @@ v4_sampe_ROC_analyses=[v4_sample_ROC_values, v4_sample_ROC_p, v4_sample_latencie
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/v4sampleROC", "wb") as fp: 
     pickle.dump(v4_sampe_ROC_analyses, fp)
 
-## pfc
+## lip
 all_lip_mag,all_lip_ang=[],[]
 all_lip_orient_value, all_lip_color_value, all_lip_neutral_value=[],[],[]
 all_lip_orient_p,all_lip_color_p,all_lip_neutral_p=[],[],[]
 all_o1_lip_sp, all_o5_lip_sp, all_c1_lip_sp, all_c5_lip_sp=[],[],[],[]
 lip_neuron=[]
-
+print("computing LIP...")
+num=0
 paths=spike_lip_files
 for p in paths:
+    num+=1
+    print(['LIP', num])
     s_path = str(p).split(os.sep)[-1]
     date    =   s_path[:19]
     index   =   s_path.find('g_')
@@ -434,7 +446,7 @@ lip_sampe_ROC_analyses=[lip_sample_ROC_values, lip_sample_ROC_p, lip_sample_late
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/lipsampleROC", "wb") as fp: 
     pickle.dump(lip_sampe_ROC_analyses, fp)
 
-
+print("LIP done")
 # plot pfc
 
 sort_neutral    =   np.argsort(np.mean(all_pfc_neutral_value[:,450:900], axis=1))
