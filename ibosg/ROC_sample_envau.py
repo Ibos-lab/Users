@@ -293,7 +293,7 @@ lat_pfc_orient, lat_pfc_color, lat_pfc_neutral  =   definelatencies(all_pfc_orie
 
 pfc_sample_ROC_values   =   ["ROC value neutral", all_pfc_neutral_value, "ROC value orient", all_pfc_orient_value, "ROC value color", all_pfc_color_value]
 pfc_sample_ROC_p        =   ["p value neutral", all_pfc_neutral_p, "p value orient", all_pfc_orient_p, "p value color", all_pfc_color_p]
-pfc_sample_latencies    =   ["Neutral lat", lat_pfc_neutral, "orient lat", lat_pfc_orient, "color lat", lat_pfc_orient, ]
+pfc_sample_latencies    =   ["Neutral lat", lat_pfc_neutral, "orient lat", lat_pfc_orient, "color lat", lat_pfc_color, ]
 
 pfc_sampe_ROC_analyses=[pfc_sample_ROC_values, pfc_sample_ROC_p, pfc_sample_latencies]
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/pfcsampleROC", "wb") as fp: 
@@ -367,7 +367,7 @@ lat_v4_orient, lat_v4_color, lat_v4_neutral  =   definelatencies(all_v4_orient_p
 
 v4_sample_ROC_values   =   ["ROC value neutral", all_v4_neutral_value, "ROC value orient", all_v4_orient_value, "ROC value color", all_v4_color_value]
 v4_sample_ROC_p        =   ["p value neutral", all_v4_neutral_p, "p value orient", all_v4_orient_p, "p value color", all_v4_color_p]
-v4_sample_latencies    =   ["Neutral lat", lat_v4_neutral, "orient lat", lat_v4_orient, "color lat", lat_v4_orient, ]
+v4_sample_latencies    =   ["Neutral lat", lat_v4_neutral, "orient lat", lat_v4_orient, "color lat", lat_v4_color, ]
 
 v4_sampe_ROC_analyses=[v4_sample_ROC_values, v4_sample_ROC_p, v4_sample_latencies]
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/v4sampleROC", "wb") as fp: 
@@ -440,7 +440,7 @@ lat_lip_orient, lat_lip_color, lat_lip_neutral  =   definelatencies(all_lip_orie
 
 lip_sample_ROC_values   =   ["ROC value neutral", all_lip_neutral_value, "ROC value orient", all_lip_orient_value, "ROC value color", all_lip_color_value]
 lip_sample_ROC_p        =   ["p value neutral", all_lip_neutral_p, "p value orient", all_lip_orient_p, "p value color", all_lip_color_p]
-lip_sample_latencies    =   ["Neutral lat", lat_lip_neutral, "orient lat", lat_lip_orient, "color lat", lat_lip_orient, ]
+lip_sample_latencies    =   ["Neutral lat", lat_lip_neutral, "orient lat", lat_lip_orient, "color lat", lat_lip_color ]
 
 lip_sampe_ROC_analyses=[lip_sample_ROC_values, lip_sample_ROC_p, lip_sample_latencies]
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/lipsampleROC", "wb") as fp: 
