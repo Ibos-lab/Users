@@ -10,15 +10,6 @@ from ephysvibe.structures.neuron_data import NeuronData
 from ephysvibe.structures.spike_data import SpikeData
 from ephysvibe.structures.bhv_data import BhvData
 from ephysvibe.trials import align_trials
-from alive_progress.styles import showtime
-from alive_progress import alive_bar
-import time
-# from ephysvibe.trials.spikes import firing_rate,sp_constants
-# from ephysvibe.trials import select_trials
-# from ephysvibe.spike_sorting import config
-# from ephysvibe.structures.spike_data import SpikeData
-# from ephysvibe.structures.bhv_data import BhvData
-# from ephysvibe.trials.spikes import firing_rate
 from ephysvibe.task import task_constants
 import os 
 from matplotlib import cm
@@ -117,7 +108,7 @@ def definelatencies(p_values, win, threshold):
 
 
 
-directory_b1    =   "W:/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/"
+directory_b1    =   "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/"
 bhv_directory   =   os.path.normpath(str(directory_b1) +  "/bhv/")
 
 area="pfc"
@@ -268,7 +259,8 @@ pfc_sample_t_ROC_p      =   ["p value t1 neutral", all_pfc_t_neutral_p, "p value
 pfc_sample_latencies    =   ["Neutral sample lat", lat_pfc_neutral, "orient sample lat", lat_pfc_orient, "color sample lat", lat_pfc_orient, ]
 
 pfc_sample_ROC_analyses  =   [pfc_sample_s_ROC_values, pfc_sample_s_ROC_p, pfc_sample_t_ROC_values, pfc_sample_t_ROC_p, pfc_sample_latencies]
-with open("C:/Users/ibos.g/Documents/Data/INT-Marseille/OpenEphys/Riesling/ROCanalayses/pfcsampleROC", "wb") as fp: 
+/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROCanalayses/pfcsampleROC", "wb") as fp: 
     pickle.dump(pfc_sample_ROC_analyses, fp)
 
 
@@ -407,7 +399,7 @@ v4_sample_t_ROC_p      =   ["p value t1 neutral", all_v4_t_neutral_p, "p value T
 v4_sample_latencies    =   ["Neutral sample lat", lat_v4_neutral, "orient sample lat", lat_v4_orient, "color sample lat", lat_v4_orient, ]
 
 v4_sample_ROC_analyses  =   [v4_sample_s_ROC_values, v4_sample_s_ROC_p, v4_sample_t_ROC_values, v4_sample_t_ROC_p, v4_sample_latencies]
-with open("C:/Users/ibos.g/Documents/Data/INT-Marseille/OpenEphys/Riesling/ROCanalayses/v4sampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROCanalayses/v4sampleROC", "wb") as fp: 
     pickle.dump(v4_sample_ROC_analyses, fp)
 
 
@@ -546,7 +538,7 @@ lip_sample_t_ROC_p      =   ["p value t1 neutral", all_lip_t_neutral_p, "p value
 lip_sample_latencies    =   ["Neutral sample lat", lat_lip_neutral, "orient sample lat", lat_lip_orient, "color sample lat", lat_lip_orient, ]
 
 lip_sample_ROC_analyses  =   [lip_sample_s_ROC_values, lip_sample_s_ROC_p, lip_sample_t_ROC_values, lip_sample_t_ROC_p, lip_sample_latencies]
-with open("C:/Users/ibos.g/Documents/Data/INT-Marseille/OpenEphys/Riesling/ROCanalayses/LIPsampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROCanalayses/LIPsampleROC", "wb") as fp: 
     pickle.dump(lip_sample_ROC_analyses, fp)
 
 
@@ -586,7 +578,7 @@ ax[2].spines['right'].set_visible(False)
 fig.colorbar(im2, ax=ax)
 
 
-plt.savefig('C:/Users/ibos.g/Documents/Data/INT-Marseille/OpenEphys/Riesling/figures/ROC_pfc.pdf')  
+plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/figures/ROC_pfc.pdf')  
 
 
 
@@ -625,7 +617,7 @@ ax[2].spines['right'].set_visible(False)
 fig.colorbar(im2, ax=ax)
 
 
-plt.savefig('C:/Users/ibos.g/Documents/Data/INT-Marseille/OpenEphys/Riesling/figures/ROC_v4.pdf')  
+plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/figures/ROC_v4.pdf')  
 
 
 
@@ -664,7 +656,7 @@ ax[2].spines['right'].set_visible(False)
 fig.colorbar(im2, ax=ax)
 
 
-plt.savefig('C:/Users/ibos.g/Documents/Data/INT-Marseille/OpenEphys/Riesling/figures/ROC_lip.pdf')  
+plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/figures/ROC_lip.pdf')  
 
 
 
