@@ -259,7 +259,7 @@ pfc_sample_t_ROC_p      =   ["p value t1 neutral", all_pfc_t_neutral_p, "p value
 pfc_sample_latencies    =   ["Neutral sample lat", lat_pfc_neutral, "orient sample lat", lat_pfc_orient, "color sample lat", lat_pfc_orient, ]
 
 pfc_sample_ROC_analyses  =   [pfc_sample_s_ROC_values, pfc_sample_s_ROC_p, pfc_sample_t_ROC_values, pfc_sample_t_ROC_p, pfc_sample_latencies]
-/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys
+
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROCanalayses/pfcsampleROC", "wb") as fp: 
     pickle.dump(pfc_sample_ROC_analyses, fp)
 
