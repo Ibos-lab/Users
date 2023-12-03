@@ -260,7 +260,7 @@ pfc_sample_latencies    =   ["Neutral sample lat", lat_pfc_neutral, "orient samp
 
 pfc_sample_ROC_analyses  =   [pfc_sample_s_ROC_values, pfc_sample_s_ROC_p, pfc_sample_t_ROC_values, pfc_sample_t_ROC_p, pfc_sample_latencies]
 
-with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROCanalayses/pfcsampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analaysis/pfcsampleROC", "wb") as fp: 
     pickle.dump(pfc_sample_ROC_analyses, fp)
 
 
@@ -399,7 +399,7 @@ v4_sample_t_ROC_p      =   ["p value t1 neutral", all_v4_t_neutral_p, "p value T
 v4_sample_latencies    =   ["Neutral sample lat", lat_v4_neutral, "orient sample lat", lat_v4_orient, "color sample lat", lat_v4_orient, ]
 
 v4_sample_ROC_analyses  =   [v4_sample_s_ROC_values, v4_sample_s_ROC_p, v4_sample_t_ROC_values, v4_sample_t_ROC_p, v4_sample_latencies]
-with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROCanalayses/v4sampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analaysis/v4sampleROC", "wb") as fp: 
     pickle.dump(v4_sample_ROC_analyses, fp)
 
 
@@ -538,7 +538,7 @@ lip_sample_t_ROC_p      =   ["p value t1 neutral", all_lip_t_neutral_p, "p value
 lip_sample_latencies    =   ["Neutral sample lat", lat_lip_neutral, "orient sample lat", lat_lip_orient, "color sample lat", lat_lip_orient, ]
 
 lip_sample_ROC_analyses  =   [lip_sample_s_ROC_values, lip_sample_s_ROC_p, lip_sample_t_ROC_values, lip_sample_t_ROC_p, lip_sample_latencies]
-with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROCanalayses/LIPsampleROC", "wb") as fp: 
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analaysis/LIPsampleROC", "wb") as fp: 
     pickle.dump(lip_sample_ROC_analyses, fp)
 
 
