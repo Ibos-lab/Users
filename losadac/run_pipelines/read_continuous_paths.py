@@ -2,7 +2,7 @@ import os
 import glob
 
 # import numpy as np
-from ephysvibe.pipelines import plot_sp_b1
+# from ephysvibe.pipelines import plot_sp_b1
 
 lip = "/envau/work/invibe/USERS/IBOS/openephys/Riesling/*/*/*/*/*/*/continuous.dat"  # "/home/INT/losada.c/Documents/data/test/areas/lip/*"
 
