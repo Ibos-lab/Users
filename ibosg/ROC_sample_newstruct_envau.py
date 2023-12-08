@@ -126,7 +126,6 @@ neurons_lip_files     =   glob.glob(neurons_lip_directory, recursive=True)
 
 
 ## pfc
-## pfc
 
 code=1
 select_block=1
@@ -253,16 +252,27 @@ for p in pfc_paths[:numcells]:
     pfc_t1_out_avg_sp       =   moving_average(data=sp_t1_out_on[:, :timetotal_t1],win=win, step=step)[:,:-win]
 
 
-    s_color, p_s_color  =   compute_roc_auc(pfc_sample_in_avg_sp[c1trials, :][0], pfc_sample_in_avg_sp[c5trials, :][0])
-    s_orient,p_s_orient =   compute_roc_auc(pfc_sample_in_avg_sp[o1trials, :][0], pfc_sample_in_avg_sp[o5trials, :][0])
-    sample_s_neutral, p_s_sample_neutral    =   compute_roc_auc(pfc_sample_in_avg_sp[nntrials, :][0], pfc_sample_in_avg_sp[ntrials, :][0])
-    s_pos, p_s_pos      =   compute_roc_auc(pfc_sample_in_avg_sp, pfc_sample_out_avg_sp)
+    if np.nanmean(sp_sample_in_on[:, :timetotal_sample]*1000)>2.5:
+        s_color, p_s_color  =   compute_roc_auc(pfc_sample_in_avg_sp[c1trials, :][0], pfc_sample_in_avg_sp[c5trials, :][0])
+        s_orient,p_s_orient =   compute_roc_auc(pfc_sample_in_avg_sp[o1trials, :][0], pfc_sample_in_avg_sp[o5trials, :][0])
+        sample_s_neutral, p_s_sample_neutral    =   compute_roc_auc(pfc_sample_in_avg_sp[nntrials, :][0], pfc_sample_in_avg_sp[ntrials, :][0])
+        s_pos, p_s_pos      =   compute_roc_auc(pfc_sample_in_avg_sp, pfc_sample_out_avg_sp)
 
-    t_color, p_t_color  = compute_roc_auc(pfc_t1_in_avg_sp[c1trials, :][0], pfc_t1_in_avg_sp[c5trials, :][0])
-    t_orient,p_t_orient = compute_roc_auc(pfc_t1_in_avg_sp[o1trials, :][0], pfc_t1_in_avg_sp[o5trials, :][0])
-    sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(pfc_t1_in_avg_sp[nntrials, :][0], pfc_t1_in_avg_sp[ntrials, :][0])
-    t_pos, p_t_pos  = compute_roc_auc(pfc_t1_in_avg_sp, pfc_t1_out_avg_sp)
-    
+        t_color, p_t_color  = compute_roc_auc(pfc_t1_in_avg_sp[c1trials, :][0], pfc_t1_in_avg_sp[c5trials, :][0])
+        t_orient,p_t_orient = compute_roc_auc(pfc_t1_in_avg_sp[o1trials, :][0], pfc_t1_in_avg_sp[o5trials, :][0])
+        sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(pfc_t1_in_avg_sp[nntrials, :][0], pfc_t1_in_avg_sp[ntrials, :][0])
+        t_pos, p_t_pos  = compute_roc_auc(pfc_t1_in_avg_sp, pfc_t1_out_avg_sp)
+    else: 
+        s_color, p_s_color  =   np.empty([1, pfc_sample_in_avg_sp.shape[1]]), np.empty([1, pfc_sample_in_avg_sp.shape[1]])
+        s_orient,p_s_orient =   np.empty([1, pfc_sample_in_avg_sp.shape[1]]), np.empty([1, pfc_sample_in_avg_sp.shape[1]])
+        sample_s_neutral, p_s_sample_neutral    =   np.empty([1, pfc_sample_in_avg_sp.shape[1]]), np.empty([1, pfc_sample_in_avg_sp.shape[1]])
+        s_pos, p_s_pos      =   np.empty([1, pfc_sample_in_avg_sp.shape[1]]), np.empty([1, pfc_sample_in_avg_sp.shape[1]])
+
+        t_color, p_t_color  = np.empty([1, pfc_t1_in_avg_sp.shape[1]]), np.empty([1, pfc_t1_in_avg_sp.shape[1]])
+        t_orient,p_t_orient = np.empty([1, pfc_t1_in_avg_sp.shape[1]]), np.empty([1, pfc_t1_in_avg_sp.shape[1]])
+        sample_t_neutral, p_t_sample_neutral    =   np.empty([1, pfc_t1_in_avg_sp.shape[1]]), np.empty([1, pfc_t1_in_avg_sp.shape[1]])
+        t_pos, p_t_pos  = np.empty([1, pfc_t1_in_avg_sp.shape[1]]), np.empty([1, pfc_t1_in_avg_sp.shape[1]])
+
     all_pfc_s_orient_value[n, :]    =   s_orient
     all_pfc_s_color_value[n, :]     =   s_color
     all_pfc_s_neutral_value[n, :]   =   sample_s_neutral
@@ -435,16 +445,27 @@ for p in v4_paths[:numcells]:
     v4_t1_out_avg_sp       =   moving_average(data=sp_t1_out_on[:, :timetotal_t1],win=win, step=step)[:,:-win]
 
 
-    s_color, p_s_color  =   compute_roc_auc(v4_sample_in_avg_sp[c1trials, :][0], v4_sample_in_avg_sp[c5trials, :][0])
-    s_orient,p_s_orient =   compute_roc_auc(v4_sample_in_avg_sp[o1trials, :][0], v4_sample_in_avg_sp[o5trials, :][0])
-    sample_s_neutral, p_s_sample_neutral    =   compute_roc_auc(v4_sample_in_avg_sp[nntrials, :][0], v4_sample_in_avg_sp[ntrials, :][0])
-    s_pos, p_s_pos      =   compute_roc_auc(v4_sample_in_avg_sp, v4_sample_out_avg_sp)
+    if np.nanmean(sp_sample_in_on[:, :timetotal_sample]*1000)>2.5:
+        s_color, p_s_color  =   compute_roc_auc(v4_sample_in_avg_sp[c1trials, :][0], v4_sample_in_avg_sp[c5trials, :][0])
+        s_orient,p_s_orient =   compute_roc_auc(v4_sample_in_avg_sp[o1trials, :][0], v4_sample_in_avg_sp[o5trials, :][0])
+        sample_s_neutral, p_s_sample_neutral    =   compute_roc_auc(v4_sample_in_avg_sp[nntrials, :][0], v4_sample_in_avg_sp[ntrials, :][0])
+        s_pos, p_s_pos      =   compute_roc_auc(v4_sample_in_avg_sp, v4_sample_out_avg_sp)
 
-    t_color, p_t_color  = compute_roc_auc(v4_t1_in_avg_sp[c1trials, :][0], v4_t1_in_avg_sp[c5trials, :][0])
-    t_orient,p_t_orient = compute_roc_auc(v4_t1_in_avg_sp[o1trials, :][0], v4_t1_in_avg_sp[o5trials, :][0])
-    sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(v4_t1_in_avg_sp[nntrials, :][0], v4_t1_in_avg_sp[ntrials, :][0])
-    t_pos, p_t_pos  = compute_roc_auc(v4_t1_in_avg_sp, v4_t1_out_avg_sp)
-    
+        t_color, p_t_color  = compute_roc_auc(v4_t1_in_avg_sp[c1trials, :][0], v4_t1_in_avg_sp[c5trials, :][0])
+        t_orient,p_t_orient = compute_roc_auc(v4_t1_in_avg_sp[o1trials, :][0], v4_t1_in_avg_sp[o5trials, :][0])
+        sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(v4_t1_in_avg_sp[nntrials, :][0], v4_t1_in_avg_sp[ntrials, :][0])
+        t_pos, p_t_pos  = compute_roc_auc(v4_t1_in_avg_sp, v4_t1_out_avg_sp)
+    else: 
+        s_color, p_s_color  =   np.empty([1, v4_sample_in_avg_sp.shape[1]]), np.empty([1, v4_sample_in_avg_sp.shape[1]])
+        s_orient,p_s_orient =   np.empty([1, v4_sample_in_avg_sp.shape[1]]), np.empty([1, v4_sample_in_avg_sp.shape[1]])
+        sample_s_neutral, p_s_sample_neutral    =   np.empty([1, v4_sample_in_avg_sp.shape[1]]), np.empty([1, v4_sample_in_avg_sp.shape[1]])
+        s_pos, p_s_pos      =   np.empty([1, v4_sample_in_avg_sp.shape[1]]), np.empty([1, v4_sample_in_avg_sp.shape[1]])
+
+        t_color, p_t_color  = np.empty([1, v4_t1_in_avg_sp.shape[1]]), np.empty([1, v4_t1_in_avg_sp.shape[1]])
+        t_orient,p_t_orient = np.empty([1, v4_t1_in_avg_sp.shape[1]]), np.empty([1, v4_t1_in_avg_sp.shape[1]])
+        sample_t_neutral, p_t_sample_neutral    =   np.empty([1, v4_t1_in_avg_sp.shape[1]]), np.empty([1, v4_t1_in_avg_sp.shape[1]])
+        t_pos, p_t_pos  = np.empty([1, v4_t1_in_avg_sp.shape[1]]), np.empty([1, v4_t1_in_avg_sp.shape[1]])
+
     all_v4_s_orient_value[n, :]    =   s_orient
     all_v4_s_color_value[n, :]     =   s_color
     all_v4_s_neutral_value[n, :]   =   sample_s_neutral
@@ -614,15 +635,27 @@ for p in lip_paths[:numcells]:
     lip_t1_out_avg_sp       =   moving_average(data=sp_t1_out_on[:, :timetotal_t1],win=win, step=step)[:,:-win]
 
 
-    s_color, p_s_color  =   compute_roc_auc(lip_sample_in_avg_sp[c1trials, :][0], lip_sample_in_avg_sp[c5trials, :][0])
-    s_orient,p_s_orient =   compute_roc_auc(lip_sample_in_avg_sp[o1trials, :][0], lip_sample_in_avg_sp[o5trials, :][0])
-    sample_s_neutral, p_s_sample_neutral    =   compute_roc_auc(lip_sample_in_avg_sp[nntrials, :][0], lip_sample_in_avg_sp[ntrials, :][0])
-    s_pos, p_s_pos      =   compute_roc_auc(lip_sample_in_avg_sp, lip_sample_out_avg_sp)
+    if np.nanmean(sp_sample_in_on[:, :timetotal_sample]*1000)>2.5:
+        s_color, p_s_color  =   compute_roc_auc(lip_sample_in_avg_sp[c1trials, :][0], lip_sample_in_avg_sp[c5trials, :][0])
+        s_orient,p_s_orient =   compute_roc_auc(lip_sample_in_avg_sp[o1trials, :][0], lip_sample_in_avg_sp[o5trials, :][0])
+        sample_s_neutral, p_s_sample_neutral    =   compute_roc_auc(lip_sample_in_avg_sp[nntrials, :][0], lip_sample_in_avg_sp[ntrials, :][0])
+        s_pos, p_s_pos      =   compute_roc_auc(lip_sample_in_avg_sp, lip_sample_out_avg_sp)
 
-    t_color, p_t_color  = compute_roc_auc(lip_t1_in_avg_sp[c1trials, :][0], lip_t1_in_avg_sp[c5trials, :][0])
-    t_orient,p_t_orient = compute_roc_auc(lip_t1_in_avg_sp[o1trials, :][0], lip_t1_in_avg_sp[o5trials, :][0])
-    sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(lip_t1_in_avg_sp[nntrials, :][0], lip_t1_in_avg_sp[ntrials, :][0])
-    t_pos, p_t_pos  = compute_roc_auc(lip_t1_in_avg_sp, lip_t1_out_avg_sp)
+        t_color, p_t_color  = compute_roc_auc(lip_t1_in_avg_sp[c1trials, :][0], lip_t1_in_avg_sp[c5trials, :][0])
+        t_orient,p_t_orient = compute_roc_auc(lip_t1_in_avg_sp[o1trials, :][0], lip_t1_in_avg_sp[o5trials, :][0])
+        sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(lip_t1_in_avg_sp[nntrials, :][0], lip_t1_in_avg_sp[ntrials, :][0])
+        t_pos, p_t_pos  = compute_roc_auc(lip_t1_in_avg_sp, lip_t1_out_avg_sp)
+    else: 
+        s_color, p_s_color  =   np.empty([1, lip_sample_in_avg_sp.shape[1]]), np.empty([1, lip_sample_in_avg_sp.shape[1]])
+        s_orient,p_s_orient =   np.empty([1, lip_sample_in_avg_sp.shape[1]]), np.empty([1, lip_sample_in_avg_sp.shape[1]])
+        sample_s_neutral, p_s_sample_neutral    =   np.empty([1, lip_sample_in_avg_sp.shape[1]]), np.empty([1, lip_sample_in_avg_sp.shape[1]])
+        s_pos, p_s_pos      =   np.empty([1, lip_sample_in_avg_sp.shape[1]]), np.empty([1, lip_sample_in_avg_sp.shape[1]])
+
+        t_color, p_t_color  = np.empty([1, lip_t1_in_avg_sp.shape[1]]), np.empty([1, lip_t1_in_avg_sp.shape[1]])
+        t_orient,p_t_orient = np.empty([1, lip_t1_in_avg_sp.shape[1]]), np.empty([1, lip_t1_in_avg_sp.shape[1]])
+        sample_t_neutral, p_t_sample_neutral    =   np.empty([1, lip_t1_in_avg_sp.shape[1]]), np.empty([1, lip_t1_in_avg_sp.shape[1]])
+        t_pos, p_t_pos  = np.empty([1, lip_t1_in_avg_sp.shape[1]]), np.empty([1, lip_t1_in_avg_sp.shape[1]])
+
     
     all_lip_s_orient_value[n, :]    =   s_orient
     all_lip_s_color_value[n, :]     =   s_color
@@ -777,11 +810,7 @@ with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analys
 # ax[2].spines['right'].set_visible(False)
 # fig.colorbar(im2, ax=ax)
 
-
 # plt.savefig('/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/figures/ROC_lip.pdf')  
-
-
-
 
 # count_lip_neutral, bins_count = np.histogram(lat_lip_neutral[np.logical_and(lat_lip_neutral>0, lat_lip_neutral< 1200)], bins=10) 
 # pdf_lip_neutral = count_lip_neutral / sum(count_lip_neutral) 
