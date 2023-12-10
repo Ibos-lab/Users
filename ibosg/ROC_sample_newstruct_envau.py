@@ -262,6 +262,28 @@ for p in pfc_paths[:numcells]:
         t_orient,p_t_orient = compute_roc_auc(pfc_t1_in_avg_sp[o1trials, :][0], pfc_t1_in_avg_sp[o5trials, :][0])
         sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(pfc_t1_in_avg_sp[nntrials, :][0], pfc_t1_in_avg_sp[ntrials, :][0])
         t_pos, p_t_pos  = compute_roc_auc(pfc_t1_in_avg_sp, pfc_t1_out_avg_sp)
+
+        all_pfc_s_orient_value[n, :]    =   s_orient
+        all_pfc_s_color_value[n, :]     =   s_color
+        all_pfc_s_neutral_value[n, :]   =   sample_s_neutral
+        all_pfc_s_pos_value[n,:]        =   s_pos
+
+        all_pfc_s_orient_p[n, :]        =   p_s_orient
+        all_pfc_s_color_p[n, :]         =   p_s_color
+        all_pfc_s_neutral_p[n, :]       =   p_s_sample_neutral
+        all_pfc_s_pos_p[n,:]            =   p_s_pos
+
+        all_pfc_t_orient_value[n, :]    =   t_orient
+        all_pfc_t_color_value[n, :]     =   t_color
+        all_pfc_t_neutral_value[n, :]   =   sample_t_neutral
+        all_pfc_t_pos_value[n,:]        =   t_pos
+
+        all_pfc_t_orient_p[n, :]        =   p_t_orient
+        all_pfc_t_color_p[n, :]         =   p_t_color
+        all_pfc_t_neutral_p[n, :]       =   p_t_sample_neutral
+        all_pfc_t_pos_p[n,:]            =   p_t_pos
+
+        n+=1
     else: 
         s_color, p_s_color  =   np.empty([1, pfc_sample_in_avg_sp.shape[1]]), np.empty([1, pfc_sample_in_avg_sp.shape[1]])
         s_orient,p_s_orient =   np.empty([1, pfc_sample_in_avg_sp.shape[1]]), np.empty([1, pfc_sample_in_avg_sp.shape[1]])
@@ -273,27 +295,7 @@ for p in pfc_paths[:numcells]:
         sample_t_neutral, p_t_sample_neutral    =   np.empty([1, pfc_t1_in_avg_sp.shape[1]]), np.empty([1, pfc_t1_in_avg_sp.shape[1]])
         t_pos, p_t_pos  = np.empty([1, pfc_t1_in_avg_sp.shape[1]]), np.empty([1, pfc_t1_in_avg_sp.shape[1]])
 
-    all_pfc_s_orient_value[n, :]    =   s_orient
-    all_pfc_s_color_value[n, :]     =   s_color
-    all_pfc_s_neutral_value[n, :]   =   sample_s_neutral
-    all_pfc_s_pos_value[n,:]        =   s_pos
-
-    all_pfc_s_orient_p[n, :]        =   p_s_orient
-    all_pfc_s_color_p[n, :]         =   p_s_color
-    all_pfc_s_neutral_p[n, :]       =   p_s_sample_neutral
-    all_pfc_s_pos_p[n,:]            =   p_s_pos
-
-    all_pfc_t_orient_value[n, :]    =   t_orient
-    all_pfc_t_color_value[n, :]     =   t_color
-    all_pfc_t_neutral_value[n, :]   =   sample_t_neutral
-    all_pfc_t_pos_value[n,:]        =   t_pos
-
-    all_pfc_t_orient_p[n, :]        =   p_t_orient
-    all_pfc_t_color_p[n, :]         =   p_t_color
-    all_pfc_t_neutral_p[n, :]       =   p_t_sample_neutral
-    all_pfc_t_pos_p[n,:]            =   p_t_pos
-
-    n+=1
+    
 
 
 
@@ -455,6 +457,28 @@ for p in v4_paths[:numcells]:
         t_orient,p_t_orient = compute_roc_auc(v4_t1_in_avg_sp[o1trials, :][0], v4_t1_in_avg_sp[o5trials, :][0])
         sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(v4_t1_in_avg_sp[nntrials, :][0], v4_t1_in_avg_sp[ntrials, :][0])
         t_pos, p_t_pos  = compute_roc_auc(v4_t1_in_avg_sp, v4_t1_out_avg_sp)
+        
+        all_v4_s_orient_value[n, :]    =   s_orient
+        all_v4_s_color_value[n, :]     =   s_color
+        all_v4_s_neutral_value[n, :]   =   sample_s_neutral
+        all_v4_s_pos_value[n,:]        =   s_pos
+
+        all_v4_s_orient_p[n, :]        =   p_s_orient
+        all_v4_s_color_p[n, :]         =   p_s_color
+        all_v4_s_neutral_p[n, :]       =   p_s_sample_neutral
+        all_v4_s_pos_p[n,:]            =   p_s_pos
+
+        all_v4_t_orient_value[n, :]    =   t_orient
+        all_v4_t_color_value[n, :]     =   t_color
+        all_v4_t_neutral_value[n, :]   =   sample_t_neutral
+        all_v4_t_pos_value[n,:]        =   t_pos
+
+        all_v4_t_orient_p[n, :]        =   p_t_orient
+        all_v4_t_color_p[n, :]         =   p_t_color
+        all_v4_t_neutral_p[n, :]       =   p_t_sample_neutral
+        all_v4_t_pos_p[n,:]            =   p_t_pos
+
+        n+=1
     else: 
         s_color, p_s_color  =   np.empty([1, v4_sample_in_avg_sp.shape[1]]), np.empty([1, v4_sample_in_avg_sp.shape[1]])
         s_orient,p_s_orient =   np.empty([1, v4_sample_in_avg_sp.shape[1]]), np.empty([1, v4_sample_in_avg_sp.shape[1]])
@@ -466,27 +490,7 @@ for p in v4_paths[:numcells]:
         sample_t_neutral, p_t_sample_neutral    =   np.empty([1, v4_t1_in_avg_sp.shape[1]]), np.empty([1, v4_t1_in_avg_sp.shape[1]])
         t_pos, p_t_pos  = np.empty([1, v4_t1_in_avg_sp.shape[1]]), np.empty([1, v4_t1_in_avg_sp.shape[1]])
 
-    all_v4_s_orient_value[n, :]    =   s_orient
-    all_v4_s_color_value[n, :]     =   s_color
-    all_v4_s_neutral_value[n, :]   =   sample_s_neutral
-    all_v4_s_pos_value[n,:]        =   s_pos
-
-    all_v4_s_orient_p[n, :]        =   p_s_orient
-    all_v4_s_color_p[n, :]         =   p_s_color
-    all_v4_s_neutral_p[n, :]       =   p_s_sample_neutral
-    all_v4_s_pos_p[n,:]            =   p_s_pos
-
-    all_v4_t_orient_value[n, :]    =   t_orient
-    all_v4_t_color_value[n, :]     =   t_color
-    all_v4_t_neutral_value[n, :]   =   sample_t_neutral
-    all_v4_t_pos_value[n,:]        =   t_pos
-
-    all_v4_t_orient_p[n, :]        =   p_t_orient
-    all_v4_t_color_p[n, :]         =   p_t_color
-    all_v4_t_neutral_p[n, :]       =   p_t_sample_neutral
-    all_v4_t_pos_p[n,:]            =   p_t_pos
-
-    n+=1
+    
 
 
 
@@ -645,6 +649,29 @@ for p in lip_paths[:numcells]:
         t_orient,p_t_orient = compute_roc_auc(lip_t1_in_avg_sp[o1trials, :][0], lip_t1_in_avg_sp[o5trials, :][0])
         sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(lip_t1_in_avg_sp[nntrials, :][0], lip_t1_in_avg_sp[ntrials, :][0])
         t_pos, p_t_pos  = compute_roc_auc(lip_t1_in_avg_sp, lip_t1_out_avg_sp)
+        
+        all_lip_s_orient_value[n, :]    =   s_orient
+        all_lip_s_color_value[n, :]     =   s_color
+        all_lip_s_neutral_value[n, :]   =   sample_s_neutral
+        all_lip_s_pos_value[n,:]        =   s_pos
+
+        all_lip_s_orient_p[n, :]        =   p_s_orient
+        all_lip_s_color_p[n, :]         =   p_s_color
+        all_lip_s_neutral_p[n, :]       =   p_s_sample_neutral
+        all_lip_s_pos_p[n,:]            =   p_s_pos
+
+        all_lip_t_orient_value[n, :]    =   t_orient
+        all_lip_t_color_value[n, :]     =   t_color
+        all_lip_t_neutral_value[n, :]   =   sample_t_neutral
+        all_lip_t_pos_value[n,:]        =   t_pos
+
+        all_lip_t_orient_p[n, :]        =   p_t_orient
+        all_lip_t_color_p[n, :]         =   p_t_color
+        all_lip_t_neutral_p[n, :]       =   p_t_sample_neutral
+        all_lip_t_pos_p[n,:]            =   p_t_pos
+
+        n+=1
+
     else: 
         s_color, p_s_color  =   np.empty([1, lip_sample_in_avg_sp.shape[1]]), np.empty([1, lip_sample_in_avg_sp.shape[1]])
         s_orient,p_s_orient =   np.empty([1, lip_sample_in_avg_sp.shape[1]]), np.empty([1, lip_sample_in_avg_sp.shape[1]])
@@ -657,28 +684,7 @@ for p in lip_paths[:numcells]:
         t_pos, p_t_pos  = np.empty([1, lip_t1_in_avg_sp.shape[1]]), np.empty([1, lip_t1_in_avg_sp.shape[1]])
 
     
-    all_lip_s_orient_value[n, :]    =   s_orient
-    all_lip_s_color_value[n, :]     =   s_color
-    all_lip_s_neutral_value[n, :]   =   sample_s_neutral
-    all_lip_s_pos_value[n,:]        =   s_pos
-
-    all_lip_s_orient_p[n, :]        =   p_s_orient
-    all_lip_s_color_p[n, :]         =   p_s_color
-    all_lip_s_neutral_p[n, :]       =   p_s_sample_neutral
-    all_lip_s_pos_p[n,:]            =   p_s_pos
-
-    all_lip_t_orient_value[n, :]    =   t_orient
-    all_lip_t_color_value[n, :]     =   t_color
-    all_lip_t_neutral_value[n, :]   =   sample_t_neutral
-    all_lip_t_pos_value[n,:]        =   t_pos
-
-    all_lip_t_orient_p[n, :]        =   p_t_orient
-    all_lip_t_color_p[n, :]         =   p_t_color
-    all_lip_t_neutral_p[n, :]       =   p_t_sample_neutral
-    all_lip_t_pos_p[n,:]            =   p_t_pos
-
-    n+=1
-
+    
 
 
 lat_lip_orient  =   definelatencies(all_lip_s_orient_p, win=75, threshold=75)
@@ -705,7 +711,7 @@ with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analys
 # sort_color      =   np.argsort(np.mean(all_pfc_color_value[:,450:900], axis=1))
 
 # # fig     =   plt.figure(figsize=(10,10))
-# fig, ax      =   plt.subplots(1,3,figsize=(10,5))
+# fig, ax      =   plt.sugitbplots(1,3,figsize=(10,5))
 # im0       =   ax[0].imshow(all_pfc_neutral_value[sort_neutral,:], vmin=-1, vmax=1, cmap='PiYG', aspect='auto')
 # im1       =   ax[1].imshow(all_pfc_orient_value[sort_orient,:], vmin=-1, vmax=1, cmap='PiYG', aspect='auto')
 # im2       =   ax[2].imshow(all_pfc_color_value[sort_orient,:], vmin=-1, vmax=1, cmap='PiYG', aspect='auto')
