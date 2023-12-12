@@ -251,6 +251,7 @@ neurons_lip_files     =   glob.glob(neurons_lip_directory, recursive=True)
 
 
 ## v4 in parralel
+numcells=len(neurons_v4_files)
 v4_roc_data    =   Parallel(n_jobs = -1)(delayed(analyses_per_area_par)(cell) for cell in tqdm(neurons_v4_files[:numcells]))
 
 timetotal_sample=v4_roc_data[0]['timetotal_sample']
@@ -322,6 +323,7 @@ with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analys
     pickle.dump(v4_sample_ROC_analyses, fp)
 
 ## lip in parralel
+numcells=len(neurons_lip_files)
 lip_roc_data    =   Parallel(n_jobs = -1)(delayed(analyses_per_area_par)(cell) for cell in tqdm(neurons_lip_files[:numcells]))
 
 timetotal_sample=lip_roc_data[0]['timetotal_sample']
@@ -394,6 +396,7 @@ with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analys
 
 
 ## pfc in parralel
+numcells=len(neurons_pfc_files)
 pfc_roc_data    =   Parallel(n_jobs = -1)(delayed(analyses_per_area_par)(cell) for cell in tqdm(neurons_pfc_files))
 
 timetotal_sample=pfc_roc_data[0]['timetotal_sample']
