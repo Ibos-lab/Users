@@ -15,6 +15,8 @@ import os
 from matplotlib import cm
 import glob
 import pickle
+from joblib import Parallel, delayed
+from tqdm import tqdm
 seed = 2023
 
 
@@ -37,8 +39,6 @@ def scale_p(x, out_range=(-1, 1)):
 
 
 def compute_roc_auc(group1,group2):
-    
-    
     rng = np.random.default_rng(seed=seed)
 
     roc_score = []
@@ -50,7 +50,7 @@ def compute_roc_auc(group1,group2):
 
         # Wilcoxon rank-sum 
     
-        p.append(stats.ttest_ind(g1, g2)[1])#stats.ttest_ind
+        p.append(stats.ranksums(g1, g2)[1])#stats.ttest_ind
 
 
         thresholds = np.unique(np.concatenate([g1,g2]))
@@ -107,177 +107,130 @@ def definelatencies(p_values, win, threshold):
    return lat
 
 
-def analyses_per_area(paths, time_before_sample, time_before_t1, timetotal_sample, timetotal_t1, win, step, numcells):
+def analyses_per_area_par(cell):
     
     code=1
     select_block=1
-    # time_before_sample  =   400
-    # time_before_t1      =   450
-
-    # timetotal_sample=   time_before_sample+450*3
-    # timetotal_t1    =   time_before_t1+450*2
-    # win=100
-    # step=1
+    time_before_sample=200
+    time_before_t1=450
+    timetotal_sample=400+450*3
+    timetotal_t1=450+450*2
+    win=100
+    step=1
     
+    neu_data    =   NeuronData.from_python_hdf5(cell)
+    date_time   =   neu_data.date_time
     
-    all_s_orient_value      =   np.empty((numcells,timetotal_sample-win,))*np.nan
-    all_s_color_value       =   np.empty((numcells,timetotal_sample-win,))*np.nan
-    all_s_neutral_value     =   np.empty((numcells,timetotal_sample-win,))*np.nan
-    all_s_pos_value         =   np.empty((numcells,timetotal_sample-win,))*np.nan
+    sp_sample_in_on,mask_sample_in = align_trials.align_on(
+            sp_samples=neu_data.sp_samples,
+            code_samples=neu_data.code_samples,
+            code_numbers=neu_data.code_numbers,
+            trial_error=neu_data.trial_error,
+            block=neu_data.block,
+            pos_code=neu_data.pos_code,
+            select_block= select_block,
+            select_pos= code,
+            event ="sample_on",
+            time_before = time_before_sample,
+            error_type= 0,
+        )
 
-    all_s_orient_p          =   np.empty((numcells,timetotal_sample-win,))*np.nan
-    all_s_color_p           =   np.empty((numcells,timetotal_sample-win,))*np.nan
-    all_s_neutral_p         =   np.empty((numcells,timetotal_sample-win,))*np.nan
-    all_s_pos_p             =   np.empty((numcells,timetotal_sample-win,))*np.nan
-
-    all_t_orient_value      =   np.empty((numcells,timetotal_t1-win,))*np.nan
-    all_t_color_value       =   np.empty((numcells,timetotal_t1-win,))*np.nan
-    all_t_neutral_value     =   np.empty((numcells,timetotal_t1-win,))*np.nan
-    all_t_pos_value         =   np.empty((numcells,timetotal_t1-win,))*np.nan
-
-    all_t_orient_p          =   np.empty((numcells,timetotal_t1-win,))*np.nan
-    all_t_color_p           =   np.empty((numcells,timetotal_t1-win,))*np.nan
-    all_t_neutral_p         =   np.empty((numcells,timetotal_t1-win,))*np.nan
-    all_t_pos_p             =   np.empty((numcells,timetotal_t1-win,))*np.nan
-    id=[]
-    meaninsp=[]
+    sp_sample_out_on,mask_sample_out = align_trials.align_on(
+            sp_samples=neu_data.sp_samples,
+            code_samples=neu_data.code_samples,
+            code_numbers=neu_data.code_numbers,
+            trial_error=neu_data.trial_error,
+            block=neu_data.block,
+            pos_code=neu_data.pos_code,
+            select_block= select_block,
+            select_pos= -1,
+            event ="sample_on",
+            time_before = time_before_sample,
+            error_type= 0,
+        )
     
-    n=0
-    for p in paths[:numcells]:
-        print(str(n) + "/" + str(len(paths)))
-        good, mua = 1, 1
-        neu_data    =   NeuronData.from_python_hdf5(p)
-        date_time   =   neu_data.date_time
-        
-        neu_data.cluster_group
-        neu_data.cluster_number
-        if neu_data.cluster_group == "good":
-            good += 1
-            cluster = "neuron"
+    sp_t1_in_on,mask_t1_in = align_trials.align_on(
+            sp_samples=neu_data.sp_samples,
+            code_samples=neu_data.code_samples,
+            code_numbers=neu_data.code_numbers,
+            trial_error=neu_data.trial_error,
+            block=neu_data.block,
+            pos_code=neu_data.pos_code,
+            select_block= select_block,
+            select_pos= code,
+            event ="test_on_1",
+            time_before = time_before_t1,
+            error_type= 0,
+        )
+    
+    sp_t1_out_on,mask_t1_in = align_trials.align_on(
+            sp_samples=neu_data.sp_samples,
+            code_samples=neu_data.code_samples,
+            code_numbers=neu_data.code_numbers,
+            trial_error=neu_data.trial_error,
+            block=neu_data.block,
+            pos_code=neu_data.pos_code,
+            select_block= select_block,
+            select_pos= -1,
+            event ="test_on_1",
+            time_before = time_before_t1,
+            error_type= 0,
+        )
 
-        else:
-            mua += 1
-        
-        sp_sample_in_on,mask_sample_in = align_trials.align_on(
-                sp_samples=neu_data.sp_samples,
-                code_samples=neu_data.code_samples,
-                code_numbers=neu_data.code_numbers,
-                trial_error=neu_data.trial_error,
-                block=neu_data.block,
-                pos_code=neu_data.pos_code,
-                select_block= select_block,
-                select_pos= code,
-                event ="sample_on",
-                time_before = time_before_sample,
-                error_type= 0,
-            )
-
-        sp_sample_out_on,mask_sample_out = align_trials.align_on(
-                sp_samples=neu_data.sp_samples,
-                code_samples=neu_data.code_samples,
-                code_numbers=neu_data.code_numbers,
-                trial_error=neu_data.trial_error,
-                block=neu_data.block,
-                pos_code=neu_data.pos_code,
-                select_block= select_block,
-                select_pos= -1,
-                event ="sample_on",
-                time_before = time_before_sample,
-                error_type= 0,
-            )
-        
-        sp_t1_in_on,mask_t1_in = align_trials.align_on(
-                sp_samples=neu_data.sp_samples,
-                code_samples=neu_data.code_samples,
-                code_numbers=neu_data.code_numbers,
-                trial_error=neu_data.trial_error,
-                block=neu_data.block,
-                pos_code=neu_data.pos_code,
-                select_block= select_block,
-                select_pos= code,
-                event ="test_on_1",
-                time_before = time_before_t1,
-                error_type= 0,
-            )
-        
-        sp_t1_out_on,mask_t1_in = align_trials.align_on(
-                sp_samples=neu_data.sp_samples,
-                code_samples=neu_data.code_samples,
-                code_numbers=neu_data.code_numbers,
-                trial_error=neu_data.trial_error,
-                block=neu_data.block,
-                pos_code=neu_data.pos_code,
-                select_block= select_block,
-                select_pos= -1,
-                event ="test_on_1",
-                time_before = time_before_t1,
-                error_type= 0,
-            )
-
-        o1trials    =   np.where(np.floor(neu_data.sample_id[mask_sample_in]/10)==1)
-        o5trials    =   np.where(np.floor(neu_data.sample_id[mask_sample_in]/10)==5)
-        
-        c1trials    =   np.where(neu_data.sample_id[mask_sample_in]%10==1)
-        c5trials    =   np.where(neu_data.sample_id[mask_sample_in]%10==5)
-        
-        ntrials     =   np.where(neu_data.sample_id[mask_sample_in]==0)
-        nntrials    =   np.where(neu_data.sample_id[mask_sample_in]!=0)
+    o1trials    =   np.where(np.floor(neu_data.sample_id[mask_sample_in]/10)==1)
+    o5trials    =   np.where(np.floor(neu_data.sample_id[mask_sample_in]/10)==5)
+    
+    c1trials    =   np.where(neu_data.sample_id[mask_sample_in]%10==1)
+    c5trials    =   np.where(neu_data.sample_id[mask_sample_in]%10==5)
+    
+    ntrials     =   np.where(neu_data.sample_id[mask_sample_in]==0)
+    nntrials    =   np.where(neu_data.sample_id[mask_sample_in]!=0)
 
 
 
-        sample_in_avg_sp   =   moving_average(data=sp_sample_in_on[:, :timetotal_sample],win=win, step=step)[:,:-win]
-        sample_out_avg_sp   =   moving_average(data=sp_sample_out_on[:, :timetotal_sample],win=win, step=step)[:,:-win]
-        t1_in_avg_sp       =   moving_average(data=sp_t1_in_on[:, :timetotal_t1],win=win, step=step)[:,:-win]
-        t1_out_avg_sp       =   moving_average(data=sp_t1_out_on[:, :timetotal_t1],win=win, step=step)[:,:-win]
-        
-        s_color, p_s_color  =   compute_roc_auc(sample_in_avg_sp[c1trials, :][0], sample_in_avg_sp[c5trials, :][0])
-        s_orient,p_s_orient =   compute_roc_auc(sample_in_avg_sp[o1trials, :][0], sample_in_avg_sp[o5trials, :][0])
-        sample_s_neutral, p_s_sample_neutral    =   compute_roc_auc(sample_in_avg_sp[nntrials, :][0], sample_in_avg_sp[ntrials, :][0])
-        s_pos, p_s_pos      =   compute_roc_auc(sample_in_avg_sp, sample_out_avg_sp)
+    sample_in_avg_sp   =   moving_average(data=sp_sample_in_on[:, :timetotal_sample],win=win, step=step)[:,:-win]
+    sample_out_avg_sp   =   moving_average(data=sp_sample_out_on[:, :timetotal_sample],win=win, step=step)[:,:-win]
+    t1_in_avg_sp       =   moving_average(data=sp_t1_in_on[:, :timetotal_t1],win=win, step=step)[:,:-win]
+    t1_out_avg_sp       =   moving_average(data=sp_t1_out_on[:, :timetotal_t1],win=win, step=step)[:,:-win]
+    
+    s_color, p_s_color  =   compute_roc_auc(sample_in_avg_sp[c1trials, :][0], sample_in_avg_sp[c5trials, :][0])
+    s_orient,p_s_orient =   compute_roc_auc(sample_in_avg_sp[o1trials, :][0], sample_in_avg_sp[o5trials, :][0])
+    s_neutral, p_s_neutral    =   compute_roc_auc(sample_in_avg_sp[nntrials, :][0], sample_in_avg_sp[ntrials, :][0])
+    s_pos, p_s_pos      =   compute_roc_auc(sample_in_avg_sp, sample_out_avg_sp)
 
-        t_color, p_t_color  = compute_roc_auc(t1_in_avg_sp[c1trials, :][0], t1_in_avg_sp[c5trials, :][0])
-        t_orient,p_t_orient = compute_roc_auc(t1_in_avg_sp[o1trials, :][0], t1_in_avg_sp[o5trials, :][0])
-        sample_t_neutral, p_t_sample_neutral    =   compute_roc_auc(t1_in_avg_sp[nntrials, :][0], t1_in_avg_sp[ntrials, :][0])
-        t_pos, p_t_pos  = compute_roc_auc(t1_in_avg_sp, t1_out_avg_sp)
+    t_color, p_t_color  = compute_roc_auc(t1_in_avg_sp[c1trials, :][0], t1_in_avg_sp[c5trials, :][0])
+    t_orient,p_t_orient = compute_roc_auc(t1_in_avg_sp[o1trials, :][0], t1_in_avg_sp[o5trials, :][0])
+    t_neutral, p_t_neutral    =   compute_roc_auc(t1_in_avg_sp[nntrials, :][0], t1_in_avg_sp[ntrials, :][0])
+    t_pos, p_t_pos  = compute_roc_auc(t1_in_avg_sp, t1_out_avg_sp)
 
-        all_s_orient_value[n, :]    =   s_orient
-        all_s_color_value[n, :]     =   s_color
-        all_s_neutral_value[n, :]   =   sample_s_neutral
-        all_s_pos_value[n,:]        =   s_pos
+    return {'name': date_time[:10] + '_'+ neu_data.cluster_group + '_'+ str(neu_data.cluster_number),
+            'Sample pos value'      :   s_pos,
+            'Sample pos p'          :   p_s_pos,
+            'Sample neutral value'  :   s_neutral, 
+            'Sample neutral p'      :   p_s_neutral, 
+            'Sample orient value'   :   s_orient,
+            'Sample orient p'       :   p_s_orient,
+            'Sample color value'    :   s_color,
+            'Sample color p'        :   p_s_color,
+            
+            'Test pos value'        :   t_pos,
+            'Test pos p'            :   p_t_pos,
+            'Test neutral value'    :   t_neutral, 
+            'Test neutral p'        :   p_t_neutral, 
+            'Test orient value'     :   t_orient,
+            'Test orient p'         :   p_t_orient,
+            'Test color value'      :   t_color,
+            'Test color p'          :   p_t_color,
+            'mean response'         :   np.nanmean(sp_sample_in_on[:, :timetotal_sample]*1000),
+            'time_before_sample'    :   time_before_sample,
+            'time_before_t1'        :   time_before_t1,
+            'timetotal_sample'      :   timetotal_sample,
+            'timetotal_t1'          :   timetotal_t1,
+            'win'                   :   win,
+            'step'                  :   step}
 
-        all_s_orient_p[n, :]        =   p_s_orient
-        all_s_color_p[n, :]         =   p_s_color
-        all_s_neutral_p[n, :]       =   p_s_sample_neutral
-        all_s_pos_p[n,:]            =   p_s_pos
 
-        all_t_orient_value[n, :]    =   t_orient
-        all_t_color_value[n, :]     =   t_color
-        all_t_neutral_value[n, :]   =   sample_t_neutral
-        all_t_pos_value[n,:]        =   t_pos
 
-        all_t_orient_p[n, :]        =   p_t_orient
-        all_t_color_p[n, :]         =   p_t_color
-        all_t_neutral_p[n, :]       =   p_t_sample_neutral
-        all_t_pos_p[n,:]            =   p_t_pos
-        
-        id.append(date_time[:10] + '_'+ neu_data.cluster_group + '_'+ str(neu_data.cluster_number))
-        meaninsp.append(np.nanmean(sp_sample_in_on[:, :timetotal_sample]*1000))
-        n+=1
-        
-    lat_orient  =   definelatencies(all_s_orient_p, win=75, threshold=75)
-    lat_color   =   definelatencies(all_s_color_p, win=75, threshold=75)
-    lat_neutral =   definelatencies(all_s_neutral_p, win=75, threshold=75)
-    lat_pos     =   definelatencies(all_s_pos_p, win=75, threshold=75)
-
-    sample_s_ROC_values =   ["ROC value sample neutral", all_s_neutral_value, "ROC value sample orient", all_s_orient_value, "ROC value sample color", all_s_color_value, "ROC value sample position", all_s_pos_value]
-    sample_s_ROC_p      =   ["p value sample neutral", all_s_neutral_p, "p value sample orient", all_s_orient_p, "p value sample color", all_s_color_p, "p value sample position", all_s_pos_p]
-    sample_t_ROC_values =   ["ROC value t1 neutral", all_t_neutral_value, "ROC value T1 orient", all_t_orient_value, "ROC value T1 color", all_t_color_value, "ROC value T1 position", all_t_pos_value]
-    sample_t_ROC_p      =   ["p value t1 neutral", all_t_neutral_p, "p value T1 orient", all_t_orient_p, "p value T1 color", all_t_color_p, "p value T1 position", all_t_pos_p]
-    sample_latencies    =   ["Neutral sample lat", lat_neutral, "orient sample lat", lat_orient, "color sample lat", lat_color, "pos sample lat", lat_pos]
-
-    sample_ROC_analyses  =   [sample_s_ROC_values, sample_s_ROC_p, sample_t_ROC_values, sample_t_ROC_p, sample_latencies,meaninsp, id]
-
-    return sample_ROC_analyses
 
 directory_b1    =   "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/"
 bhv_directory   =   os.path.normpath(str(directory_b1) +  "/bhv/")
@@ -296,23 +249,222 @@ neurons_lip_directory =   os.path.normpath(str(directory_b1) + area + "/neurons/
 neurons_lip_files     =   glob.glob(neurons_lip_directory, recursive=True)
 
 
-## pfc
-pfc_sample_ROC_analyses=analyses_per_area(paths=neurons_pfc_files, time_before_sample=400, time_before_t1=450, timetotal_sample=400+450*3, timetotal_t1=450+450*2, win=100, step=1, numcells=len(neurons_pfc_files))
-with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/pfcsampleROC", "wb") as fp: 
-    pickle.dump(pfc_sample_ROC_analyses, fp)
+
+## v4 in parralel
+v4_roc_data    =   Parallel(n_jobs = -1)(delayed(analyses_per_area_par)(cell) for cell in tqdm(neurons_v4_files[:numcells]))
+
+timetotal_sample=v4_roc_data[0]['timetotal_sample']
+timetotal_t1=v4_roc_data[0]['timetotal_t1']
+win=v4_roc_data[0]['win']
 
 
+all_s_orient_value      =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_color_value       =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_neutral_value     =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_pos_value         =   np.empty((numcells,timetotal_sample-win,))*np.nan
 
-## v4
-v4_sample_ROC_analyses=analyses_per_area(paths=neurons_v4_files, time_before_sample=400, time_before_t1=450, timetotal_sample=400+450*3, timetotal_t1=450+450*2, win=100, step=1, numcells=len(neurons_v4_files))
+all_s_orient_p          =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_color_p           =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_neutral_p         =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_pos_p             =   np.empty((numcells,timetotal_sample-win,))*np.nan
+
+all_t_orient_value      =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_color_value       =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_neutral_value     =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_pos_value         =   np.empty((numcells,timetotal_t1-win,))*np.nan
+
+all_t_orient_p          =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_color_p           =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_neutral_p         =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_pos_p             =   np.empty((numcells,timetotal_t1-win,))*np.nan
+name        =   []
+meaninsp    =   np.empty(numcells)*np.nan
+
+for i in range(len(v4_roc_data)):
+    name.append(v4_roc_data[i]['name'])
+    all_s_orient_value[i, :]    =   v4_roc_data[i]['Sample orient value']
+    all_s_color_value[i, :]     =   v4_roc_data[i]['Sample color value']
+    all_s_neutral_value[i, :]   =   v4_roc_data[i]['Sample neutral value']
+    all_s_pos_value[i,:]        =   v4_roc_data[i]['Sample pos value']
+
+    all_s_orient_p[i, :]        =   v4_roc_data[i]['Sample orient p']
+    all_s_color_p[i, :]         =   v4_roc_data[i]['Sample color p']
+    all_s_neutral_p[i, :]       =   v4_roc_data[i]['Sample neutral p']
+    all_s_pos_p[i,:]            =   v4_roc_data[i]['Sample pos p']
+
+    all_t_orient_value[i, :]    =   v4_roc_data[i]['Test orient value']
+    all_t_color_value[i, :]     =   v4_roc_data[i]['Test color value']
+    all_t_neutral_value[i, :]   =   v4_roc_data[i]['Test neutral value']
+    all_t_pos_value[i,:]        =   v4_roc_data[i]['Test pos value']
+
+    all_t_orient_p[i, :]        =   v4_roc_data[i]['Test orient p']
+    all_t_color_p[i, :]         =   v4_roc_data[i]['Test color p']
+    all_t_neutral_p[i, :]       =   v4_roc_data[i]['Test neutral p']
+    all_t_pos_p[i,:]            =   v4_roc_data[i]['Test pos p']
+    meaninsp[i]                 =   v4_roc_data[i]['mean response']
+        
+        
+lat_orient  =   definelatencies(all_s_orient_p, win=75, threshold=75)
+lat_color   =   definelatencies(all_s_color_p, win=75, threshold=75)
+lat_neutral =   definelatencies(all_s_neutral_p, win=75, threshold=75)
+lat_pos     =   definelatencies(all_s_pos_p, win=75, threshold=75)
+
+
+sample_s_ROC_values =   {"ROC value sample neutral": all_s_neutral_value, "ROC value sample orient": all_s_orient_value, "ROC value sample color": all_s_color_value, "ROC value sample position": all_s_pos_value}
+sample_s_ROC_p      =   {"p value sample neutral": all_s_neutral_p, "p value sample orient": all_s_orient_p, "p value sample color": all_s_color_p,  "p value sample position": all_s_pos_p}
+sample_t_ROC_values =   {"ROC value t1 neutral": all_t_neutral_value,  "ROC value T1 orient": all_t_orient_value,  "ROC value T1 color": all_t_color_value,  "ROC value T1 position": all_t_pos_value}
+sample_t_ROC_p      =   {"p value t1 neutral": all_t_neutral_p,  "p value T1 orient": all_t_orient_p,  "p value T1 color": all_t_color_p,  "p value T1 position": all_t_pos_p}
+sample_latencies    =   {"lat_neutral": lat_neutral,  "lat_orient": lat_orient, "lat_color": lat_color,  "lat_pos": lat_pos}
+
+v4_sample_ROC_analyses  =   {'sample_s_ROC_values': sample_s_ROC_values, 'sample_s_ROC_p': sample_s_ROC_p, 'sample_t_ROC_values': sample_t_ROC_values,
+                              'sample_t_ROC_p': sample_t_ROC_p, 'sample_latencies': sample_latencies, 'names': name, 'mean response': meaninsp}
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/v4sampleROC", "wb") as fp: 
     pickle.dump(v4_sample_ROC_analyses, fp)
 
-## lip
-lip_sample_ROC_analyses=analyses_per_area(paths=neurons_lip_files, time_before_sample=400, time_before_t1=450, timetotal_sample=400+450*3, timetotal_t1=450+450*2, win=100, step=1, numcells=len(neurons_lip_files))
+## lip in parralel
+lip_roc_data    =   Parallel(n_jobs = -1)(delayed(analyses_per_area_par)(cell) for cell in tqdm(neurons_lip_files[:numcells]))
+
+timetotal_sample=lip_roc_data[0]['timetotal_sample']
+timetotal_t1=lip_roc_data[0]['timetotal_t1']
+win=lip_roc_data[0]['win']
+
+
+all_s_orient_value      =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_color_value       =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_neutral_value     =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_pos_value         =   np.empty((numcells,timetotal_sample-win,))*np.nan
+
+all_s_orient_p          =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_color_p           =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_neutral_p         =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_pos_p             =   np.empty((numcells,timetotal_sample-win,))*np.nan
+
+all_t_orient_value      =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_color_value       =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_neutral_value     =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_pos_value         =   np.empty((numcells,timetotal_t1-win,))*np.nan
+
+all_t_orient_p          =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_color_p           =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_neutral_p         =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_pos_p             =   np.empty((numcells,timetotal_t1-win,))*np.nan
+name        =   []
+meaninsp    =   np.empty(numcells)*np.nan
+
+for i in range(len(lip_roc_data)):
+    name.append(lip_roc_data[i]['name'])
+    all_s_orient_value[i, :]    =   lip_roc_data[i]['Sample orient value']
+    all_s_color_value[i, :]     =   lip_roc_data[i]['Sample color value']
+    all_s_neutral_value[i, :]   =   lip_roc_data[i]['Sample neutral value']
+    all_s_pos_value[i,:]        =   lip_roc_data[i]['Sample pos value']
+
+    all_s_orient_p[i, :]        =   lip_roc_data[i]['Sample orient p']
+    all_s_color_p[i, :]         =   lip_roc_data[i]['Sample color p']
+    all_s_neutral_p[i, :]       =   lip_roc_data[i]['Sample neutral p']
+    all_s_pos_p[i,:]            =   lip_roc_data[i]['Sample pos p']
+
+    all_t_orient_value[i, :]    =   lip_roc_data[i]['Test orient value']
+    all_t_color_value[i, :]     =   lip_roc_data[i]['Test color value']
+    all_t_neutral_value[i, :]   =   lip_roc_data[i]['Test neutral value']
+    all_t_pos_value[i,:]        =   lip_roc_data[i]['Test pos value']
+
+    all_t_orient_p[i, :]        =   lip_roc_data[i]['Test orient p']
+    all_t_color_p[i, :]         =   lip_roc_data[i]['Test color p']
+    all_t_neutral_p[i, :]       =   lip_roc_data[i]['Test neutral p']
+    all_t_pos_p[i,:]            =   lip_roc_data[i]['Test pos p']
+    meaninsp[i]                 =   lip_roc_data[i]['mean response']
+        
+        
+lat_orient  =   definelatencies(all_s_orient_p, win=75, threshold=75)
+lat_color   =   definelatencies(all_s_color_p, win=75, threshold=75)
+lat_neutral =   definelatencies(all_s_neutral_p, win=75, threshold=75)
+lat_pos     =   definelatencies(all_s_pos_p, win=75, threshold=75)
+
+
+sample_s_ROC_values =   {"ROC value sample neutral": all_s_neutral_value, "ROC value sample orient": all_s_orient_value, "ROC value sample color": all_s_color_value, "ROC value sample position": all_s_pos_value}
+sample_s_ROC_p      =   {"p value sample neutral": all_s_neutral_p, "p value sample orient": all_s_orient_p, "p value sample color": all_s_color_p,  "p value sample position": all_s_pos_p}
+sample_t_ROC_values =   {"ROC value t1 neutral": all_t_neutral_value,  "ROC value T1 orient": all_t_orient_value,  "ROC value T1 color": all_t_color_value,  "ROC value T1 position": all_t_pos_value}
+sample_t_ROC_p      =   {"p value t1 neutral": all_t_neutral_p,  "p value T1 orient": all_t_orient_p,  "p value T1 color": all_t_color_p,  "p value T1 position": all_t_pos_p}
+sample_latencies    =   {"lat_neutral": lat_neutral,  "lat_orient": lat_orient, "lat_color": lat_color,  "lat_pos": lat_pos}
+
+lip_sample_ROC_analyses  =   {'sample_s_ROC_values': sample_s_ROC_values, 'sample_s_ROC_p': sample_s_ROC_p, 'sample_t_ROC_values': sample_t_ROC_values,
+                              'sample_t_ROC_p': sample_t_ROC_p, 'sample_latencies': sample_latencies, 'names': name, 'mean response': meaninsp}
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/LIPsampleROC", "wb") as fp: 
     pickle.dump(lip_sample_ROC_analyses, fp)
 
+
+## pfc in parralel
+pfc_roc_data    =   Parallel(n_jobs = -1)(delayed(analyses_per_area_par)(cell) for cell in tqdm(neurons_pfc_files))
+
+timetotal_sample=pfc_roc_data[0]['timetotal_sample']
+timetotal_t1=pfc_roc_data[0]['timetotal_t1']
+win=pfc_roc_data[0]['win']
+
+
+all_s_orient_value      =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_color_value       =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_neutral_value     =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_pos_value         =   np.empty((numcells,timetotal_sample-win,))*np.nan
+
+all_s_orient_p          =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_color_p           =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_neutral_p         =   np.empty((numcells,timetotal_sample-win,))*np.nan
+all_s_pos_p             =   np.empty((numcells,timetotal_sample-win,))*np.nan
+
+all_t_orient_value      =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_color_value       =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_neutral_value     =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_pos_value         =   np.empty((numcells,timetotal_t1-win,))*np.nan
+
+all_t_orient_p          =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_color_p           =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_neutral_p         =   np.empty((numcells,timetotal_t1-win,))*np.nan
+all_t_pos_p             =   np.empty((numcells,timetotal_t1-win,))*np.nan
+name        =   []
+meaninsp    =   np.empty(numcells)*np.nan
+
+for i in range(len(pfc_roc_data)):
+    name.append(pfc_roc_data[i]['name'])
+    all_s_orient_value[i, :]    =   pfc_roc_data[i]['Sample orient value']
+    all_s_color_value[i, :]     =   pfc_roc_data[i]['Sample color value']
+    all_s_neutral_value[i, :]   =   pfc_roc_data[i]['Sample neutral value']
+    all_s_pos_value[i,:]        =   pfc_roc_data[i]['Sample pos value']
+
+    all_s_orient_p[i, :]        =   pfc_roc_data[i]['Sample orient p']
+    all_s_color_p[i, :]         =   pfc_roc_data[i]['Sample color p']
+    all_s_neutral_p[i, :]       =   pfc_roc_data[i]['Sample neutral p']
+    all_s_pos_p[i,:]            =   pfc_roc_data[i]['Sample pos p']
+
+    all_t_orient_value[i, :]    =   pfc_roc_data[i]['Test orient value']
+    all_t_color_value[i, :]     =   pfc_roc_data[i]['Test color value']
+    all_t_neutral_value[i, :]   =   pfc_roc_data[i]['Test neutral value']
+    all_t_pos_value[i,:]        =   pfc_roc_data[i]['Test pos value']
+
+    all_t_orient_p[i, :]        =   pfc_roc_data[i]['Test orient p']
+    all_t_color_p[i, :]         =   pfc_roc_data[i]['Test color p']
+    all_t_neutral_p[i, :]       =   pfc_roc_data[i]['Test neutral p']
+    all_t_pos_p[i,:]            =   pfc_roc_data[i]['Test pos p']
+    meaninsp[i]                 =   pfc_roc_data[i]['mean response']
+        
+        
+lat_orient  =   definelatencies(all_s_orient_p, win=75, threshold=75)
+lat_color   =   definelatencies(all_s_color_p, win=75, threshold=75)
+lat_neutral =   definelatencies(all_s_neutral_p, win=75, threshold=75)
+lat_pos     =   definelatencies(all_s_pos_p, win=75, threshold=75)
+
+
+sample_s_ROC_values =   {"ROC value sample neutral": all_s_neutral_value, "ROC value sample orient": all_s_orient_value, "ROC value sample color": all_s_color_value, "ROC value sample position": all_s_pos_value}
+sample_s_ROC_p      =   {"p value sample neutral": all_s_neutral_p, "p value sample orient": all_s_orient_p, "p value sample color": all_s_color_p,  "p value sample position": all_s_pos_p}
+sample_t_ROC_values =   {"ROC value t1 neutral": all_t_neutral_value,  "ROC value T1 orient": all_t_orient_value,  "ROC value T1 color": all_t_color_value,  "ROC value T1 position": all_t_pos_value}
+sample_t_ROC_p      =   {"p value t1 neutral": all_t_neutral_p,  "p value T1 orient": all_t_orient_p,  "p value T1 color": all_t_color_p,  "p value T1 position": all_t_pos_p}
+sample_latencies    =   {"lat_neutral": lat_neutral,  "lat_orient": lat_orient, "lat_color": lat_color,  "lat_pos": lat_pos}
+
+pfc_sample_ROC_analyses  =   {'sample_s_ROC_values': sample_s_ROC_values, 'sample_s_ROC_p': sample_s_ROC_p, 'sample_t_ROC_values': sample_t_ROC_values,
+                              'sample_t_ROC_p': sample_t_ROC_p, 'sample_latencies': sample_latencies, 'names': name, 'mean response': meaninsp}
+# with open("C:/Users/ibos.g/Documents/Data/INT-Marseille/OpenEphys/Riesling/ROCanalayses/v4sampleROC", "wb") as fp: 
+#     pickle.dump(pfc_sample_ROC_analyses, fp)
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/ROC_analysis/pfcsampleROC", "wb") as fp: 
+    pickle.dump(pfc_sample_ROC_analyses, fp)
 
 
 # # plot pfc
