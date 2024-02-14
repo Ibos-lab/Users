@@ -7,8 +7,6 @@ import pandas as pd
 from typing import Dict
 from collections import defaultdict
 from ephysvibe.structures.neuron_data import NeuronData
-from ephysvibe.structures.spike_data import SpikeData
-from ephysvibe.structures.bhv_data import BhvData
 from ephysvibe.trials import align_trials
 from ephysvibe.task import task_constants
 import os 
