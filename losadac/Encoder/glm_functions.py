@@ -1,5 +1,7 @@
 import numpy as np
 from ephysvibe.task import task_constants
+from scipy import signal
+import glm_functions
 
 
 ## Basis ----------------------------------------------------------------------
@@ -81,24 +83,22 @@ def def_sample_stim(stim, len_tr, e_time, sample_id):
     stim["s_on_off"] = np.zeros(len_tr)
     stim["s_on_off"][int(e_time[4]) : int(e_time[5])] = 1  # : int(e_time[5])
     # sample features
-    stim["s_o1"] = np.zeros(len_tr)
-    stim["s_o5"] = np.zeros(len_tr)
-    stim["s_c1"] = np.zeros(len_tr)
-    stim["s_c5"] = np.zeros(len_tr)
+    stim["s_11"] = np.zeros(len_tr)
+    stim["s_15"] = np.zeros(len_tr)
+    stim["s_55"] = np.zeros(len_tr)
+    stim["s_51"] = np.zeros(len_tr)
     stim["s_n0"] = np.zeros(len_tr)
-    stim["not_engage"] = np.zeros(len_tr)
-    orientation = sample_id // 10
-    color = sample_id % 10
-    if orientation == 1:
-        stim["s_o1"][int(e_time[4]) : int(e_time[5])] = 1
-    elif orientation == 5:
-        stim["s_o5"][int(e_time[4]) : int(e_time[5])] = 1
-    elif orientation == 0:
+
+    if sample_id == 11:
+        stim["s_11"][int(e_time[4]) : int(e_time[5])] = 1
+    elif sample_id == 15:
+        stim["s_15"][int(e_time[4]) : int(e_time[5])] = 1
+    elif sample_id == 0:
         stim["s_n0"][int(e_time[4]) : int(e_time[5])] = 1
-    if color == 1:
-        stim["s_c1"][int(e_time[4]) : int(e_time[5])] = 1
-    elif color == 5:
-        stim["s_c5"][int(e_time[4]) : int(e_time[5])] = 1
+    elif sample_id == 55:
+        stim["s_55"][int(e_time[4]) : int(e_time[5])] = 1
+    elif sample_id == 51:
+        stim["s_51"][int(e_time[4]) : int(e_time[5])] = 1
     return stim
 
 
@@ -106,23 +106,22 @@ def def_delay_stim(stim, len_tr, e_time, sample_id):
     # delay on off
     stim["d_on_off"] = np.zeros(len_tr)
     stim["d_on_off"][int(e_time[5]) : int(e_time[6])] = 1  #: int(e_time[6])
-    stim["d_o1"] = np.zeros(len_tr)
-    stim["d_o5"] = np.zeros(len_tr)
-    stim["d_c1"] = np.zeros(len_tr)
-    stim["d_c5"] = np.zeros(len_tr)
+    stim["d_11"] = np.zeros(len_tr)
+    stim["d_15"] = np.zeros(len_tr)
+    stim["d_55"] = np.zeros(len_tr)
+    stim["d_51"] = np.zeros(len_tr)
     stim["d_n0"] = np.zeros(len_tr)
-    orientation = sample_id // 10
-    color = sample_id % 10
-    if orientation == 1:
-        stim["d_o1"][int(e_time[5]) : int(e_time[6])] = 1
-    elif orientation == 5:
-        stim["d_o5"][int(e_time[5]) : int(e_time[6])] = 1
-    elif orientation == 0:
+
+    if sample_id == 11:
+        stim["d_11"][int(e_time[5]) : int(e_time[6])] = 1
+    elif sample_id == 15:
+        stim["d_15"][int(e_time[5]) : int(e_time[6])] = 1
+    elif sample_id == 0:
         stim["d_n0"][int(e_time[5]) : int(e_time[6])] = 1
-    if color == 1:
-        stim["d_c1"][int(e_time[5]) : int(e_time[6])] = 1
-    elif color == 5:
-        stim["d_c5"][int(e_time[5]) : int(e_time[6])] = 1
+    elif sample_id == 55:
+        stim["d_55"][int(e_time[5]) : int(e_time[6])] = 1
+    elif sample_id == 51:
+        stim["d_51"][int(e_time[5]) : int(e_time[6])] = 1
     return stim
 
 
@@ -146,10 +145,10 @@ def def_stim(events, len_tr, e_time, e_code, sample_id, sp, test_stimuli):
         stim["fixation"] = np.zeros(len_tr)
         stim["fixation"][int(e_time[3]) : int(e_time[idx_off])] = 1
     # samples
-    if np.any(np.isin(["s_o1", "s_o5", "s_c1", "s_c5", "s_n0"], events)):
+    if np.any(np.isin(["s_11", "s_15", "s_51", "s_55", "s_n0"], events)):
         stim = def_sample_stim(stim, len_tr, e_time, sample_id)
     # delay
-    if np.any(np.isin(["d_o1", "d_o5", "d_c1", "d_c5", "d_n0"], events)):
+    if np.any(np.isin(["d_11", "d_15", "d_51", "d_55", "d_n0"], events)):
         stim = def_delay_stim(stim, len_tr, e_time, sample_id)
     # test stimuli on off
     if np.any(
@@ -335,3 +334,116 @@ def neglogposterior(thetas, neglogli_fun, Cinv, vals_to_return=3):
         return neglogpost, grad, H
     else:
         return [neglogpost, grad, H][vals_to_return]
+
+
+def get_dm(i_tr, last_event, events, neu_data, time_before, sp_sample_on, mask, basis):
+    print(i_tr)
+    print(neu_data.sample_id[mask][i_tr])
+    e_time = (
+        neu_data.code_samples[mask][i_tr]
+        - neu_data.code_samples[mask][i_tr][4]
+        + time_before
+    )
+    e_code = neu_data.code_numbers[mask][i_tr]
+    test_stimuli = neu_data.test_stimuli[mask][i_tr]
+    # n_test=np.sum(~np.isnan(test_stimuli))
+    reward = task_constants.EVENTS_B1[last_event]
+    idx_last = np.where(e_code == reward)[0]
+
+    len_tr = int(e_time[idx_last][0] + 200)
+    sample_id = neu_data.sample_id[mask][i_tr]
+    stim = glm_functions.def_stim(
+        events,
+        len_tr,
+        e_time,
+        e_code,
+        sample_id,
+        sp_sample_on[i_tr, :len_tr],
+        test_stimuli,
+    )
+    all_dm = {}
+    indices = {}
+    design_mat = np.zeros((len_tr, 1))
+    shape = 0
+    for key in events:
+        base = basis[key]
+        if np.any(np.isnan(base)):
+            all_dm[key] = stim[key][:, np.newaxis]
+        else:
+            sb_conv = signal.convolve2d(stim[key][:, np.newaxis], base)
+            all_dm[key] = sb_conv[:len_tr]
+        indices[key] = [shape, shape + all_dm[key].shape[1]]
+        shape = shape + all_dm[key].shape[1]
+        design_mat = np.concatenate((design_mat, all_dm[key]), axis=1)
+
+    return {
+        "design_mat": design_mat[:, 1:],
+        "all_dm": all_dm,
+        "stim": stim,
+        "len_tr": len_tr,
+        "s_on": e_time[4],
+        "fix_on": e_time[2],
+        "delay_on": e_time[5],
+        "test1_on": e_time[6],
+        "indices": indices,
+        "sp": sp_sample_on[i_tr, :len_tr],
+        "sample_id": sample_id,
+    }
+
+
+def get_dm_mix(
+    i_tr, last_event, events, neu_data, time_before, sp_sample_on, mask, basis
+):
+    e_time = (
+        neu_data.code_samples[mask][i_tr]
+        - neu_data.code_samples[mask][i_tr][4]
+        + time_before
+    )
+    e_code = neu_data.code_numbers[mask][i_tr]
+    test_stimuli = neu_data.test_stimuli[mask][i_tr]
+    # n_test=np.sum(~np.isnan(test_stimuli))
+    reward = task_constants.EVENTS_B1[last_event]
+    idx_last = np.where(e_code == reward)[0]
+
+    len_tr = int(e_time[idx_last][0] + 200)
+    rng = np.random.default_rng(seed=2024)
+    a = neu_data.sample_id[mask].copy()
+    rng.shuffle(a)
+    sample_id = a[i_tr]
+    # print(a[i_tr], neu_data.sample_id[mask][i_tr])
+    stim = glm_functions.def_stim(
+        events,
+        len_tr,
+        e_time,
+        e_code,
+        sample_id,
+        sp_sample_on[i_tr, :len_tr],
+        test_stimuli,
+    )
+    all_dm = {}
+    indices = {}
+    design_mat = np.zeros((len_tr, 1))
+    shape = 0
+    for key in events:
+        base = basis[key]
+        if np.any(np.isnan(base)):
+            all_dm[key] = stim[key][:, np.newaxis]
+        else:
+            sb_conv = signal.convolve2d(stim[key][:, np.newaxis], base)
+            all_dm[key] = sb_conv[:len_tr]
+        indices[key] = [shape, shape + all_dm[key].shape[1]]
+        shape = shape + all_dm[key].shape[1]
+        design_mat = np.concatenate((design_mat, all_dm[key]), axis=1)
+
+    return {
+        "design_mat": design_mat[:, 1:],
+        "all_dm": all_dm,
+        "stim": stim,
+        "len_tr": len_tr,
+        "s_on": e_time[4],
+        "fix_on": e_time[2],
+        "delay_on": e_time[5],
+        "test1_on": e_time[6],
+        "indices": indices,
+        "sp": sp_sample_on[i_tr, :len_tr],
+    }
