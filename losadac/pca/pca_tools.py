@@ -1,6 +1,6 @@
 from ephysvibe.structures.neuron_data import NeuronData
 import numpy as np
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, SparsePCA
 import matplotlib.pyplot as plt
 import os
 import glob
@@ -18,6 +18,13 @@ seed = 2024
 
 def compute_pca(x, n_comp=50):
     model = PCA(n_components=n_comp).fit(x.T)
+    C = model.components_
+    pc_s = C @ x
+    return model, pc_s
+
+
+def compute_sparse_pca(x, n_comp=50):
+    model = SparsePCA(n_components=n_comp).fit(x.T)
     C = model.components_
     pc_s = C @ x
     return model, pc_s
@@ -108,7 +115,7 @@ def plot_pc_3d(pcomp, colors, t_epochs, area, figsize=(5, 5)):
     fig.tight_layout(pad=0.2, h_pad=0.2, w_pad=0.8)
 
 
-def plot_explained_var(model, figsize):
+def plot_explained_var(model, figsize, area):
     fig, ax = plt.subplots(figsize=figsize)
     exp_var_pca = model.explained_variance_ratio_
     cum_sum_eigenvalues = np.cumsum(exp_var_pca)
@@ -126,9 +133,13 @@ def plot_explained_var(model, figsize):
         where="mid",
         label="Cumulative explained variance",
     )
-    ax.set(xlabel="Principal component index", ylabel="Explained variance ratio")
+    ax.set(
+        xlabel="Principal component index",
+        ylabel="Explained variance ratio",
+        title=area,
+    )
     ax.legend(loc="best")
     print(
-        "%d components to explain 80%% of the variance"
-        % np.where(cum_sum_eigenvalues > 0.8)[0][0]
+        "%s: %d components to explain 80%% of the variance"
+        % (area, np.where(cum_sum_eigenvalues > 0.8)[0][0])
     )
