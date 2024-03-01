@@ -106,7 +106,23 @@ def plot_pc_3d(pcomp, colors, t_epochs, area, figsize=(5, 5)):
             pcomp[i + 2][t_epochs[key]],
             color=colors[key],
             label=key,
+            markersize=0.5,
         )
+        ax.scatter(
+            pcomp[i][t_epochs[key]][0],
+            pcomp[i + 1][t_epochs[key]][0],
+            pcomp[i + 2][t_epochs[key]][0],
+            color=colors[key],
+            s=30,
+        )
+        ax.scatter(
+            pcomp[i][t_epochs[key]],
+            pcomp[i + 1][t_epochs[key]],
+            pcomp[i + 2][t_epochs[key]],
+            color=colors[key],
+            s=5,
+        )
+
     fig.suptitle(area)
     ax.set(xlabel="PC " + str(i), ylabel="PC " + str(i + 1), zlabel="PC " + str(i + 2))
     ax.legend(
