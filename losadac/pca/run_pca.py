@@ -82,7 +82,7 @@ def select_trials(neu_data, select_block, code, time_before, error_type=0):
 
 
 def get_neuron_sample_test1_fr(
-    path, time_before, start, end, end_test, n_test, min_trials
+    path, time_before, start, end, end_test, n_test, min_trials, nonmatch=True
 ):
     neu_data = NeuronData.from_python_hdf5(path)
     select_block = 1
@@ -106,7 +106,11 @@ def get_neuron_sample_test1_fr(
     ) > (n_test - 1)
     # mask_match_neu = np.logical_or(mask_match,mask_neu)
     # mask_match_neu = np.logical_or(np.full(mask_neu.shape,True),mask_neu)
-    mask_match_neu = np.logical_or(mask_ntest, mask_neu)
+    if nonmatch:
+        mask_match_neu = np.logical_or(mask_ntest, mask_neu)
+    else:
+        mask_match_neu = np.logical_or(mask_match, mask_neu)
+
     if np.sum(mask_match_neu) < 20:
         return {"fr": None}
     sp = np.concatenate(
@@ -143,6 +147,7 @@ path_list = glob.glob(neu_path)
 
 # Load data
 n_test = 2
+nonmatch = False
 min_trials = 10
 time_before = 500
 start = -200
@@ -154,7 +159,7 @@ idx_end = time_before + end
 
 data = Parallel(n_jobs=-1)(
     delayed(get_neuron_sample_test1_fr)(
-        path, time_before, start, end, end_test, n_test, min_trials
+        path, time_before, start, end, end_test, n_test, min_trials, nonmatch
     )
     for path in tqdm(path_list)
 )
@@ -173,7 +178,7 @@ to_python_hdf5(
     + area
     + "_win50_test"
     + str(n_test)
-    + "_wmatch_min"
+    + "_match_min"
     + str(min_trials)
     + "tr_pca.h5",
 )

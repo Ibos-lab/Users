@@ -30,8 +30,9 @@ def compute_sparse_pca(x, n_comp=50):
     return model, pc_s
 
 
-def plot_pc(pcomp, colors, t_epochs, area, figsize):
-    fig, ax = plt.subplots(2, 3, figsize=figsize)
+def plot_pc(pcomp, colors, t_epochs, area, figsize=None, fig=None, ax=None):
+    if fig == None:
+        fig, ax = plt.subplots(2, 3, figsize=figsize)
     j_ax = 0
     i_ax = 0
     for i in np.arange(0, 4):
@@ -42,12 +43,24 @@ def plot_pc(pcomp, colors, t_epochs, area, figsize):
                 i_ax = 1
                 j_ax = 0
             for key in t_epochs.keys():
+                ax[i_ax, j_ax].plot(
+                    pcomp[i][t_epochs[key]],
+                    pcomp[j][t_epochs[key]],
+                    markersize=0.5,
+                    color=colors[key],
+                    label=key,
+                )
+                ax[i_ax, j_ax].scatter(
+                    pcomp[i][t_epochs[key]][0],
+                    pcomp[j][t_epochs[key]][0],
+                    color="#FF0000",
+                    s=40,
+                )
                 ax[i_ax, j_ax].scatter(
                     pcomp[i][t_epochs[key]],
                     pcomp[j][t_epochs[key]],
-                    s=8,
                     color=colors[key],
-                    label=key,
+                    s=5,
                 )
 
             ax[i_ax, j_ax].set(xlabel="PC " + str(i + 1), ylabel="PC " + str(j + 1))
@@ -94,11 +107,14 @@ def plot_pc_neu(pcomp, pcomp_neu, colors, colors_neu, t_epochs, area, figsize):
     fig.tight_layout(pad=0.2, h_pad=0.2, w_pad=0.8)
 
 
-def plot_pc_3d(pcomp, colors, t_epochs, area, figsize=(5, 5)):
+def plot_pc_3d(pcomp, colors, t_epochs, area, figsize=None, fig=None, ax=None):
     i = 0
-    fig, ax = plt.subplots(
-        figsize=figsize, sharey=True, sharex=True, subplot_kw={"projection": "3d"}
-    )
+    dalpha = np.round(1 / (len(t_epochs.keys()) + 1), 5)
+    alpha = 1
+    if fig == None:
+        fig, ax = plt.subplots(
+            figsize=figsize, sharey=True, sharex=True, subplot_kw={"projection": "3d"}
+        )
     for key in t_epochs.keys():
         ax.plot(
             pcomp[i][t_epochs[key]],
@@ -107,13 +123,14 @@ def plot_pc_3d(pcomp, colors, t_epochs, area, figsize=(5, 5)):
             color=colors[key],
             label=key,
             markersize=0.5,
+            alpha=alpha,
         )
         ax.scatter(
             pcomp[i][t_epochs[key]][0],
             pcomp[i + 1][t_epochs[key]][0],
             pcomp[i + 2][t_epochs[key]][0],
-            color=colors[key],
-            s=30,
+            color="#FF0000",
+            s=40,
         )
         ax.scatter(
             pcomp[i][t_epochs[key]],
@@ -121,7 +138,9 @@ def plot_pc_3d(pcomp, colors, t_epochs, area, figsize=(5, 5)):
             pcomp[i + 2][t_epochs[key]],
             color=colors[key],
             s=5,
+            alpha=alpha,
         )
+        alpha -= dalpha
 
     fig.suptitle(area)
     ax.set(xlabel="PC " + str(i), ylabel="PC " + str(i + 1), zlabel="PC " + str(i + 2))
