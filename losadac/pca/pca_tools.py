@@ -150,8 +150,9 @@ def plot_pc_3d(pcomp, colors, t_epochs, area, figsize=None, fig=None, ax=None):
     fig.tight_layout(pad=0.2, h_pad=0.2, w_pad=0.8)
 
 
-def plot_explained_var(model, figsize, area):
-    fig, ax = plt.subplots(figsize=figsize)
+def plot_explained_var(model, area, figsize=None, fig=None, ax=None):
+    if fig == None:
+        fig, ax = plt.subplots(figsize=figsize)
     exp_var_pca = model.explained_variance_ratio_
     cum_sum_eigenvalues = np.cumsum(exp_var_pca)
     # Create the visualization plot

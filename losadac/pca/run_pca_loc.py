@@ -85,6 +85,18 @@ def get_neuron_sample_test1_fr(
     path, time_before, start, end, end_test, n_test, min_trials, nonmatch=True
 ):
     neu_data = NeuronData.from_python_hdf5(path)
+
+    position = neu_data.position[
+        np.logical_and(neu_data.block == 1, neu_data.pos_code == 1)
+    ]
+    u_pos = np.unique(position, axis=0)
+
+    if u_pos.shape[0] > 1:
+        print("Position of the sample change during the session %s" % path)
+        return {"fr": None}
+    if u_pos[0][0][0] != 5:
+        return {"fr": None}
+
     select_block = 1
     code = 1
     idx_start = time_before + start
@@ -141,12 +153,12 @@ if platform.system() == "Linux":
 elif platform.system() == "Windows":
     basepath = "C:/Users/camil/Documents/int/"
 
-area = "lip"
+area = "v4"
 neu_path = basepath + "/session_struct/" + area + "/neurons/*neu.h5"
 path_list = glob.glob(neu_path)
 
 # Load data
-n_test = 2
+n_test = 1
 nonmatch = True
 min_trials = 15
 time_before = 500
@@ -176,6 +188,7 @@ to_python_hdf5(
     dat=neurons_fr,
     save_path=basepath
     + area
+    + "_pos5-5"
     + "_win50_test"
     + str(n_test)
     + "_wnonmatch_min"
