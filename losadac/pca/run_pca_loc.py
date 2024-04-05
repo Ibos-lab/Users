@@ -94,7 +94,7 @@ def get_neuron_sample_test1_fr(
     if u_pos.shape[0] > 1:
         print("Position of the sample change during the session %s" % path)
         return {"fr": None}
-    if u_pos[0][0][0] != 5:
+    if np.logical_or(u_pos[0][0][0] != 5, u_pos[0][0][1] != 5):
         return {"fr": None}
 
     select_block = 1
