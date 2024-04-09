@@ -41,7 +41,7 @@ samples = {
 
 save_fig = True
 # Load data
-area = "v4"
+area = "lip"
 n_trials = 10
 n_test = 1
 time_before = 500
@@ -64,7 +64,7 @@ fold_size = X_fr_raw_lip.shape[1]
 basepath = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/dpca/data/"
     + area.upper()
-    + "/nksmt"
+    + "/nksmt/reg"
 )
 path = basepath + "/fr_dpca_" + area + "_trials_" + str(n_trials) + "_nksmt.hs"
 X_fr_raw_all = from_python_hdf5(path)[0]["pp"]
@@ -77,7 +77,7 @@ neurons_folds1 = neu_folds.reshape(k_folds, -1)
 neurons_folds = neurons_folds1.copy()
 if k_folds != 1:
     rng.shuffle(neurons_folds1, axis=0)
-neurons_folds = np.concatenate((neurons_folds, neurons_folds1), axis=0)
+    neurons_folds = np.concatenate((neurons_folds, neurons_folds1), axis=0)
 
 for i_fold in tqdm(range(neurons_folds.shape[0])):
 
@@ -93,12 +93,12 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
     dpca = dPCA.dPCA(
         labels="smt",
         join={"st": ["s", "st"], "mt": ["m", "mt"], "smt": ["sm", "smt"]},
-        regularizer=0,
-        n_components=100,
+        regularizer="auto",
+        n_components=40,
         n_iter=5,
     )
     dpca.protect = ["t"]
-    comp = dpca.fit_transform(X, X_fr)
+    comp = dpca.fit(X, X_fr)
     variances = dpca.get_variances(X)
 
     marg_var_t = variances["marg_var"]["t"]
@@ -173,23 +173,18 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
     # ----- plot componenets
     comp_plot = 3
 
-    X_full = np.mean(X_fr, 0)
-    X = X_full.reshape((N, -1))
-    X_cen = X - np.mean(X, 1)[:, None]
-
-    Z_full = X_cen.T @ dpca.D_sorted
+    Z = dpca.transform(X)  # X_cen.T@dpca.D_sorted #
     which_marg = variances["which_marg"]
+    marg_labels = np.unique(which_marg)
     components = np.concatenate(
-        [np.where(which_marg == i)[0][:comp_plot] for i in list(comp.keys())]
+        [np.where(which_marg == i)[0][:comp_plot] for i in marg_labels]
     )
-    Z = Z_full.T[components].reshape(
-        np.concatenate((components.shape, X_full.shape[1:]))
-    )
+    comp_in_z = np.concatenate([[i] * comp_plot for i in marg_labels])
 
-    time = np.arange(T - 400) - 200
+    time = np.arange(T - 400 - 450) - 200
     n_plots, i_plot = 0, 0  #
-    for i in range(Z.shape[0]):
-        i_comp = which_marg[components[i]]
+    for i in range(len(comp_in_z)):
+        i_comp = comp_in_z[i]
         if i_plot != 0 and i_plot < comp_plot:
             ax = ax_all[i_plot]
             i_plot += 1
@@ -202,12 +197,12 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
             for s in samples.keys():
                 ax.plot(
                     time,
-                    Z[i][samples[s]][i_m],
+                    Z[i_comp][i_plot - 1][samples[s]][i_m],
                     color=task_constants.PALETTE_B1[s],
                     linestyle=lstyle,
                 )
-            max_v = np.max(Z[i][samples[s]])
-            min_v = np.min(Z[i][samples[s]])
+            max_v = np.max(Z[i_comp][i_plot - 1][samples[s]])
+            min_v = np.min(Z[i_comp][i_plot - 1][samples[s]])
             ax.axvline(0, color="k", linestyle="--")
             ax.axvline(450, color="k", linestyle="--")
             ax.axvline(850, color="k", linestyle="--")
@@ -215,7 +210,7 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
                 0.5,
                 1.05,
                 "C%d - Exp. var: %.2f"
-                % (i_plot, variances["component_var"][components][i]),
+                % (i_plot, variances["component_var"][i_comp][i_plot - 1]),
                 horizontalalignment="right",
                 verticalalignment="bottom",
                 transform=ax.transAxes,
