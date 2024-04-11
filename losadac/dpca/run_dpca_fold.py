@@ -41,7 +41,7 @@ samples = {
 
 save_fig = True
 # Load data
-area = "lip"
+area = "pfc"
 n_trials = 10
 n_test = 1
 time_before = 500
@@ -64,11 +64,15 @@ fold_size = X_fr_raw_lip.shape[1]
 basepath = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/dpca/data/"
     + area.upper()
-    + "/nksmt/reg"
+    + "/nksmt"
 )
 path = basepath + "/fr_dpca_" + area + "_trials_" + str(n_trials) + "_nksmt.hs"
 X_fr_raw_all = from_python_hdf5(path)[0]["pp"]
-
+basepath = (
+    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/dpca/plots/"
+    + area.upper()
+    + "/nksmt/reg"
+)
 
 k_folds = int(np.floor(X_fr_raw_all.shape[1] / fold_size))
 rng = np.random.default_rng(seed=seed)
@@ -79,9 +83,9 @@ if k_folds != 1:
     rng.shuffle(neurons_folds1, axis=0)
     neurons_folds = np.concatenate((neurons_folds, neurons_folds1), axis=0)
 
-for i_fold in tqdm(range(neurons_folds.shape[0])):
+for i_fold in tqdm(range(1)):
 
-    X_fr_raw = X_fr_raw_all[:, neurons_folds[i_fold]]
+    X_fr_raw = X_fr_raw_all  # [:, neurons_folds[i_fold]]
     X_fr = firing_rate.convolve_signal(
         arr=X_fr_raw, fs=1000, w_size=0.1, w_std=0.015, axis=-1
     )[:, :, :, :, 200 : 1500 + 200]
@@ -94,10 +98,11 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
         labels="smt",
         join={"st": ["s", "st"], "mt": ["m", "mt"], "smt": ["sm", "smt"]},
         regularizer="auto",
-        n_components=40,
+        n_components=100,
         n_iter=5,
-    )
+    )  # X_fr.shape[1] ,'rt' : ['r','rt']
     dpca.protect = ["t"]
+    # dpca.n_trials = 3
     comp = dpca.fit(X, X_fr)
     variances = dpca.get_variances(X)
 
@@ -166,7 +171,9 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
             + str(i_fold)
             + "_"
             + str(fold_size)
-            + "neurons_variance.jpg"
+            + "_reg"
+            + str(dpca.regularizer)
+            + "_neurons_variance.jpg"
         )
         f.savefig(path, format="jpg", bbox_inches="tight", transparent=False)
     plt.close()
@@ -181,7 +188,7 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
     )
     comp_in_z = np.concatenate([[i] * comp_plot for i in marg_labels])
 
-    time = np.arange(T - 400 - 450) - 200
+    time = np.arange(X.shape[-1]) - 200
     n_plots, i_plot = 0, 0  #
     for i in range(len(comp_in_z)):
         i_comp = comp_in_z[i]
@@ -239,6 +246,8 @@ for i_fold in tqdm(range(neurons_folds.shape[0])):
                 + "_"
                 + str(fold_size)
                 + "neurons_"
+                + "_reg"
+                + str(dpca.regularizer)
                 + i_comp
                 + "_components.jpg"
             )
