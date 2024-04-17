@@ -31,9 +31,9 @@ def find_latency(p_value: np.ndarray, win: int, step: int = 1) -> np.ndarray:
     latency = np.where(sig)[0]
 
     if len(latency) != 0:
-        endl = np.where(np.cumsum(sig[latency[0] :]) == 0)[0]
+        endl = np.where(sig[latency[0] :] == False)[0]
         endl = endl[0] if len(endl) != 0 else -1
-        return latency[0], endl
+        return latency[0], endl + latency[0] + win
     else:
         return np.nan, np.nan
 
@@ -58,7 +58,7 @@ def get_vd_index(bl, group1, group2, step=1, avg_win=100, pwin=75):
         g1 = group1[:, lat_son:end_son]
         g2 = group2
     elif np.logical_and(np.isnan(lat_son), np.isnan(lat_d)):
-        return np.nan
+        return np.nan, np.nan, np.nan, np.nan
     else:
         g1 = group1[:, lat_son:end_son]
         g2 = group2[:, lat_d:end_d]
@@ -67,7 +67,8 @@ def get_vd_index(bl, group1, group2, step=1, avg_win=100, pwin=75):
     g2_mean = np.mean(g2)
     g2_mean_bl = np.abs(g2_mean - bl_mean)
     g1_mean_bl = np.abs(g1_mean - bl_mean)
-    return (g2_mean_bl - g1_mean_bl) / (g1_mean_bl + g2_mean_bl)
+    vd_idx = (g2_mean_bl - g1_mean_bl) / (g1_mean_bl + g2_mean_bl)
+    return vd_idx, bl_mean, g1_mean, g2_mean
 
 
 def get_align_tr(neu_data, select_block, select_pos, time_before, event="sample_on"):
@@ -128,26 +129,6 @@ def main(neuron_path: Path, output_dir: Path):
     logging.info("-- Read neuron data --")
     logging.info(neuron_path)
 
-    # parameters
-    time_before = 200
-    start = -200
-    end = 1000
-    idx_start = time_before + start
-    idx_end = time_before + end
-    ## fixation
-    dur_fix = 200
-    ## visual stim
-    st_v = 80
-    end_v = 300
-    ## delay
-    st_d = 600
-    end_d = 800
-    # trials and threshold
-    min_trials = 3
-    n_spikes = 1
-    p_threshold = 0.05
-    vd_threshold = 0.4
-
     neu_data = NeuronData.from_python_hdf5(neuron_path)
 
     time_before = 200
@@ -170,33 +151,29 @@ def main(neuron_path: Path, output_dir: Path):
     sp_dout = sp_dout[neu_data.sample_id[mask_dout] != 0]
 
     #### Compute VD index
-    # Select durarion to analyze
-    sp_in = sp_in[:, : time_before + 460 + 700]
-    sp_out = sp_out[:, : time_before + 460 + 700]
-    # Select durarion to analyze
-    sp_din = sp_din[:, :350]
-    sp_dout = sp_dout[:, :350]
     # get avg fr over trials and time
-    vd_in = np.nan
-    vd_out = np.nan
+    vd_in, bl_in, g1_in, g2_in = np.nan, np.nan, np.nan, np.nan
+    vd_out, bl_out, g1_out, g2_out = np.nan, np.nan, np.nan, np.nan
     i_st = 10
+    pwin = 150
+    avg_win = 200
     if np.logical_and(sp_din.shape[0] > 2, sp_din.ndim > 1):
-        vd_in = get_vd_index(
+        vd_in, bl_in, g1_in, g2_in = get_vd_index(
             bl=sp_in[:, :time_before],
             group1=sp_in[:, time_before + i_st : time_before + i_st + 460],
             group2=sp_din[:, i_st:400],
             step=1,
-            avg_win=200,
-            pwin=150,
+            avg_win=avg_win,
+            pwin=pwin,
         )
     if np.logical_and(sp_dout.shape[0] > 2, sp_dout.ndim > 1):
-        vd_out = get_vd_index(
+        vd_out, bl_out, g1_out, g2_out = get_vd_index(
             bl=sp_out[:, :time_before],
             group1=sp_out[:, time_before + i_st : time_before + i_st + 460],
             group2=sp_dout[:, i_st:400],
             step=1,
-            avg_win=200,
-            pwin=150,
+            avg_win=avg_win,
+            pwin=pwin,
         )
 
     # parameters

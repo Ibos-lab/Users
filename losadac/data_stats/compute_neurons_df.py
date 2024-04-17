@@ -90,9 +90,9 @@ def find_latency(p_value: np.ndarray, win: int, step: int = 1) -> np.ndarray:
     latency = np.where(sig)[0]
 
     if len(latency) != 0:
-        endl = np.where(np.cumsum(sig[latency[0] :]) == 0)[0]
+        endl = np.where(sig[latency[0] :] == False)[0]
         endl = endl[0] if len(endl) != 0 else -1
-        return latency[0], endl
+        return latency[0], endl + latency[0] + win
     else:
         return np.nan, np.nan
 
@@ -193,14 +193,16 @@ def compute_vd_idx(neu_data):
     vd_in, bl_in, g1_in, g2_in = np.nan, np.nan, np.nan, np.nan
     vd_out, bl_out, g1_out, g2_out = np.nan, np.nan, np.nan, np.nan
     i_st = 10
+    pwin = 150
+    avg_win = 200
     if np.logical_and(sp_din.shape[0] > 2, sp_din.ndim > 1):
         vd_in, bl_in, g1_in, g2_in = get_vd_index(
             bl=sp_in[:, :time_before],
             group1=sp_in[:, time_before + i_st : time_before + i_st + 460],
             group2=sp_din[:, i_st:400],
             step=1,
-            avg_win=200,
-            pwin=150,
+            avg_win=avg_win,
+            pwin=pwin,
         )
     if np.logical_and(sp_dout.shape[0] > 2, sp_dout.ndim > 1):
         vd_out, bl_out, g1_out, g2_out = get_vd_index(
@@ -208,8 +210,8 @@ def compute_vd_idx(neu_data):
             group1=sp_out[:, time_before + i_st : time_before + i_st + 460],
             group2=sp_dout[:, i_st:400],
             step=1,
-            avg_win=200,
-            pwin=150,
+            avg_win=avg_win,
+            pwin=pwin,
         )
     return vd_in, vd_out, bl_in, g1_in, g2_in, bl_out, g1_out, g2_out
 
@@ -232,7 +234,6 @@ def get_neuron_info(path: Path) -> Dict:
     u_pos = np.unique(position, axis=0)
 
     if u_pos.shape[0] > 1:
-        print("Position of the sample change during the session %s" % path)
         x_pos, y_pos = np.nan, np.nan
     else:
         x_pos, y_pos = u_pos[0][0][0], u_pos[0][0][1]
