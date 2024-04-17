@@ -56,7 +56,7 @@ def compute_roc_auc(group1, group2):
     for n_win in np.arange(group1.shape[1]):
         g1 = group1[:, n_win]
         g2 = group2[:, n_win]
-        p.append(stats.ttest_ind(g1, g2)[1])
+        p.append(stats.ranksums(g1, g2)[1])
         thresholds = np.unique(np.concatenate([g1, g2]))
         y_g1, y_g2 = np.ones(len(g1)), np.zeros(len(g2))
         score = 0.5
@@ -88,10 +88,13 @@ def find_latency(p_value: np.ndarray, win: int, step: int = 1) -> np.ndarray:
             np.all(p_value[i_step : i_step + win] < 0.05), True, False
         )
     latency = np.where(sig)[0]
+
     if len(latency) != 0:
-        return latency[0]
+        endl = np.where(np.cumsum(sig[latency[0] :]) == 0)[0]
+        endl = endl[0] if len(endl) != 0 else -1
+        return latency[0], endl
     else:
-        return np.nan
+        return np.nan, np.nan
 
 
 def get_selectivity(sp_1, sp_2, win):
@@ -100,7 +103,7 @@ def get_selectivity(sp_1, sp_2, win):
     if np.logical_or(sp_1.shape[0] < 2, sp_2.shape[0] < 2):
         return np.nan, np.nan
     roc_score, p_value = compute_roc_auc(sp_1, sp_2)
-    lat = find_latency(p_value, win=win, step=1)
+    lat, _ = find_latency(p_value, win=win, step=1)
     if np.isnan(lat):
         return lat, np.nan
     return lat, roc_score[lat]
@@ -123,13 +126,92 @@ def get_align_tr(neu_data, select_block, select_pos, time_before, event="sample_
     return sp, mask
 
 
-def get_vd_idx(bs, sp_sample, sp_delay):
-    bs_fr = get_avg_fr(bs)
-    sample_fr = get_avg_fr(sp_sample)
-    delay_fr = get_avg_fr(sp_delay)
-    sample_fr = np.abs(sample_fr - bs_fr)
-    delay_fr = np.abs(delay_fr - bs_fr)
-    return (delay_fr - sample_fr) / (delay_fr + sample_fr)
+# def get_vd_idx(bs, sp_sample, sp_delay):
+#     bs_fr = get_avg_fr(bs)
+#     sample_fr = get_avg_fr(sp_sample)
+#     delay_fr = get_avg_fr(sp_delay)
+#     sample_fr = np.abs(sample_fr - bs_fr)
+#     delay_fr = np.abs(delay_fr - bs_fr)
+#     return (delay_fr - sample_fr) / (delay_fr + sample_fr)
+
+
+def get_vd_index(bl, group1, group2, step=1, avg_win=100, pwin=75):
+    p_son, p_d = [], []
+    bl = np.mean(bl, axis=1)
+    for i in range(0, group1.shape[1] - avg_win, step):
+        g1 = np.mean(group1[:, i : i + avg_win], axis=1)
+        p_son.append(stats.ranksums(bl, g1)[1])
+    for i in range(0, group2.shape[1] - avg_win, step):
+        g2 = np.mean(group2[:, i : i + avg_win], axis=1)
+        p_d.append(stats.ranksums(bl, g2)[1])
+    p_son = np.array(p_son)
+    p_d = np.array(p_d)
+    lat_son, end_son = find_latency(p_value=p_son, win=pwin, step=1)
+    lat_d, end_d = find_latency(p_value=p_d, win=pwin, step=1)
+    if np.logical_and(np.isnan(lat_son), ~np.isnan(lat_d)):
+        g1 = group1
+        g2 = group2[:, lat_d:end_d]
+    elif np.logical_and(~np.isnan(lat_son), np.isnan(lat_d)):
+        g1 = group1[:, lat_son:end_son]
+        g2 = group2
+    elif np.logical_and(np.isnan(lat_son), np.isnan(lat_d)):
+        return np.nan, np.nan, np.nan, np.nan
+    else:
+        g1 = group1[:, lat_son:end_son]
+        g2 = group2[:, lat_d:end_d]
+    bl_mean = np.mean(bl)
+    g1_mean = np.mean(g1)
+    g2_mean = np.mean(g2)
+    g2_mean_bl = np.abs(g2_mean - bl_mean)
+    g1_mean_bl = np.abs(g1_mean - bl_mean)
+    vd_idx = (g2_mean_bl - g1_mean_bl) / (g1_mean_bl + g2_mean_bl)
+    return vd_idx, bl_mean, g1_mean, g2_mean
+
+
+def compute_vd_idx(neu_data):
+    time_before = 200
+    # get spike matrices in and out conditions
+    sp_in, mask_in = get_align_tr(
+        neu_data, select_block=1, select_pos=1, time_before=time_before
+    )
+    sp_in = sp_in[neu_data.sample_id[mask_in] != 0]
+    sp_out, mask_out = get_align_tr(
+        neu_data, select_block=1, select_pos=-1, time_before=time_before
+    )
+    sp_out = sp_out[neu_data.sample_id[mask_out] != 0]
+    sp_din, mask_din = get_align_tr(
+        neu_data, select_block=1, select_pos=1, time_before=0, event="sample_off"
+    )
+    sp_din = sp_din[neu_data.sample_id[mask_din] != 0]
+    sp_dout, mask_dout = get_align_tr(
+        neu_data, select_block=1, select_pos=-1, time_before=0, event="sample_off"
+    )
+    sp_dout = sp_dout[neu_data.sample_id[mask_dout] != 0]
+
+    #### Compute VD index
+    # get avg fr over trials and time
+    vd_in, bl_in, g1_in, g2_in = np.nan, np.nan, np.nan, np.nan
+    vd_out, bl_out, g1_out, g2_out = np.nan, np.nan, np.nan, np.nan
+    i_st = 10
+    if np.logical_and(sp_din.shape[0] > 2, sp_din.ndim > 1):
+        vd_in, bl_in, g1_in, g2_in = get_vd_index(
+            bl=sp_in[:, :time_before],
+            group1=sp_in[:, time_before + i_st : time_before + i_st + 460],
+            group2=sp_din[:, i_st:400],
+            step=1,
+            avg_win=200,
+            pwin=150,
+        )
+    if np.logical_and(sp_dout.shape[0] > 2, sp_dout.ndim > 1):
+        vd_out, bl_out, g1_out, g2_out = get_vd_index(
+            bl=sp_out[:, :time_before],
+            group1=sp_out[:, time_before + i_st : time_before + i_st + 460],
+            group2=sp_dout[:, i_st:400],
+            step=1,
+            avg_win=200,
+            pwin=150,
+        )
+    return vd_in, vd_out, bl_in, g1_in, g2_in, bl_out, g1_out, g2_out
 
 
 def get_neuron_info(path: Path) -> Dict:
@@ -145,6 +227,16 @@ def get_neuron_info(path: Path) -> Dict:
     sp_out, mask_out = get_align_tr(
         neu_data, select_block=1, select_pos=-1, time_before=time_before
     )
+    # sample position in the screen
+    position = neu_data.position[mask_in]
+    u_pos = np.unique(position, axis=0)
+
+    if u_pos.shape[0] > 1:
+        print("Position of the sample change during the session %s" % path)
+        x_pos, y_pos = np.nan, np.nan
+    else:
+        x_pos, y_pos = u_pos[0][0][0], u_pos[0][0][1]
+    # -----
     # Select durarion to analyze
     sp_in = sp_in[:, : time_before + 460 + 700]
     sp_out = sp_out[:, : time_before + 460 + 700]
@@ -156,30 +248,9 @@ def get_neuron_info(path: Path) -> Dict:
     if np.logical_and(sp_out.shape[0] > 2, sp_out.ndim > 1):
         avgfr_out = get_avg_fr(sp_out)
     # ----VD------
-    sp_din, mask_din = get_align_tr(
-        neu_data, select_block=1, select_pos=1, time_before=0, event="sample_off"
+    vd_in, vd_out, bl_in, g1_in, g2_in, bl_out, g1_out, g2_out = compute_vd_idx(
+        neu_data
     )
-    sp_dout, mask_dout = get_align_tr(
-        neu_data, select_block=1, select_pos=-1, time_before=0, event="sample_off"
-    )
-    # Select durarion to analyze
-    sp_din = sp_din[:, :350]
-    sp_dout = sp_dout[:, :350]
-    # get avg fr over trials and time
-    vd_in = np.nan
-    vd_out = np.nan
-    if np.logical_and(sp_din.shape[0] > 2, sp_din.ndim > 1):
-        vd_in = get_vd_idx(
-            sp_in[:, :time_before],
-            sp_in[:, time_before : time_before + 350],
-            sp_delay=sp_din,
-        )
-    if np.logical_and(sp_dout.shape[0] > 2, sp_dout.ndim > 1):
-        vd_out = get_vd_idx(
-            sp_out[:, :time_before],
-            sp_out[:, time_before : time_before + 350],
-            sp_delay=sp_dout,
-        )
     # -------------
     # get fr
     sp_in = moving_average(data=sp_in, win=100, step=1)
@@ -249,11 +320,19 @@ def get_neuron_info(path: Path) -> Dict:
     neu_info["avgfr_out"] = avgfr_out
     neu_info["vd_in"] = vd_in
     neu_info["vd_out"] = vd_out
+    neu_info["bl_in"] = bl_in
+    neu_info["s_in"] = g1_in
+    neu_info["d_in"] = g2_in
+    neu_info["bl_out"] = bl_out
+    neu_info["s_out"] = g1_out
+    neu_info["d_out"] = g2_out
     neu_info["t_before_s_on"] = time_before
     neu_info["area"] = area
     neu_info["matrix_row"] = row[0]
     neu_info["matrix_col"] = col[0]
     neu_info["cluster_group"] = neu_data.cluster_group
+    neu_info["x_pos_sample"] = x_pos
+    neu_info["y_pos_sample"] = y_pos
     return neu_info
 
 
