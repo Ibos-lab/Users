@@ -4,12 +4,12 @@ from pathlib import Path
 import logging
 import numpy as np
 from matplotlib import pyplot as plt
-from ephysvibe.trials.spikes import firing_rate
 from ephysvibe.trials import align_trials, select_trials
+from ephysvibe.trials.spikes import firing_rate
+from ephysvibe.stats import smetrics
 from ephysvibe.task import task_constants
 from ephysvibe.structures.neuron_data import NeuronData
 from scipy import stats
-import platform
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -18,74 +18,6 @@ logging.basicConfig(
     datefmt="%d/%m/%Y %I:%M:%S %p",
     level=logging.INFO,
 )
-
-
-## Def functions
-def find_latency(p_value: np.ndarray, win: int, step: int = 1) -> np.ndarray:
-    sig = np.full(p_value.shape[0], False)
-    sig[p_value < 0.05] = True
-    for i_step in np.arange(0, sig.shape[0], step):
-        sig[i_step] = np.where(
-            np.all(p_value[i_step : i_step + win] < 0.05), True, False
-        )
-    latency = np.where(sig)[0]
-
-    if len(latency) != 0:
-        endl = np.where(sig[latency[0] :] == False)[0]
-        endl = endl[0] if len(endl) != 0 else -1
-        return latency[0], endl + latency[0] + win
-    else:
-        return np.nan, np.nan
-
-
-def get_vd_index(bl, group1, group2, step=1, avg_win=100, pwin=75):
-    p_son, p_d = [], []
-    bl = np.mean(bl, axis=1)
-    for i in range(0, group1.shape[1] - avg_win, step):
-        g1 = np.mean(group1[:, i : i + avg_win], axis=1)
-        p_son.append(stats.ranksums(bl, g1)[1])
-    for i in range(0, group2.shape[1] - avg_win, step):
-        g2 = np.mean(group2[:, i : i + avg_win], axis=1)
-        p_d.append(stats.ranksums(bl, g2)[1])
-    p_son = np.array(p_son)
-    p_d = np.array(p_d)
-    lat_son, end_son = find_latency(p_value=p_son, win=pwin, step=1)
-    lat_d, end_d = find_latency(p_value=p_d, win=pwin, step=1)
-    if np.logical_and(np.isnan(lat_son), ~np.isnan(lat_d)):
-        g1 = group1
-        g2 = group2[:, lat_d:end_d]
-    elif np.logical_and(~np.isnan(lat_son), np.isnan(lat_d)):
-        g1 = group1[:, lat_son:end_son]
-        g2 = group2
-    elif np.logical_and(np.isnan(lat_son), np.isnan(lat_d)):
-        return np.nan, np.nan, np.nan, np.nan
-    else:
-        g1 = group1[:, lat_son:end_son]
-        g2 = group2[:, lat_d:end_d]
-    bl_mean = np.mean(bl)
-    g1_mean = np.mean(g1)
-    g2_mean = np.mean(g2)
-    g2_mean_bl = np.abs(g2_mean - bl_mean)
-    g1_mean_bl = np.abs(g1_mean - bl_mean)
-    vd_idx = (g2_mean_bl - g1_mean_bl) / (g1_mean_bl + g2_mean_bl)
-    return vd_idx, bl_mean, g1_mean, g2_mean
-
-
-def get_align_tr(neu_data, select_block, select_pos, time_before, event="sample_on"):
-    sp, mask = align_trials.align_on(
-        sp_samples=neu_data.sp_samples,
-        code_samples=neu_data.code_samples,
-        code_numbers=neu_data.code_numbers,
-        trial_error=neu_data.trial_error,
-        block=neu_data.block,
-        pos_code=neu_data.pos_code,
-        select_block=select_block,
-        select_pos=select_pos,
-        event=event,
-        time_before=time_before,
-        error_type=0,
-    )
-    return sp, mask
 
 
 def plot_raster_conv(sp_sample, start, conv, time, ax1, ax2, colors):
@@ -133,19 +65,19 @@ def main(neuron_path: Path, output_dir: Path):
 
     time_before = 200
     # get spike matrices in and out conditions
-    sp_in, mask_in = get_align_tr(
+    sp_in, mask_in = align_trials.get_align_tr(
         neu_data, select_block=1, select_pos=1, time_before=time_before
     )
     sp_in = sp_in[neu_data.sample_id[mask_in] != 0]
-    sp_out, mask_out = get_align_tr(
+    sp_out, mask_out = align_trials.get_align_tr(
         neu_data, select_block=1, select_pos=-1, time_before=time_before
     )
     sp_out = sp_out[neu_data.sample_id[mask_out] != 0]
-    sp_din, mask_din = get_align_tr(
+    sp_din, mask_din = align_trials.get_align_tr(
         neu_data, select_block=1, select_pos=1, time_before=0, event="sample_off"
     )
     sp_din = sp_din[neu_data.sample_id[mask_din] != 0]
-    sp_dout, mask_dout = get_align_tr(
+    sp_dout, mask_dout = align_trials.get_align_tr(
         neu_data, select_block=1, select_pos=-1, time_before=0, event="sample_off"
     )
     sp_dout = sp_dout[neu_data.sample_id[mask_dout] != 0]
@@ -158,7 +90,7 @@ def main(neuron_path: Path, output_dir: Path):
     pwin = 150
     avg_win = 200
     if np.logical_and(sp_din.shape[0] > 2, sp_din.ndim > 1):
-        vd_in, bl_in, g1_in, g2_in = get_vd_index(
+        vd_in, bl_in, g1_in, g2_in = smetrics.get_vd_index(
             bl=sp_in[:, :time_before],
             group1=sp_in[:, time_before + i_st : time_before + i_st + 460],
             group2=sp_din[:, i_st:400],
@@ -167,7 +99,7 @@ def main(neuron_path: Path, output_dir: Path):
             pwin=pwin,
         )
     if np.logical_and(sp_dout.shape[0] > 2, sp_dout.ndim > 1):
-        vd_out, bl_out, g1_out, g2_out = get_vd_index(
+        vd_out, bl_out, g1_out, g2_out = smetrics.get_vd_index(
             bl=sp_out[:, :time_before],
             group1=sp_out[:, time_before + i_st : time_before + i_st + 460],
             group2=sp_dout[:, i_st:400],
