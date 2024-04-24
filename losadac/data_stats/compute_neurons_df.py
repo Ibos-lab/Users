@@ -26,11 +26,38 @@ logging.basicConfig(
 )
 
 
+def moving_average(data: np.ndarray, win: int, step: int = 1) -> np.ndarray:
+    d_shape = data.shape
+    count = 0
+    win = int(np.floor(win / 2))
+    if len(d_shape) == 3:
+        d_avg = np.zeros((d_shape[0], d_shape[1], int(np.floor(d_shape[2] / step))))
+        for i_step in np.arange(0, d_shape[2] - step, step):
+            st_win = 0 if i_step - win < 0 else i_step - win
+            d_avg[:, :, count] = np.mean(data[:, :, st_win : i_step + win], axis=2)
+            count += 1
+    if len(d_shape) == 2:
+        d_avg = np.zeros((d_shape[0], int(np.floor(d_shape[1] / step))))
+        for i_step in np.arange(0, d_shape[1] - step, step):
+            st_win = 0 if i_step - win < 0 else i_step - win
+            d_avg[:, count] = np.mean(data[:, st_win : i_step + win], axis=1)
+            count += 1
+    if len(d_shape) == 1:
+        d_avg = np.zeros((int(np.floor(d_shape[0] / step))))
+        for i_step in np.arange(0, d_shape[0] - step, step):
+            st_win = 0 if i_step - win < 0 else i_step - win
+            d_avg[count] = np.mean(data[st_win : i_step + win], axis=0)
+            count += 1
+    return d_avg
+
+
 def main(
     path: Path,
     sessions_path: Path,
     ch_pos_path: Path,
-    time_before: int = 200,
+    time_before: int = 500,
+    start: int = -200,
+    end: int = 1000,
     mov_avg_win: int = 100,
     selec_win: int = 75,
     vd_st: int = 10,
@@ -38,6 +65,8 @@ def main(
     vd_avg_win: int = 200,
 ) -> Dict:
     neu_info = {}
+    idx_start = time_before + start
+    idx_end = time_before + end
     # Read neuron data
     neu_data = NeuronData.from_python_hdf5(path)
 
@@ -82,7 +111,7 @@ def main(
     # ----VD------
     vd_in, bl_in, g1_in, g2_in = smetrics.compute_vd_idx(
         neu_data=neu_data,
-        time_before=time_before,
+        time_before=abs(start),
         vd_st=vd_st,
         vd_win=vd_win,
         vd_avg_win=vd_avg_win,
@@ -90,7 +119,7 @@ def main(
     )
     vd_out, bl_out, g1_out, g2_out = smetrics.compute_vd_idx(
         neu_data=neu_data,
-        time_before=time_before,
+        time_before=abs(start),
         vd_st=vd_st,
         vd_win=vd_win,
         vd_avg_win=vd_avg_win,
@@ -98,19 +127,34 @@ def main(
     )
     # -------------
     # Select durarion to analyze
-    sp_in = sp_in[:, : time_before + 460 + 700]
-    sp_out = sp_out[:, : time_before + 460 + 700]
+    sp_in = sp_in[:, : idx_end + mov_avg_win]
+    sp_out = sp_out[:, : idx_end + mov_avg_win]
     # get fr
-    sp_in = firing_rate.moving_average(data=sp_in, win=mov_avg_win, step=1)
-    sp_out = firing_rate.moving_average(data=sp_out, win=mov_avg_win, step=1)
-    sp_in_d = firing_rate.moving_average(data=sp_in_d, win=mov_avg_win, step=1)
-    sp_out_d = firing_rate.moving_average(data=sp_out_d, win=mov_avg_win, step=1)
-    # split sp by samples id
-
+    sp_in = moving_average(data=sp_in, win=mov_avg_win, step=1)[:, idx_start:idx_end]
+    sp_out = moving_average(data=sp_out, win=mov_avg_win, step=1)[:, idx_start:idx_end]
+    sp_in_d = moving_average(data=sp_in_d, win=mov_avg_win, step=1)[
+        :, idx_start:idx_end
+    ]
+    sp_out_d = moving_average(data=sp_out_d, win=mov_avg_win, step=1)[
+        :, idx_start:idx_end
+    ]
+    # ----- Visual response
+    sp_vr_in = sp_in[neu_data.sample_id[mask_in] != 0]
+    avg_fr = np.mean(sp_vr_in, axis=0)
+    avg_fr = avg_fr - np.mean(avg_fr[: abs(start)])
+    vr_in = np.mean(avg_fr[abs(start) + 50 : abs(start) + 250] * 1000)  # vis response
+    sp_vr_out = sp_out[neu_data.sample_id[mask_out] != 0]
+    avg_fr = np.mean(sp_vr_out, axis=0)
+    avg_fr = avg_fr - np.mean(avg_fr[: abs(start)])
+    vr_out = np.mean(avg_fr[abs(start) + 50 : abs(start) + 250] * 1000)  # vis response
+    neu_info["vr_in"] = vr_in
+    neu_info["vr_out"] = vr_out
+    # ----- Analysis by sample (selectivity, vd)
     samples = [11, 15, 51, 55, 0]
     for in_out, mask, sp in zip(
         ["in", "out"], [mask_in, mask_out], [[sp_in, sp_in_d], [sp_out, sp_out_d]]
     ):
+        # split sp by samples id
         sample_id = neu_data.sample_id[mask]
         sp_samples = select_trials.get_sp_by_sample(sp[0], sample_id, samples)
         o1 = np.concatenate((sp_samples["11"], sp_samples["15"]))
@@ -151,7 +195,7 @@ def main(
             vd_idx, bl_mean, g1_mean, g2_mean = smetrics.compute_vd_idx(
                 sp_s=isp_s,
                 sp_d=isp_d,
-                time_before=time_before,
+                time_before=abs(start),
                 vd_st=vd_st,
                 vd_win=vd_win,
                 vd_avg_win=vd_avg_win,
@@ -199,7 +243,6 @@ def main(
     neu_info["bl_out"] = bl_out
     neu_info["s_out"] = g1_out
     neu_info["d_out"] = g2_out
-    neu_info["t_before_s_on"] = time_before
     neu_info["area"] = area
     neu_info["matrix_row"] = row[0]
     neu_info["matrix_col"] = col[0]
@@ -218,14 +261,16 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("path", help="Path to neuron data (neu.h5)", type=Path)
-    parser.add_argument("--sessions_path", "-s", help="Output directory", type=Path)
-    parser.add_argument("--ch_pos_path", "-s", help="Output directory", type=Path)
-    parser.add_argument("--time_before", "-s", help="Output directory", type=int)
-    parser.add_argument("--mov_avg_win", "-s", help="Output directory", type=int)
-    parser.add_argument("--selec_win", "-s", help="Output directory", type=int)
-    parser.add_argument("--vd_st", "-s", help="Output directory", type=int)
-    parser.add_argument("--vd_win", "-s", help="Output directory", type=int)
-    parser.add_argument("--vd_avg_win", "-s", help="Output directory", type=int)
+    parser.add_argument("--sessions_path", help="", type=Path)
+    parser.add_argument("--ch_pos_path", help="", type=Path)
+    parser.add_argument("--time_before", help="", type=int)
+    parser.add_argument("--start", help="", type=int)
+    parser.add_argument("--end", help="", type=int)
+    parser.add_argument("--mov_avg_win", help="", type=int)
+    parser.add_argument("--selec_win", help="", type=int)
+    parser.add_argument("--vd_st", help="", type=int)
+    parser.add_argument("--vd_win", help="", type=int)
+    parser.add_argument("--vd_avg_win", help="", type=int)
     args = parser.parse_args()
 
     #### Define parameters and compute neurons df
@@ -236,6 +281,8 @@ if __name__ == "__main__":
             args.sessions_path,
             args.ch_pos_path,
             args.time_before,
+            args.start,
+            args.end,
             args.mov_avg_win,
             args.selec_win,
             args.vd_st,

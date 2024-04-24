@@ -27,7 +27,9 @@ save_path = "./"
 sessions_path = "/envau/work/invibe/USERS/IBOS/openephys/Riesling/"
 ch_pos_path = "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/"
 areas = ["v4", "pfc"]  # ,'pfc']
-time_before = 200
+time_before = 500
+start = -200
+end = 1000
 mov_avg_win = 100
 selec_win = 75
 vd_st = 10
@@ -44,14 +46,16 @@ for area in areas:
     info = Parallel(n_jobs=-1)(
         delayed(compute_neurons_df.main)(
             path_list[i],
-            sessions_path,
-            ch_pos_path,
-            time_before,
-            mov_avg_win,
-            selec_win,
-            vd_st,
-            vd_win,
-            vd_avg_win,
+            sessions_path=sessions_path,
+            ch_pos_path=ch_pos_path,
+            time_before=time_before,
+            start=start,
+            end=end,
+            mov_avg_win=mov_avg_win,
+            selec_win=selec_win,
+            vd_st=vd_st,
+            vd_win=vd_win,
+            vd_avg_win=vd_avg_win,
         )
         for i in tqdm(range(len(path_list)))
     )
