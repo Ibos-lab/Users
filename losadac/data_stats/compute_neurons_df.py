@@ -51,6 +51,21 @@ def moving_average(data: np.ndarray, win: int, step: int = 1) -> np.ndarray:
     return d_avg
 
 
+def get_visual_fr(sp, start, st_v=50, end_v=250):
+    if np.nansum(sp[:, : start + end_v]) == 0:
+        return np.nan, np.nan
+    avgtr_fr = np.mean(sp, axis=0)
+    bl_avg = np.mean(avgtr_fr[:start])
+    avg_fr = avgtr_fr - bl_avg
+    vr = np.mean(avg_fr[start + st_v : start + end_v] * 1000)  # vis response
+
+    g1 = np.mean(sp[:, :start], axis=1)
+    g2 = np.mean(sp[:, start + st_v : start + end_v], axis=1)
+    p = stats.ranksums(g1, g2)[1]
+    sig = p < 0.5
+    return vr, sig
+
+
 def main(
     path: Path,
     sessions_path: Path,
@@ -60,8 +75,11 @@ def main(
     end: int = 1000,
     mov_avg_win: int = 100,
     selec_win: int = 75,
-    vd_st: int = 10,
-    vd_win: int = 150,
+    st_v: int = 50,
+    end_v: int = 200,
+    st_d: int = 100,
+    end_d: int = 300,
+    vd_pwin: int = 150,
     vd_avg_win: int = 200,
 ) -> Dict:
     neu_info = {}
@@ -105,50 +123,62 @@ def main(
     avgfr_in = np.nan
     avgfr_out = np.nan
     if np.logical_and(sp_in.shape[0] > 2, sp_in.ndim > 1):
-        avgfr_in = np.nanmean(sp_in) * 1000
+        avgfr_in = np.nanmean(sp_in[:, idx_start:idx_end]) * 1000
     if np.logical_and(sp_out.shape[0] > 2, sp_out.ndim > 1):
-        avgfr_out = np.nanmean(sp_out) * 1000
+        avgfr_out = np.nanmean(sp_out[:, idx_start:idx_end]) * 1000
     # ----VD------
     vd_in, bl_in, g1_in, g2_in = smetrics.compute_vd_idx(
         neu_data=neu_data,
         time_before=abs(start),
-        vd_st=vd_st,
-        vd_win=vd_win,
+        st_v=st_v,
+        end_v=end_v,
+        st_d=st_d,
+        end_d=end_d,
+        vd_pwin=vd_pwin,
         vd_avg_win=vd_avg_win,
         in_out=1,
     )
     vd_out, bl_out, g1_out, g2_out = smetrics.compute_vd_idx(
         neu_data=neu_data,
         time_before=abs(start),
-        vd_st=vd_st,
-        vd_win=vd_win,
+        st_v=st_v,
+        end_v=end_v,
+        st_d=st_d,
+        end_d=end_d,
+        vd_pwin=vd_pwin,
         vd_avg_win=vd_avg_win,
         in_out=-1,
     )
     # -------------
     # Select durarion to analyze
-    sp_in = sp_in[:, : idx_end + mov_avg_win]
-    sp_out = sp_out[:, : idx_end + mov_avg_win]
+    # sp_in = sp_in[:, : idx_end + mov_avg_win]
+    # sp_out = sp_out[:, : idx_end + mov_avg_win]
     # get fr
-    sp_in = moving_average(data=sp_in, win=mov_avg_win, step=1)[:, idx_start:idx_end]
-    sp_out = moving_average(data=sp_out, win=mov_avg_win, step=1)[:, idx_start:idx_end]
-    sp_in_d = moving_average(data=sp_in_d, win=mov_avg_win, step=1)[
+    sp_in = firing_rate.moving_average(data=sp_in, win=mov_avg_win, step=1)[
         :, idx_start:idx_end
     ]
-    sp_out_d = moving_average(data=sp_out_d, win=mov_avg_win, step=1)[
+    sp_out = firing_rate.moving_average(data=sp_out, win=mov_avg_win, step=1)[
+        :, idx_start:idx_end
+    ]
+    sp_in_d = firing_rate.moving_average(data=sp_in_d, win=mov_avg_win, step=1)[
+        :, idx_start:idx_end
+    ]
+    sp_out_d = firing_rate.moving_average(data=sp_out_d, win=mov_avg_win, step=1)[
         :, idx_start:idx_end
     ]
     # ----- Visual response
     sp_vr_in = sp_in[neu_data.sample_id[mask_in] != 0]
-    avg_fr = np.mean(sp_vr_in, axis=0)
-    avg_fr = avg_fr - np.mean(avg_fr[: abs(start)])
-    vr_in = np.mean(avg_fr[abs(start) + 50 : abs(start) + 250] * 1000)  # vis response
+    vr_in, vr_in_sig = get_visual_fr(
+        sp=sp_vr_in, start=abs(start), st_v=st_v, end_v=end_v
+    )
     sp_vr_out = sp_out[neu_data.sample_id[mask_out] != 0]
-    avg_fr = np.mean(sp_vr_out, axis=0)
-    avg_fr = avg_fr - np.mean(avg_fr[: abs(start)])
-    vr_out = np.mean(avg_fr[abs(start) + 50 : abs(start) + 250] * 1000)  # vis response
+    vr_out, vr_out_sig = get_visual_fr(
+        sp=sp_vr_out, start=abs(start), st_v=st_v, end_v=end_v
+    )
     neu_info["vr_in"] = vr_in
+    neu_info["vr_in_sig"] = vr_in_sig
     neu_info["vr_out"] = vr_out
+    neu_info["vr_out_sig"] = vr_out_sig
     # ----- Analysis by sample (selectivity, vd)
     samples = [11, 15, 51, 55, 0]
     for in_out, mask, sp in zip(
@@ -196,8 +226,11 @@ def main(
                 sp_s=isp_s,
                 sp_d=isp_d,
                 time_before=abs(start),
-                vd_st=vd_st,
-                vd_win=vd_win,
+                st_v=st_v,
+                end_v=end_v,
+                st_d=st_d,
+                end_d=end_d,
+                vd_pwin=vd_pwin,
                 vd_avg_win=vd_avg_win,
             )
             neu_info[i_sam + "_vd_" + in_out] = vd_idx
@@ -268,8 +301,11 @@ if __name__ == "__main__":
     parser.add_argument("--end", help="", type=int)
     parser.add_argument("--mov_avg_win", help="", type=int)
     parser.add_argument("--selec_win", help="", type=int)
-    parser.add_argument("--vd_st", help="", type=int)
-    parser.add_argument("--vd_win", help="", type=int)
+    parser.add_argument("--st_v", type=int)
+    parser.add_argument("--end_v", type=int)
+    parser.add_argument("--st_d", type=int)
+    parser.add_argument("--end_d", type=int)
+    parser.add_argument("--vd_pwin", help="", type=int)
     parser.add_argument("--vd_avg_win", help="", type=int)
     args = parser.parse_args()
 
@@ -277,17 +313,20 @@ if __name__ == "__main__":
 
     try:
         main(
-            args.path,
-            args.sessions_path,
-            args.ch_pos_path,
-            args.time_before,
-            args.start,
-            args.end,
-            args.mov_avg_win,
-            args.selec_win,
-            args.vd_st,
-            args.vd_win,
-            args.vd_avg_win,
+            path=args.path,
+            sessions_path=args.sessions_path,
+            ch_pos_path=args.ch_pos_path,
+            time_before=args.time_before,
+            start=args.start,
+            end=args.end,
+            mov_avg_win=args.mov_avg_win,
+            selec_win=args.selec_win,
+            st_v=args.st_v,
+            end_v=args.end_v,
+            st_d=args.st_d,
+            end_d=args.end_d,
+            vd_pwin=args.vd_pwin,
+            vd_avg_win=args.vd_avg_win,
         )
     except FileExistsError:
         logging.error("filepath does not exist")

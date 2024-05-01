@@ -1,0 +1,1 @@
+{"script": "compute_neurons_df.py", "date_time": "26/04/2024 13:42:07", "time_before": 500, "start": -200, "end": 1000, "mov_avg_win": 100, "selec_win": 75, "vd_pwin": 75, "vd_avg_win": 100, "st_v": 100, "end_v": 250, "st_d": 100, "end_d": 300}

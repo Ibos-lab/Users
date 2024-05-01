@@ -32,8 +32,7 @@ start = -200
 end = 1000
 mov_avg_win = 100
 selec_win = 75
-vd_st = 10
-vd_win = 75
+vd_pwin = 75
 vd_avg_win = 100
 
 
@@ -42,7 +41,16 @@ area_info = {}
 for area in areas:
     neu_path = basepath + "session_struct/" + area + "/neurons/*neu.h5"
     path_list = glob.glob(neu_path)
-
+    if area == "v4":
+        st_v = 50
+        end_v = 200
+        st_d = 100
+        end_d = 300
+    elif area == "pfc":
+        st_v = 100
+        end_v = 250
+        st_d = 100
+        end_d = 300
     info = Parallel(n_jobs=-1)(
         delayed(compute_neurons_df.main)(
             path_list[i],
@@ -53,8 +61,11 @@ for area in areas:
             end=end,
             mov_avg_win=mov_avg_win,
             selec_win=selec_win,
-            vd_st=vd_st,
-            vd_win=vd_win,
+            st_v=st_v,
+            end_v=end_v,
+            st_d=st_d,
+            end_d=end_d,
+            vd_pwin=vd_pwin,
             vd_avg_win=vd_avg_win,
         )
         for i in tqdm(range(len(path_list)))
@@ -72,11 +83,16 @@ for area in areas:
         "script": "compute_neurons_df.py",
         "date_time": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
         "time_before": time_before,
+        "start": start,
+        "end": end,
         "mov_avg_win": mov_avg_win,
         "selec_win": selec_win,
-        "vd_st": vd_st,
-        "vd_win": vd_win,
+        "vd_pwin": vd_pwin,
         "vd_avg_win": vd_avg_win,
+        "st_v": st_v,
+        "end_v": end_v,
+        "st_d": st_d,
+        "end_d": end_d,
     }
     with open(save_path + area + "_pipeline_parameters.json", "w") as f:
         json.dump(parameters, f)
