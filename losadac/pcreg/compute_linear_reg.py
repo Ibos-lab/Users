@@ -149,7 +149,7 @@ def run_iteration(units_info, area_x, area_y, sample, lams, seed, params):
     t_end = params["t_end"]
     win = params["win"]
     time_before = params["time_before"]
-    for i_n in tqdm(range(1, units_info[area_x]["in"][sample].shape[0] + 1)):
+    for i_n in range(1, units_info[area_x]["in"][sample].shape[0] + 1):
         x_in = units_info[area_x]["in"][sample]
         y_in = units_info[area_y]["in"][sample]
         x_out = units_info[area_x]["out"][sample]
