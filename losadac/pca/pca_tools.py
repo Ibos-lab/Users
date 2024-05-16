@@ -31,7 +31,15 @@ def compute_sparse_pca(x, n_comp=50):
 
 
 def plot_pc(
-    pcomp, colors, t_epochs, area, figsize=None, fig=None, ax=None, sample_flag=False
+    pcomp,
+    colors,
+    t_epochs,
+    area,
+    figsize=None,
+    fig=None,
+    ax=None,
+    sample_flag=False,
+    idot=0,
 ):
     if fig == None:
         fig, ax = plt.subplots(2, 3, figsize=figsize)
@@ -54,8 +62,8 @@ def plot_pc(
                     label=label,
                 )
                 ax[i_ax, j_ax].scatter(
-                    pcomp[i][t_epochs[key]][0],
-                    pcomp[j][t_epochs[key]][0],
+                    pcomp[i][t_epochs[key]][idot],
+                    pcomp[j][t_epochs[key]][idot],
                     color="#FF0000",
                     s=40,
                 )
@@ -86,6 +94,7 @@ def plot_pc_neu(
     fig=None,
     ax=None,
     sample_flag=False,
+    idot=0,
 ):
     if fig == None:
         fig, ax = plt.subplots(2, 3, figsize=figsize)
@@ -108,8 +117,8 @@ def plot_pc_neu(
                     label=label,
                 )
                 ax[i_ax, j_ax].scatter(
-                    pcomp[i][t_epochs[key]][0],
-                    pcomp[j][t_epochs[key]][0],
+                    pcomp[i][t_epochs[key]][idot],
+                    pcomp[j][t_epochs[key]][idot],
                     s=40,
                     color="#FF0000",
                     # label=label,
