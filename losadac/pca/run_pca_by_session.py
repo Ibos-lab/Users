@@ -379,7 +379,7 @@ for session in all_sessions:
     fig, ax = plt.subplots(figsize=(5, 5))
     pca_tools.plot_explained_var(model, figsize=(5, 5), area=area, fig=fig, ax=ax)
     if save:
-        figname = session + "explained_var." + save_format
+        figname = area + session + "explained_var." + save_format
         fig.savefig(savepath + figname, format=save_format, bbox_inches="tight")
 
     reshape_pc_s = pc_s.reshape(n_comp, -1, end - start)
@@ -409,4 +409,16 @@ for session in all_sessions:
     )
     if save:
         figname = area + session + "_pcs_neutral_sample." + save_format
+        fig.savefig(savepath + figname, format=save_format, bbox_inches="tight")
+
+    mean_pc_s = np.mean(reshape_pc_s[:, 1:, :], axis=1)
+    fig, ax = plt.subplots(2, 3, figsize=(17, 10))
+    pca_tools.plot_pc(
+        mean_pc_s, colors1, t_epochs1, area, sample_flag=False, fig=fig, ax=ax, idot=0
+    )
+    pca_tools.plot_pc(
+        mean_pc_s, colors2, t_epochs2, area, sample_flag=False, fig=fig, ax=ax, idot=-1
+    )
+    if save:
+        figname = area + session + "_pcs_sample_mean." + save_format
         fig.savefig(savepath + figname, format=save_format, bbox_inches="tight")
