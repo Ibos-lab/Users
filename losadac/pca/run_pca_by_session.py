@@ -337,16 +337,35 @@ for session in all_sessions:
         pname_match = "_match_"
 
     s0, s11, s15, s51, s55 = [], [], [], [], []
+    s0mean, s11mean, s15mean, s51mean, s55mean = [], [], [], [], []
     for asc in data:
         fr = asc["fr"]
         if fr is not None:
-
             s0.append(fr["0"])
             s11.append(fr["11"])
             s15.append(fr["15"])
             s51.append(fr["51"])
             s55.append(fr["55"])
-    neurons_fr = [{"0": s0, "11": s11, "15": s15, "51": s51, "55": s55}]
+            s0mean.append(np.mean(fr["0"], axis=0))
+            s11mean.append(np.mean(fr["11"], axis=0))
+            s15mean.append(np.mean(fr["15"], axis=0))
+            s51mean.append(np.mean(fr["51"], axis=0))
+            s55mean.append(np.mean(fr["55"], axis=0))
+
+    neurons_fr = [
+        {
+            "0mean": s0mean,
+            "11mean": s11mean,
+            "15mean": s15mean,
+            "51mean": s51mean,
+            "55mean": s55mean,
+            "0": s0,
+            "11": s11,
+            "15": s15,
+            "51": s51,
+            "55": s55,
+        }
+    ]
 
     if len(s55) < 6:
         continue
