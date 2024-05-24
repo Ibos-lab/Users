@@ -520,7 +520,7 @@ for session in all_sessions:
     }
 
     part1 = 200 + 450 + 400
-    f, ax = plt.subplots(3, 2, figsize=(18, 10))
+    fig, ax = plt.subplots(3, 2, figsize=(18, 10))
     for i_sample in ["0", "11", "15", "51", "55"]:
         trialspc = proj_sam[i_sample]
 
@@ -572,7 +572,7 @@ for session in all_sessions:
         fig.savefig(savepath + figname, format=save_format, bbox_inches="tight")
 
     part1 = 200 + 450 + 400
-    f, ax = plt.subplots(3, 2, figsize=(18, 10))
+    fig, ax = plt.subplots(3, 2, figsize=(18, 10))
     for i_sample in ["0", "11", "15", "51", "55"]:
         trialspc = proj_sam[i_sample]
         irow, icol = 0, 0
