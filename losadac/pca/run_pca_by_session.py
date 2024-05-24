@@ -504,7 +504,7 @@ for session in all_sessions:
         "#F1EC91",
         "#F7C895",
         "#FA9A98",
-        "F14297",
+        "#F14297",
         "#FEB4D8",
         "#DFBAFF",
         "#BFBEFF",
