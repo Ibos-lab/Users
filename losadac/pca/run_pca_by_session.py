@@ -618,7 +618,10 @@ for session in all_sessions:
 
     # Animation
     color_epo = ["#0A4580", "#18B13C", "#DAD02C", "#F14297", "#5E5CFD", "#65B0FF"]
-
+    all_tr = []
+    for i_sample in ["11", "15", "51", "55"]:
+        all_tr.append(proj_sam[i_sample])
+    all_tr = np.concatenate(all_tr, axis=1)
     for i_sample in ["0", "11", "15", "51", "55"]:
         trialspc = proj_sam[i_sample]
         # apply some smoothing to the trajectories
@@ -650,7 +653,8 @@ for session in all_sessions:
             ax.set_ylabel(ylabel)
             ax.set_title("%s - sample %s" % (area.upper(), i_sample))
 
-        mean_pc_s = np.mean(reshape_pc_s[:, 1:, :], axis=1)
+        mean_pc_s = np.mean(all_tr, axis=1)
+        # mean_pc_s= np.mean(reshape_pc_s[:,1:,:],axis=1)
         for c in range(mean_pc_s.shape[0]):
             mean_pc_s[c, :] = gaussian_filter1d(mean_pc_s[c, :], sigma=sigma)
 
