@@ -658,6 +658,8 @@ for session in all_sessions:
         for c in range(mean_pc_s.shape[0]):
             mean_pc_s[c, :] = gaussian_filter1d(mean_pc_s[c, :], sigma=sigma)
 
+        rng = np.random.default_rng(seed=seed)
+        idx_tr = rng.choice(g_mean_pc.shape[1], size=5, replace=False)
         for component_x in np.arange(0, 2):
             for component_y in np.arange(0 + component_x, 2):
                 if component_x == component_y:
@@ -703,7 +705,7 @@ for session in all_sessions:
                         linestyle="--",
                     )
 
-                    for ic, itr in enumerate(range(0, g_mean_pc.shape[1], 10)):
+                    for ic, itr in enumerate(idx_tr):
 
                         # plot 1st part
                         x11 = x1[component_x, itr, 0:i]
@@ -721,7 +723,7 @@ for session in all_sessions:
                         # update stimulus and time annotation
                         if i < 200:
                             # stimdot.set_data(10, 14)
-                            if itr == 0:
+                            if ic == 0:
                                 ax.text(
                                     0.05,
                                     0.95,
@@ -733,7 +735,7 @@ for session in all_sessions:
                         elif np.logical_and(i > 200, i < 200 + 450):
                             # stimdot.set_data(10, 14)
                             ax.scatter(x11[200], y11[200], c=color_epo[0])
-                            if itr == 0:
+                            if ic == 0:
                                 ax.text(
                                     0.05,
                                     0.95,
@@ -746,7 +748,7 @@ for session in all_sessions:
                             # stimdot.set_data(10, 14)
                             ax.scatter(x11[200], y11[200], c=color_epo[0])
                             ax.scatter(x11[200 + 450], y11[200 + 450], c=color_epo[1])
-                            if itr == 0:
+                            if ic == 0:
                                 ax.text(
                                     0.05,
                                     0.95,
@@ -766,7 +768,7 @@ for session in all_sessions:
                                 y22[200 + 450 + 600],
                                 c=color_epo[2],
                             )
-                            if itr == 0:
+                            if ic == 0:
                                 ax.text(
                                     0.05,
                                     0.95,
@@ -789,7 +791,7 @@ for session in all_sessions:
                                 y22[200 + 450 + 600 + 450],
                                 c=color_epo[3],
                             )
-                            if itr == 0:
+                            if ic == 0:
                                 ax.text(
                                     0.05,
                                     0.95,
@@ -811,7 +813,8 @@ for session in all_sessions:
                 #
                 if save:
                     figname = (
-                        area
+                        session
+                        + area
                         + "_"
                         + i_sample
                         + "_pc"
@@ -823,3 +826,4 @@ for session in all_sessions:
                     anim.save(figname, writer="Pillow", fps=30)
                 else:
                     HTML(anim.to_jshtml(default_mode="once"))
+                plt.close("all")
