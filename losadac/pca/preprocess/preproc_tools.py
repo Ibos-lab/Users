@@ -67,6 +67,7 @@ def get_neuron_sample_test_fr(
     nonmatch=True,
     avgwin=50,
     n_sp_sec=5,
+    norm=False,
 ):
     neu_data = NeuronData.from_python_hdf5(path)
     select_block = 1
@@ -115,6 +116,8 @@ def get_neuron_sample_test_fr(
         sample_fr = sp[np.where(sample_id == s_id, True, False)]
         if sample_fr.shape[0] < min_trials:
             return {"fr": None}
+    if norm == True:
+        sp = sp / np.max(sp)
     # Get trials grouped by sample
     fr_samples = select_trials.get_sp_by_sample(sp, sample_id, samples=samples)
 

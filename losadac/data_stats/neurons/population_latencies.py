@@ -31,11 +31,11 @@ def from_python_hdf5(load_path: Path):
 
 
 # Define parameters
-filepaths = [
-    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/lip/neurons/",
-    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
-    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
-]
+filepaths = {
+    "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/lip/neurons/",
+    "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
+    "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
+}
 outputpath = "./test/"
 
 areas = ["pfc", "v4", "lip"]
@@ -65,9 +65,10 @@ idx_end_test = time_before_test + end_test
 # total trial duration
 trial_dur = end_sample - start_sample + end_test - start_test
 
-allspath = []
+allspath = {}
 # ------------------------------------------ Start preprocessing ----------------------------------------
-for path, area in zip(filepaths, areas):
+for area in areas:
+    path = filepaths[area]
     neu_path = path + "*neu.h5"
     path_list = glob.glob(neu_path)
     data = Parallel(n_jobs=-1)(
@@ -107,11 +108,18 @@ for path, area in zip(filepaths, areas):
             all_s = np.concatenate(
                 (fr["0"], fr["11"], fr["15"], fr["51"], fr["55"]), axis=0
             )
-
-            nn_idx_tr = rng.choice(len(all_s), size=len(fr["0"]) * 2, replace=False)
-
-            g1mean.append(np.mean(all_s[nn_idx_tr[: len(fr["0"])]], axis=0))
-            g2mean.append(np.mean(all_s[nn_idx_tr[len(fr["0"]) :]], axis=0))
+            sizemax = np.max(
+                [
+                    len(fr["0"]),
+                    len(fr["11"]),
+                    len(fr["15"]),
+                    len(fr["51"]),
+                    len(fr["55"]),
+                ]
+            )
+            idx_tr = rng.choice(len(all_s), size=sizemax * 2, replace=False)
+            g1mean.append(np.mean(all_s[idx_tr[:sizemax]], axis=0))
+            g2mean.append(np.mean(all_s[idx_tr[sizemax:]], axis=0))
 
     neurons_fr = [
         {
@@ -126,12 +134,13 @@ for path, area in zip(filepaths, areas):
         }
     ]
     spath = "./" + area + "_data_to_dist.h5"
-    allspath.append(spath)
+    allspath[area] = spath
     to_python_hdf5(dat=neurons_fr, save_path=spath)
 
 
 pc_areas = {}
-for path, area in zip(allspath, areas):  #'lip',
+for area in areas:  #'lip',
+    path = allspath[area]
     fr = from_python_hdf5(path)[0]
     fr_concat = np.concatenate(
         (fr["0mean"], fr["11mean"], fr["15mean"], fr["51mean"], fr["55mean"]), axis=1
@@ -150,7 +159,7 @@ for path, area in zip(allspath, areas):  #'lip',
 
 res = {"lip": {}, "v4": {}, "pfc": {}}
 rng = np.random.default_rng(seed)
-for area in ["lip"]:
+for area in areas:
     all_distn = []
     all_distnn = []
     all_dist_n_nn = []
@@ -159,15 +168,11 @@ for area in ["lip"]:
     allreshape_pc = []
     alldist_fake_n_nn = []
     tot_nneu = pc_areas[area]["n_neurons"]
-    for _ in range(1000):
+    for _ in range(300):
         idx_neu = rng.choice(tot_nneu, size=n_comp, replace=False)
         allidx_neu.append(idx_neu)
         allsamp_fr = pc_areas[area]["allsamples_fr"][idx_neu]
         fr_group_concat = pc_areas[area]["fr_group_concat"][idx_neu]
-
-        n_fr = pc_areas[area]["n_fr"][idx_neu]
-        nn_fr = pc_areas[area]["nn_fr"][idx_neu]
-        # neurons_fr=np.concatenate((n_fr,nn_fr),axis=1)
 
         reshape_pc = allsamp_fr.reshape(n_comp, 5, -1)
         reshape_pc = np.concatenate(
@@ -181,7 +186,7 @@ for area in ["lip"]:
         dist_fake_n_nn = []
         for i in range(reshape_pc.shape[-1]):
             # dist.append(signed_euclidean_distance(nnpc[:,i].T, npc[:,i].T))
-            reference = fr_groups[:, 0, i]  # np.zeros(n_comp) # allsamp_pc[:,i] #
+            reference = np.zeros(n_comp)  # allsamp_pc[:,i] # fr_groups[:,0,i]#
             distn.append(pdist(np.array((reshape_pc[:, 0, i], reference))))
             distnn.append(pdist(np.array((reshape_pc[:, 1, i], reference))))
             dist_n_nn.append(
@@ -201,8 +206,8 @@ for area in ["lip"]:
     alldist_fake_n_nn = np.array(alldist_fake_n_nn)
     # group1=all_distnn
     # group2=all_distn
-    group1 = all_dist_n_nn
-    group2 = alldist_fake_n_nn
+    group1 = all_distnn
+    group2 = all_distn
     roc_score, p = smetrics.compute_roc_auc(group1, group2)
     latency, _ = smetrics.find_latency(p_value=p, win=75, step=1, p_treshold=0.05)
     res[area]["roc_score"] = roc_score
