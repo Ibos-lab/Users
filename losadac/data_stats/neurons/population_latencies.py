@@ -36,14 +36,18 @@ filepaths = {
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
 }
-outputpath = "./test/"
+outputpath = "./test_15tr_noNorm/"
+
+
+if not os.path.exists(outputpath):
+    os.makedirs(outputpath)
 
 areas = ["pfc", "v4", "lip"]
 subject = "Riesling"
 avgwin = 100
-min_sp_sec = 5
+min_sp_sec = 1
 n_test = 1
-min_trials = 10
+min_trials = 15
 nonmatch = True  # if True: includes nonmatch trials
 
 # sample timing
@@ -85,6 +89,7 @@ for area in areas:
             nonmatch=nonmatch,
             avgwin=avgwin,
             n_sp_sec=min_sp_sec,
+            norm=False,
         )
         for path in tqdm(path_list)
     )
@@ -133,7 +138,7 @@ for area in areas:
             "g2mean": g2mean,
         }
     ]
-    spath = "./" + area + "_data_to_dist.h5"
+    spath = outputpath + area + "_data_to_dist.h5"
     allspath[area] = spath
     to_python_hdf5(dat=neurons_fr, save_path=spath)
 
@@ -168,7 +173,7 @@ for area in areas:
     allreshape_pc = []
     alldist_fake_n_nn = []
     tot_nneu = pc_areas[area]["n_neurons"]
-    for _ in range(300):
+    for _ in range(1000):
         idx_neu = rng.choice(tot_nneu, size=n_comp, replace=False)
         allidx_neu.append(idx_neu)
         allsamp_fr = pc_areas[area]["allsamples_fr"][idx_neu]
@@ -220,4 +225,4 @@ for area in areas:
     res[area]["alldist_fake_n_nn"] = alldist_fake_n_nn
     print(area)
     print(latency - 200)
-    to_python_hdf5(dat=[res[area]], save_path="./" + area + "_population_dist.h5")
+    to_python_hdf5(dat=[res[area]], save_path=outputpath + area + "_population_dist.h5")
