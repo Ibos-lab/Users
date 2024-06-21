@@ -36,7 +36,7 @@ filepaths = {
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
 }
-outputpath = "./test_15tr_noNorm/"
+outputpath = "./test_15tr_1sp_Norm/"
 
 
 if not os.path.exists(outputpath):
@@ -89,7 +89,7 @@ for area in areas:
             nonmatch=nonmatch,
             avgwin=avgwin,
             n_sp_sec=min_sp_sec,
-            norm=False,
+            norm=True,
         )
         for path in tqdm(path_list)
     )
