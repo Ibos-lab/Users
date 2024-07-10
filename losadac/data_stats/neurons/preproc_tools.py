@@ -35,7 +35,7 @@ def select_sample_test_aligned_trials(
         time_before=time_before_sample,
         error_type=error_type,
     )
-    # Select trials aligned to test onset
+    # Select trials aligned to sample onset
     sp_test_on, mask_t = align_trials.align_on(
         sp_samples=neu_data.sp_samples,
         code_samples=neu_data.code_samples,
