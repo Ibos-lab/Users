@@ -70,10 +70,10 @@ def get_neuron_sample_test_fr(
     n_sp_sec=5,
     norm=False,
     zscore=False,
+    code=1,
 ):
     neu_data = NeuronData.from_python_hdf5(path)
     select_block = 1
-    code = 1
     # Select trials aligned to sample onset
     sp_sample_on, sp_test_on, mask_s, mask_t = select_sample_test_aligned_trials(
         neu_data, select_block, code, time_before_sample, time_before_test, error_type=0

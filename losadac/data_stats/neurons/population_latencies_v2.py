@@ -222,8 +222,6 @@ def from_python_hdf5(load_path: Path):
 
 
 # Define parameters
-
-
 areas = ["lip", "pfc", "v4"]
 subject = "Riesling"
 avgwin = 100

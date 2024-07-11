@@ -9,17 +9,20 @@ from datetime import datetime
 import json
 
 # Define parameters
-filepaths = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/lip/neurons/"
-outputpath = "./test/"
-
-area = "lip"
+area = "pfc"
+filepaths = (
+    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/"
+    + area
+    + "/neurons/"
+)
+outputpath = "./test_remove_ind_signal/"
 subject = "Riesling"
 avgwin = 100
 min_sp_sec = 5
 n_test = 1
 min_trials = 10
 nonmatch = True  # if True: includes nonmatch trials
-
+ind_sig = True
 # sample timing
 time_before_sample = 500
 start_sample = -200
@@ -59,6 +62,7 @@ data = Parallel(n_jobs=-1)(
         nonmatch=nonmatch,
         avgwin=avgwin,
         n_sp_sec=min_sp_sec,
+        ind_sig=ind_sig,
     )
     for path in tqdm(path_list)
 )

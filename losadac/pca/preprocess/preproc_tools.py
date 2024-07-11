@@ -70,6 +70,7 @@ def get_neuron_sample_test_fr(
     n_sp_sec=5,
     norm=False,
     zscore=False,
+    ind_sig=False,
 ):
     neu_data = NeuronData.from_python_hdf5(path)
     select_block = 1
@@ -126,6 +127,8 @@ def get_neuron_sample_test_fr(
                 return {"fr": None}
     if norm == True:
         sp = sp / np.max(sp)
+    if ind_sig == True:
+        sp = sp - np.mean(sp)
     if zscore == True:
         sp_std = np.std(sp, ddof=1, axis=0)
         sp_std = np.where(sp_std == 0, 1, sp_std)
