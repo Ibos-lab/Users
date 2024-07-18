@@ -1,22 +1,11 @@
 import glob
-import os
 import numpy as np
-from joblib import Parallel, delayed
-from tqdm import tqdm
-import json
 from pathlib import Path
 from typing import Dict, List
-import h5py
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 from scipy.spatial.distance import pdist
 from ephysvibe.structures.neuron_data import NeuronData
-from ephysvibe.trials.spikes import firing_rate
-from ephysvibe.trials import align_trials, select_trials
 from ephysvibe.structures.population_data import PopulationData
-from datetime import datetime
 import pandas as pd
-from scipy import stats
 
 
 # Define functions
