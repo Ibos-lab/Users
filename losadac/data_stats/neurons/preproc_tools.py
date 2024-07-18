@@ -114,7 +114,6 @@ def get_neuron_sample_test_fr(
     # Check number of trials
     sample_id = neu_data.sample_id[mask_t][mask_match_neu]
     samples = [0, 11, 15, 55, 51]
-
     if min_neu:
         sample_fr = sp[np.where(sample_id == 0, True, False)]
         if sample_fr.shape[0] < min_trials:
