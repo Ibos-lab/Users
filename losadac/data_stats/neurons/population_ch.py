@@ -52,6 +52,7 @@ filepaths = {
 }
 
 for area in areas:
+    print(area)
     path = filepaths[area]
     neu_path = path + "*neu.h5"
     path_list = glob.glob(neu_path)
@@ -80,4 +81,4 @@ for area in areas:
     sessions_path = "/envau/work/invibe/USERS/IBOS/openephys/Riesling/"
     params = {"ch_path": ch_path, "sessions_path": sessions_path}
     df_ch = popu.execute_function(get_ch_info, params=params, n_jobs=1, ret_df=True)
-    df_ch.to_csv("population_ch_" + area + ".csv")
+    df_ch.to_csv("population_ch_" + area + ".csv", index=False)

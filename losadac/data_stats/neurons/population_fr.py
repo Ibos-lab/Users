@@ -26,18 +26,18 @@ def get_fr_info(neu: NeuronData, params: List[Dict]):
         # Select trials by sample type (N or NN)
         sid = neu.sample_id[mask]
         smask = (sid != 0) if it["stype"] == "NN" else (sid == 0)
-        if np.sum(smask) == 0:  # If there's no N trials
+        if np.sum(smask) < 10:  # If there's no enough trials
             continue
         sp = allsp[smask]
         # Fr [sp/sec] in epoch (from 0 to it['end])
-        it["end"] = it["time_before"] + it["end"]
-        it["st"] = it["time_before"] + it["st"]
-        epoch_fr = np.nanmean(sp[:, it["st"] : it["end"]]) * 1000
+        endt = it["time_before"] + it["end"]
+        stt = it["time_before"] + it["st"]
+        epoch_fr = np.nanmean(sp[:, stt:endt]) * 1000
         res["fr_" + it["epoch"] + it["stype"] + it["inout"]] = epoch_fr
         # Maximum fr and latency
         sp_avg = firing_rate.moving_average(
-            np.mean(sp, axis=0)[: it["end"] + it["win"]], win=it["win"], step=1
-        )[it["st"] : it["end"]]
+            np.mean(sp, axis=0)[: endt + it["win"]], win=it["win"], step=1
+        )[stt:endt]
         lat = np.nanargmax(sp_avg)
         res["maxfrlat_" + it["epoch"] + it["stype"] + it["inout"]] = lat
         max_fr = sp_avg[lat]
@@ -55,8 +55,8 @@ def get_fr_info(neu: NeuronData, params: List[Dict]):
             error_type=0,
         )
         blsp = blallsp[smask, :200]
-        epmaxsp = sp[:, it["st"] + (lat - 100) : it["st"] + lat + 100]
-        epfixsp = sp[:, it["st"] + 50 : it["st"] + 250]
+        epmaxsp = sp[:, stt + (lat - 100) : stt + lat + 100]
+        epfixsp = sp[:, stt + 50 : stt + 250]
         ## Compute ratios
         bl_fr = np.mean(blsp)
         if bl_fr == 0:
@@ -74,7 +74,7 @@ def get_fr_info(neu: NeuronData, params: List[Dict]):
         ## Compute p-value
         tr_fr_bl = np.mean(blsp, axis=1)
         tr_maxfr = np.mean(epmaxsp, axis=1)
-        if np.logical_or(len(tr_fr_bl) < 10, len(tr_maxfr) < 10):
+        if np.all((tr_fr_bl - tr_maxfr) == 0):
             continue
         _, p_maxfr = stats.wilcoxon(tr_fr_bl, tr_maxfr)
         res["p_maxfr_" + it["epoch"] + it["stype"] + it["inout"]] = p_maxfr
@@ -82,7 +82,7 @@ def get_fr_info(neu: NeuronData, params: List[Dict]):
 
 
 # Define parameters
-areas = ["lip", "pfc", "v4"]
+areas = ["pfc", "v4"]
 subject = "Riesling"
 # paths
 filepaths = {
@@ -92,11 +92,11 @@ filepaths = {
 }
 
 for area in areas:
+    print(area)
     path = filepaths[area]
     neu_path = path + "*neu.h5"
     path_list = glob.glob(neu_path)
 
-for area in areas:
     attr_dtype = {
         "sp_samples": np.float16,
         "cluster_ch": np.float16,
@@ -113,7 +113,7 @@ for area in areas:
         "pos_code": np.float16,
         "code_numbers": np.float16,
     }
-    popu = PopulationData.get_population(path_list, attr_dtype)
+    popu = PopulationData.get_population(path_list[1500:], attr_dtype)
 
     params = []
     for iinout in ["in", "out"]:
@@ -156,5 +156,5 @@ for area in areas:
             params.append(i_param)
     params = np.concatenate(params)
 
-    df_fr = popu.execute_function(get_fr_info, params=params, n_jobs=1, ret_df=True)
-    df_fr.to_csv("population_fr_" + area + ".csv")
+    df_fr = popu.execute_function(get_fr_info, params=params, n_jobs=-1, ret_df=True)
+    df_fr.to_csv("population_fr_" + area + ".csv", index=False)
