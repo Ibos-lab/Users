@@ -10,6 +10,7 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 from ephysvibe.stats import smetrics
 from sklearn import metrics
+import os
 
 seed = 1997
 
@@ -102,51 +103,57 @@ filepaths = {
 }
 savepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/"
 popu_path = {
-    "lip": "",
+    "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_lip.h5",
     "pfc": "",
     "v4": "",
 }
 for area in areas:
     print(area)
-    path = filepaths[area]
-    neu_path = path + "*neu.h5"
-    path_list = glob.glob(neu_path)
+    if not os.path.isfile(popu_path[area]):
+        path = filepaths[area]
+        neu_path = path + "*neu.h5"
+        path_list = glob.glob(neu_path)
 
-    params = [
-        {
-            "inout": "in",
-            "sp": "sample_on_in",
-            "mask": "mask_in",
-            "event": "sample_on",
-            "time_before": 500,
-            "st": 0,
-            "end": 1000,
-            "select_block": 1,
-            "win": 100,
-            "dtype_sp": np.int8,
-            "dtype_mask": bool,
-        },
-        {
-            "inout": "out",
-            "sp": "sample_on_out",
-            "mask": "mask_out",
-            "event": "sample_on",
-            "time_before": 500,
-            "st": 0,
-            "end": 1000,
-            "select_block": 1,
-            "win": 100,
-            "dtype_sp": np.int8,
-            "dtype_mask": bool,
-        },
-    ]
-    population_list = Parallel(n_jobs=-1)(
-        delayed(get_neu_align)(neu, params) for neu in tqdm(path_list)
-    )
-    comment = "{'inout':'in','sp':'sample_on_in','mask':'mask_in','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool},{'inout':'out','sp':'sample_on_out','mask':'mask_out','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool}"
-    population = PopulationData(population_list, comment=comment)
-    population.to_python_hdf5(savepath + "population_selectivity_" + area + ".h5")
+        params = [
+            {
+                "inout": "in",
+                "sp": "sample_on_in",
+                "mask": "mask_in",
+                "event": "sample_on",
+                "time_before": 500,
+                "st": 0,
+                "end": 1000,
+                "select_block": 1,
+                "win": 100,
+                "dtype_sp": np.int8,
+                "dtype_mask": bool,
+            },
+            {
+                "inout": "out",
+                "sp": "sample_on_out",
+                "mask": "mask_out",
+                "event": "sample_on",
+                "time_before": 500,
+                "st": 0,
+                "end": 1000,
+                "select_block": 1,
+                "win": 100,
+                "dtype_sp": np.int8,
+                "dtype_mask": bool,
+            },
+        ]
+        population_list = Parallel(n_jobs=-1)(
+            delayed(get_neu_align)(neu, params) for neu in tqdm(path_list)
+        )
+        comment = "{'inout':'in','sp':'sample_on_in','mask':'mask_in','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool},{'inout':'out','sp':'sample_on_out','mask':'mask_out','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool}"
+        population = PopulationData(population_list, comment=comment)
+        print("Saving population.h5")
+        population.to_python_hdf5(savepath + "population_selectivity_" + area + ".h5")
 
+    else:
+        print("Reading population data")
+        population = PopulationData.from_python_hdf5(popu_path[area])
+    print("Computing selectivity")
     df_selectivity = population.execute_function(
         get_selectivity_info, n_jobs=-1, ret_df=True
     )
