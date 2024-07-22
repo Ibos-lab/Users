@@ -101,7 +101,11 @@ filepaths = {
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
 }
 savepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/"
-
+popu_path = {
+    "lip": "",
+    "pfc": "",
+    "v4": "",
+}
 for area in areas:
     print(area)
     path = filepaths[area]
@@ -136,11 +140,11 @@ for area in areas:
             "dtype_mask": bool,
         },
     ]
-    population = Parallel(n_jobs=-1)(
+    population_list = Parallel(n_jobs=-1)(
         delayed(get_neu_align)(neu, params) for neu in tqdm(path_list)
     )
     comment = "{'inout':'in','sp':'sample_on_in','mask':'mask_in','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool},{'inout':'out','sp':'sample_on_out','mask':'mask_out','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool}"
-    population = PopulationData(population, comment=comment)
+    population = PopulationData(population_list, comment=comment)
     population.to_python_hdf5(savepath + "population_selectivity_" + area + ".h5")
 
     df_selectivity = population.execute_function(
