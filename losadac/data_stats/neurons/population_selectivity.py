@@ -37,13 +37,13 @@ def get_selectivity_info(neu: NeuronData):
         # Check selectivity and latency
         color_lat, color_score = smetrics.get_selectivity(c1, c5, win=75, scores=True)
         color_selec = (
-            "nan"
+            np.nan
             if np.isnan(color_lat)
             else "c1" if color_score[color_lat] > 0 else "c5"
         )
         orient_lat, orient_score = smetrics.get_selectivity(o1, o5, win=75, scores=True)
         orient_selec = (
-            "nan"
+            np.nan
             if np.isnan(orient_lat)
             else "o1" if orient_score[orient_lat] > 0 else "o5"
         )
@@ -51,7 +51,7 @@ def get_selectivity_info(neu: NeuronData):
             sample, n0, win=75, scores=True
         )
         neutral_selec = (
-            "nan"
+            np.nan
             if np.isnan(neutral_lat)
             else "NN" if neutral_score[neutral_lat] > 0 else "N"
         )
@@ -92,7 +92,7 @@ def get_neu_align(path, params, sp_sample=False):
 
 
 # Define parameters
-areas = ["pfc", "v4", "lip"]
+areas = ["lip", "pfc", "v4"]
 subject = "Riesling"
 # paths
 filepaths = {
@@ -100,6 +100,7 @@ filepaths = {
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
 }
+savepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/"
 
 for area in areas:
     print(area)
@@ -140,11 +141,12 @@ for area in areas:
     )
     comment = "{'inout':'in','sp':'sample_on_in','mask':'mask_in','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool},{'inout':'out','sp':'sample_on_out','mask':'mask_out','event':'sample_on','time_before':500,'st':0,'end':1000,'select_block':1,'win':100,'dtype_sp':np.int8,'dtype_mask':bool}"
     population = PopulationData(population, comment=comment)
-    population.to_python_hdf5("population_selectivity_" + area + ".h5")
+    population.to_python_hdf5(savepath + "population_selectivity_" + area + ".h5")
 
     df_selectivity = population.execute_function(
         get_selectivity_info, n_jobs=-1, ret_df=True
     )
 
-    df_selectivity = df_selectivity.replace("nan", np.nan)
-    df_selectivity.to_csv("population_selectivity_" + area + ".csv", index=False)
+    df_selectivity.to_csv(
+        savepath + "population_selectivity_" + area + ".csv", index=False
+    )
