@@ -53,7 +53,7 @@ def get_neu_align(path, params, sp_sample=False):
 
 # Define parameters
 # Create one population per session
-filepath = "/envau_cifs.intlocal.univ-amu.fr/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/*/neurons/*neu.h5"
+filepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/*/neurons/*neu.h5"
 path_list = glob.glob(filepath)
 # Group paths per session
 date_pattern = r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}"
@@ -151,7 +151,7 @@ def compute_correlation(popu_fr, n1, n2):
     return {"areas": areas, "y": neu1["id"], "x": neu2["id"], "corr": corr, "p": p_val}
 
 
-res = Parallel(n_jobs=3)(
+res = Parallel(n_jobs=-1)(
     delayed(compute_correlation)(popu_fr, n1, n2) for n1, n2 in tqdm(pairs)
 )
 with open("./corr_" + date_time + ".pkl", "wb") as fp:
