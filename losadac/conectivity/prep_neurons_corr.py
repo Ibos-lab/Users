@@ -107,12 +107,9 @@ population = Parallel(n_jobs=-1)(
 
 comment = str(params)
 popu = PopulationData(population, comment=comment)
-popu.to_python_hdf5("res/test.h5")
+popu.to_python_hdf5("corr_" + date_time + ".h5")
 
 popu = PopulationData.from_python_hdf5("corr_" + date_time + ".h5")
-
-numbers = range(len(popu.population))
-pairs = list(itertools.combinations(numbers, 2))  # Compute each pair in parallel
 
 
 def get_fr(neu, inout, sample, st, end, win=100):
@@ -122,9 +119,14 @@ def get_fr(neu, inout, sample, st, end, win=100):
     fr = firing_rate.moving_average(data=sp, win=win, step=1)[:, st:end]
     sample_id = neu.sample_id[mask]
     fr_samples = select_trials.get_sp_by_sample(fr, sample_id, [sample])
+    frs = fr_samples[str(sample)]
+    nzeros = np.sum(np.sum(frs[:, 200:], axis=0) == 0)
+    print(nzeros)
+    if np.logical_or(nzeros > 25, np.mean(frs[:, 200:]) * 1000 < 5):
+        return None
     res["id"] = neu.cluster_group + "_" + str(neu.cluster_number)
     res["area"] = neu.area
-    res["fr"] = fr_samples[str(sample)]
+    res["fr"] = frs
     return res
 
 
@@ -138,21 +140,41 @@ popu_fr = popu.execute_function(
     get_fr, win=win, inout=inout, sample=sample, st=st, end=end, n_jobs=-1, ret_df=False
 )
 
+fr_dicts_only = [item for item in popu_fr if isinstance(item, dict)]
+len(fr_dicts_only)
+
 
 def compute_correlation(popu_fr, n1, n2):
     neu1 = popu_fr[n1]
     neu2 = popu_fr[n2]
+    if np.logical_or(neu1 is None, neu2 is None):
+        return None
     trial_dur = neu1["fr"].shape[1]
-    corr, p_val = stats.spearmanr(neu1["fr"], neu2["fr"])
-    p_val = p_val[:trial_dur, trial_dur:]
+    corr = np.corrcoef(neu1["fr"].T, neu2["fr"].T)
+    # corr,p_val = stats.spearmanr(neu1['fr'],neu2['fr'])
+    if np.all(np.isnan(corr)):
+        corr = np.array([corr], dtype=np.float16)
+        # p_val = np.array([p_val],dtype=np.float16)
+    else:
+        # p_val=p_val[:trial_dur,trial_dur:].astype(np.float16)
+        corr = corr.round(decimals=3)[:trial_dur, trial_dur:].astype(np.float16)
     # corr = np.corrcoef(np.array(t_neus1).T,np.array(t_neus2).T)
-    corr = corr.round(decimals=3)[:trial_dur, trial_dur:].astype(np.float16)
     areas = neu1["area"] + "_" + neu2["area"]
-    return {"areas": areas, "y": neu1["id"], "x": neu2["id"], "corr": corr, "p": p_val}
+    return {
+        "areas": areas,
+        "y": neu1["id"],
+        "x": neu2["id"],
+        "corr": corr,
+    }  # ,'p':p_val}
 
+
+numbers = range(len(fr_dicts_only))
+pairs = list(itertools.combinations(numbers, 2))  # Compute each pair in parallel
+len(pairs)
 
 res = Parallel(n_jobs=-1)(
-    delayed(compute_correlation)(popu_fr, n1, n2) for n1, n2 in tqdm(pairs)
+    delayed(compute_correlation)(fr_dicts_only, n1, n2) for n1, n2 in tqdm(pairs)
 )
-with open("./corr_" + date_time + ".pkl", "wb") as fp:
-    pickle.dump(res, fp)
+res_dicts_only = [item for item in res if isinstance(item, dict)]
+with open("corr_" + date_time + ".pkl", "wb") as fp:
+    pickle.dump(res_dicts_only, fp)
