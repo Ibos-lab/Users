@@ -71,8 +71,13 @@ def get_neuron_sample_test_fr(
     norm=False,
     zscore=False,
     code=1,
+    include_nid=None,
 ):
     neu_data = NeuronData.from_python_hdf5(path)
+    if include_nid is not None:
+        nid = neu_data.get_neuron_id()
+        if not (nid in include_nid):
+            return {"fr": None}
     select_block = 1
     # Select trials aligned to sample onset
     sp_sample_on, sp_test_on, mask_s, mask_t = select_sample_test_aligned_trials(

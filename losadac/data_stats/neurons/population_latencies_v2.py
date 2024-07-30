@@ -12,95 +12,9 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from scipy.spatial.distance import pdist
 import pickle
-
+import pandas as pd
 
 seed = 1997
-
-
-def scrum_eqsize(fr):
-
-    meanfr0 = np.mean(fr["0"], axis=0)
-    meanfr11 = np.mean(fr["11"], axis=0)
-    meanfr15 = np.mean(fr["15"], axis=0)
-    meanfr51 = np.mean(fr["51"], axis=0)
-    meanfr55 = np.mean(fr["55"], axis=0)
-
-    nn = np.concatenate((fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-    size_nn = nn.shape[0]
-
-    all_s = np.concatenate((fr["0"], fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-
-    sizemax = np.sum(
-        [
-            len(fr["0"]),
-            len(fr["11"]),
-            len(fr["15"]),
-            len(fr["51"]),
-            len(fr["55"]),
-        ]
-    )
-    idx_tr = rng.choice(len(all_s), size=sizemax, replace=False)
-    g1 = np.mean(all_s[idx_tr[:size_nn]], axis=0)
-    g2 = np.mean(all_s[idx_tr[size_nn:]], axis=0)
-
-    return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
-
-
-def scrum_neutralsize(fr, ntr=15):
-
-    nn = np.concatenate((fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-    size_nn = nn.shape[0]
-
-    idx_tr = rng.choice(size_nn, size=ntr, replace=False)
-    nn_trs = nn[idx_tr]
-
-    idx_tr = rng.choice(fr["0"].shape[0], size=ntr, replace=False)
-    neutral_trs = fr["0"][idx_tr]
-
-    meanfr0 = np.mean(neutral_trs, axis=0)
-    meanfr11 = np.mean(nn_trs, axis=0)
-    meanfr15 = np.mean(nn_trs, axis=0)
-    meanfr51 = np.mean(nn_trs, axis=0)
-    meanfr55 = np.mean(nn_trs, axis=0)
-
-    all_s = np.concatenate((fr["0"], fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-
-    idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
-    g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
-    g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
-
-    return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
-
-
-def scrum_neutralsize_newpool(fr, ntr=15):
-
-    nn = np.concatenate((fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-    size_nn = nn.shape[0]
-
-    idx_tr = rng.choice(size_nn, size=ntr, replace=False)
-    nn_trs = nn[idx_tr]
-
-    idx_tr = rng.choice(fr["0"].shape[0], size=ntr, replace=False)
-    neutral_trs = fr["0"][idx_tr]
-
-    meanfr0 = np.mean(neutral_trs, axis=0)
-    meanfr11 = np.mean(nn_trs, axis=0)
-    meanfr15 = np.mean(nn_trs, axis=0)
-    meanfr51 = np.mean(nn_trs, axis=0)
-    meanfr55 = np.mean(nn_trs, axis=0)
-
-    idx_tr = rng.choice(size_nn, size=ntr, replace=False)
-    f_nn_trs = nn[idx_tr]
-    idx_tr = rng.choice(fr["0"].shape[0], size=ntr, replace=False)
-    f_neutral_trs = fr["0"][idx_tr]
-
-    all_s = np.concatenate((f_neutral_trs, f_nn_trs), axis=0)
-
-    idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
-    g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
-    g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
-
-    return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
 
 
 def scrum_neutralsize_samepool(fr, ntr):
@@ -139,58 +53,6 @@ def scrum_neutral_fixes_size(fr):
     nn_trs = nn[idx_tr]
 
     neutral_trs = fr["0"]
-
-    meanfr0 = np.mean(neutral_trs, axis=0)
-    meanfr11 = np.mean(nn_trs, axis=0)
-    meanfr15 = np.mean(nn_trs, axis=0)
-    meanfr51 = np.mean(nn_trs, axis=0)
-    meanfr55 = np.mean(nn_trs, axis=0)
-
-    all_s = np.concatenate((neutral_trs, nn_trs), axis=0)
-
-    idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
-    g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
-    g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
-
-    return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
-
-
-def scrum_neutral_fixes_size_difpool(fr):
-
-    ntr = fr["0"].shape[0]
-    nn = np.concatenate((fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-    size_nn = nn.shape[0]
-
-    idx_tr = rng.choice(size_nn, size=ntr, replace=False)
-    nn_trs = nn[idx_tr]
-
-    neutral_trs = fr["0"]
-
-    meanfr0 = np.mean(neutral_trs, axis=0)
-    meanfr11 = np.mean(nn_trs, axis=0)
-    meanfr15 = np.mean(nn_trs, axis=0)
-    meanfr51 = np.mean(nn_trs, axis=0)
-    meanfr55 = np.mean(nn_trs, axis=0)
-
-    all_s = np.concatenate((fr["0"], fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-
-    idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
-    g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
-    g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
-
-    return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
-
-
-def scrum_eqsize_replacement(fr, ntr=30):
-
-    nn = np.concatenate((fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-    size_nn = nn.shape[0]
-
-    idx_tr = rng.choice(size_nn, size=ntr, replace=True)
-    nn_trs = nn[idx_tr]
-
-    idx_tr = rng.choice(fr["0"].shape[0], size=ntr, replace=True)
-    neutral_trs = fr["0"][idx_tr]
 
     meanfr0 = np.mean(neutral_trs, axis=0)
     meanfr11 = np.mean(nn_trs, axis=0)
@@ -251,12 +113,14 @@ outputpath = (
     + str(min_trials)
     + "tr_"
     + str(min_sp_sec)
-    + "sp_Zscore_scrum_neutral_fixes_size/"
+    + "sp_Zscore_scrum_neutralsize_samepool_selectivity>0/"
 )
-dataoutputpath = "./"
+dataoutputpath = "./popudata_selectivity>0/"
 
 if not os.path.exists(outputpath):
     os.makedirs(outputpath)
+if not os.path.exists(dataoutputpath):
+    os.makedirs(dataoutputpath)
 # -------------------------------------------- End parameters ------------------------------------------
 
 # Compute idxs
@@ -268,22 +132,29 @@ idx_end_test = time_before_test + end_test
 trial_dur = end_sample - start_sample + end_test - start_test
 
 allspath = {
-    "lip": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/lip_"
-    + str(min_trials)
-    + "tr_1sp_Zscore.pickle",
-    "pfc": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/pfc_"
-    + str(min_trials)
-    + "tr_1sp_Zscore.pickle",
-    "v4": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/v4_"
-    + str(min_trials)
-    + "tr_1sp_Zscore.pickle",
+    # "lip": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/lip_"
+    # + str(min_trials)
+    # + "tr_1sp_Zscore.pickle",
+    # "pfc": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/pfc_"
+    # + str(min_trials)
+    # + "tr_1sp_Zscore.pickle",
+    # "v4": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/v4_"
+    # + str(min_trials)
+    # + "tr_1sp_Zscore.pickle",
 }
 # ------------------------------------------ Start preprocessing ----------------------------------------
 if not bool(allspath):
     for area in areas:
+        print(area)
         path = filepaths[area]
         neu_path = path + "*neu.h5"
         path_list = glob.glob(neu_path)
+        df_sel = pd.read_pickle(
+            "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_"
+            + area
+            + ".pkl"
+        )
+        include_nid = df_sel[df_sel["neutral_lat_in"] > 0]["nid"].values
         data = Parallel(n_jobs=-1)(
             delayed(get_neuron_sample_test_fr)(
                 path=path,
@@ -301,6 +172,7 @@ if not bool(allspath):
                 n_sp_sec=min_sp_sec,
                 norm=norm,
                 zscore=zscore,
+                include_nid=include_nid,
             )
             for path in tqdm(path_list)
         )
@@ -315,17 +187,19 @@ if not bool(allspath):
             + "sp_Zscore.pickle"
         )
         allspath[area] = spath
-
+        print("saving")
         with open(spath, "wb") as fp:
             pickle.dump(data, fp)
 
 
+print("Compute distances")
 rng = np.random.default_rng(seed)
 
 res = {"lip": {}, "v4": {}, "pfc": {}}
 
 pc_areas = {}
 for area in areas:
+    print(area)
     path = allspath[area]
 
     with open(path, "br") as fp:
@@ -338,7 +212,7 @@ for area in areas:
     allidx_neu = []
     allreshape_pc = []
     alldist_fake_n_nn = []
-
+    print("start iterations")
     for _ in range(1000):
 
         s0, s11, s15, s51, s55 = [], [], [], [], []
@@ -434,5 +308,5 @@ for area in areas:
     res[area]["all_dist_n_nn"] = all_dist_n_nn
     res[area]["alldist_fake_n_nn"] = alldist_fake_n_nn
     res[area]["n_neurons"] = fr_concat.shape[0]
-    print(area)
+    print("saving")
     to_python_hdf5(dat=[res[area]], save_path=outputpath + area + "_population_dist.h5")
