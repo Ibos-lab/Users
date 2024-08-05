@@ -59,27 +59,32 @@ for date_time in grouped_paths.keys():
             "v4v4": [],
         }
         for icorr in corrlist:
+
             if np.all(np.isnan(icorr["corr"])):
                 continue
-            corrmat = icorr["corr"]
             areas = icorr["areas"].split("_")
-            y_label = areas[0] + "_" + icorr["y"]
-            x_label = areas[1] + "_" + icorr["x"]
-            srted = sorted(areas)
-            joinsrted = "".join(srted)
-            mean_corr = np.empty((3, 3))
-            corrmat = corrmat.astype(np.float32)
-            for i in range(3):
-                for j in range(3):
-                    mean_corr[i, j] = np.nanmean(corrmat[slices[i], slices[j]])
-            if joinsrted in groups:
-                if "".join(areas) != joinsrted:
-                    mean_corr = mean_corr.T
-                groups[joinsrted].append(mean_corr)
+            areas = "".join(areas)
+            # corrmat = icorr["corr"]
+            # areas = icorr["areas"].split("_")
+            # y_label = areas[0] + "_" + icorr["y"]
+            # x_label = areas[1] + "_" + icorr["x"]
+            # srted = sorted(areas)
+            # joinsrted = "".join(srted)
+            # mean_corr = np.empty((3, 3))
+            # corrmat = corrmat.astype(np.float32)
+            # for i in range(3):
+            #     for j in range(3):
+            #         mean_corr[i, j] = np.nanmean(corrmat[slices[i], slices[j]])
+            # if joinsrted in groups:
+            #     if "".join(areas) != joinsrted:
+            #         mean_corr = mean_corr.T
+            #     groups[joinsrted].append(mean_corr)
+            groups[areas].append(icorr["corr"])
         samp_groups[str(samp)] = groups
 print("sort")
 res_samples = {"0": {}, "11": {}, "15": {}, "51": {}, "55": {}}
 for samp in [0, 11, 15, 51, 55]:
+    # lipv4
     lipv4 = np.array(samp_groups[str(samp)]["lipv4"])
     if lipv4.shape[0] == 0:
         res_samples[str(samp)]["lipv4"] = {"slip_dv4": np.nan, "dlip_sv4": np.nan}
@@ -87,6 +92,7 @@ for samp in [0, 11, 15, 51, 55]:
         slip_dv4 = lipv4[:, 1, 2]  # sample lip delay v4
         dlip_sv4 = lipv4[:, 2, 1]  # delay lip sample v4
         res_samples[str(samp)]["lipv4"] = {"slip_dv4": slip_dv4, "dlip_sv4": dlip_sv4}
+    # lippfc
     lippfc = np.array(samp_groups[str(samp)]["lippfc"])
     if lippfc.shape[0] == 0:
         res_samples[str(samp)]["lippfc"] = {"slip_dpfc": np.nan, "dlip_spfc": np.nan}
@@ -97,6 +103,7 @@ for samp in [0, 11, 15, 51, 55]:
             "slip_dpfc": slip_dpfc,
             "dlip_spfc": dlip_spfc,
         }
+    # liplip
     liplip = np.array(samp_groups[str(samp)]["liplip"])
     if liplip.shape[0] == 0:
         res_samples[str(samp)]["liplip"] = {"slip_dlip": np.nan, "dlip_slip": np.nan}
@@ -107,6 +114,7 @@ for samp in [0, 11, 15, 51, 55]:
             "slip_dlip": slip_dlip,
             "dlip_slip": dlip_slip,
         }
+    # pfcpfc
     pfcpfc = np.array(samp_groups[str(samp)]["pfcpfc"])
     if pfcpfc.shape[0] == 0:
         res_samples[str(samp)]["pfcpfc"] = {"spfc_dpfc": np.nan, "dpfc_spfc": np.nan}
@@ -117,6 +125,7 @@ for samp in [0, 11, 15, 51, 55]:
             "spfc_dpfc": spfc_dpfc,
             "dpfc_spfc": dpfc_spfc,
         }
+    # pfcv4
     pfcv4 = np.array(samp_groups[str(samp)]["pfcv4"])
     if pfcv4.shape[0] == 0:
         res_samples[str(samp)]["pfcv4"] = {"spfc_dv4": np.nan, "dpfc_sv4": np.nan}
@@ -124,6 +133,7 @@ for samp in [0, 11, 15, 51, 55]:
         spfc_dv4 = pfcv4[:, 1, 2]  # sample pfc delay v4
         dpfc_sv4 = pfcv4[:, 2, 1]  # delay pfc sample v4
         res_samples[str(samp)]["pfcv4"] = {"spfc_dv4": spfc_dv4, "dpfc_sv4": dpfc_sv4}
+    # v4v4
     v4v4 = np.array(samp_groups[str(samp)]["v4v4"])
     if v4v4.shape[0] == 0:
         res_samples[str(samp)]["v4v4"] = {"sv4_dv4": np.nan, "dv4_sv4": np.nan}
@@ -145,4 +155,4 @@ for isamp, samp in enumerate(["0", "11", "15", "51", "55"]):
             "k",
         )
         ax[isamp, ja].set(xlabel=dkeys[0], ylabel=dkeys[1], title=samp + " " + akey)
-f.savefig(outputpath + "sample_delay_corr")
+f.savefig(outputpath + "sample_delay_corr2")
