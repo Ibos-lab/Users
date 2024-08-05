@@ -149,12 +149,12 @@ if not bool(allspath):
         path = filepaths[area]
         neu_path = path + "*neu.h5"
         path_list = glob.glob(neu_path)
-        df_sel = pd.read_pickle(
-            "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_"
-            + area
-            + ".pkl"
-        )
-        include_nid = df_sel[df_sel["neutral_lat_in"] > 0]["nid"].values
+        # df_sel = pd.read_pickle(
+        #     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_"
+        #     + area
+        #     + ".pkl"
+        # )
+        # include_nid = df_sel[df_sel["neutral_lat_in"] > 0]["nid"].values
         data = Parallel(n_jobs=-1)(
             delayed(get_neuron_sample_test_fr)(
                 path=path,
@@ -172,7 +172,6 @@ if not bool(allspath):
                 n_sp_sec=min_sp_sec,
                 norm=norm,
                 zscore=zscore,
-                include_nid=include_nid,
             )
             for path in tqdm(path_list)
         )
