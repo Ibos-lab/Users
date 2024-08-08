@@ -22,8 +22,12 @@ import pickle
 pathlocs = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/*.pkl"
 )
-filepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/"
-outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/"
+filepath = (
+    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/mean_max/"
+)
+outputpath = (
+    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/mean_max/"
+)
 path_list = glob.glob(pathlocs)
 # Group paths per session
 date_pattern = r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}"
@@ -39,9 +43,18 @@ for path in path_list:
 print(grouped_paths.keys())
 slices = [slice(0, 200), slice(200, 650), slice(650, None)]
 samp_groups = {}
-for date_time in grouped_paths.keys():
-    print(date_time)
-    for samp in [0, 11, 15, 51, 55]:
+
+for samp in [0, 11, 15, 51, 55]:
+    print(samp)
+    groups = {
+        "liplip": [],
+        "lippfc": [],
+        "lipv4": [],
+        "pfcpfc": [],
+        "pfcv4": [],
+        "v4v4": [],
+    }
+    for date_time in grouped_paths.keys():
         if not os.path.isfile(
             filepath + "corr_s" + str(samp) + "_" + date_time + ".pkl"
         ):
@@ -50,37 +63,15 @@ for date_time in grouped_paths.keys():
             filepath + "corr_s" + str(samp) + "_" + date_time + ".pkl", "rb"
         ) as handle:
             corrlist = pickle.load(handle)
-        groups = {
-            "liplip": [],
-            "lippfc": [],
-            "lipv4": [],
-            "pfcpfc": [],
-            "pfcv4": [],
-            "v4v4": [],
-        }
+
         for icorr in corrlist:
 
             if np.all(np.isnan(icorr["corr"])):
                 continue
             areas = icorr["areas"].split("_")
             areas = "".join(areas)
-            # corrmat = icorr["corr"]
-            # areas = icorr["areas"].split("_")
-            # y_label = areas[0] + "_" + icorr["y"]
-            # x_label = areas[1] + "_" + icorr["x"]
-            # srted = sorted(areas)
-            # joinsrted = "".join(srted)
-            # mean_corr = np.empty((3, 3))
-            # corrmat = corrmat.astype(np.float32)
-            # for i in range(3):
-            #     for j in range(3):
-            #         mean_corr[i, j] = np.nanmean(corrmat[slices[i], slices[j]])
-            # if joinsrted in groups:
-            #     if "".join(areas) != joinsrted:
-            #         mean_corr = mean_corr.T
-            #     groups[joinsrted].append(mean_corr)
             groups[areas].append(icorr["corr"])
-        samp_groups[str(samp)] = groups
+    samp_groups[str(samp)] = groups
 print("sort")
 res_samples = {"0": {}, "11": {}, "15": {}, "51": {}, "55": {}}
 for samp in [0, 11, 15, 51, 55]:
@@ -148,6 +139,8 @@ for isamp, samp in enumerate(["0", "11", "15", "51", "55"]):
     for ja, akey in enumerate(sampdict.keys()):
         adict = sampdict[akey]
         dkeys = list(adict.keys())
+        if np.all(np.isnan(adict[dkeys[0]])):
+            continue
         ax[isamp, ja].scatter(adict[dkeys[0]], adict[dkeys[1]])
         ax[isamp, ja].plot(
             [np.min(adict[dkeys[0]]), np.max(adict[dkeys[0]])],
@@ -155,4 +148,4 @@ for isamp, samp in enumerate(["0", "11", "15", "51", "55"]):
             "k",
         )
         ax[isamp, ja].set(xlabel=dkeys[0], ylabel=dkeys[1], title=samp + " " + akey)
-f.savefig(outputpath + "sample_delay_corr2")
+f.savefig(outputpath + "sample_delay_corr4")

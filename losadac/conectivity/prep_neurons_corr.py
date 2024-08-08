@@ -44,10 +44,8 @@ def get_neu_align(path, params, sp_sample=False):
             "time_before_" + it["event"] + "_" + it["inout"],
             np.array(it["time_before"], dtype=int),
         )
-
     if ~sp_sample:
         setattr(neu, "sp_samples", np.array([]))
-
     return neu
 
 
@@ -81,46 +79,61 @@ def sort_neu_by_area(neu1, neu2):
     return n1_sorted, n2_sorted
 
 
-def compute_correlation(popu_fr, n1, n2):
-
+def compute_correlation(popu_fr, n1, n2, num_permutations=1000):
+    rng = np.random.default_rng(seed=seed)
     neu1, neu2 = sort_neu_by_area(popu_fr[n1], popu_fr[n2])
 
     trial_dur = neu1["fr"].shape[1]
-    # corr = np.corrcoef(neu1['fr'].T,neu2['fr'].T)
     corr, _ = stats.spearmanr(neu1["fr"], neu2["fr"])
     if np.all(np.isnan(corr)):
-        # corr = np.array([corr],dtype=np.float16)
-        # p_val = np.array([p_val],dtype=np.float16)
         return None
     else:
-        # p_val=p_val[:trial_dur,trial_dur:].astype(np.float16)
+        corr_permuted = []
+        for i in range(num_permutations):
+            n1_permuted = rng.permuted(neu1["fr"], axis=0)
+            corr_perm, _ = stats.spearmanr(n1_permuted, neu2["fr"])
+            corr_perm = corr_perm.round(decimals=3)[:trial_dur, trial_dur:].astype(
+                np.float16
+            )
+            corr_permuted.append(corr_perm)
+        corr_permuted = np.array(corr_permuted)
         corr = corr.round(decimals=3)[:trial_dur, trial_dur:].astype(np.float16)
-
-        slices = [slice(0, 200), slice(200, 650), slice(650, None)]
+        maxcorrperm = np.max((np.abs(corr_permuted)), axis=0)
+        mask = np.abs(corr) <= np.percentile(maxcorrperm, 0.95)
+        corr = np.where(mask, np.nan, corr)
+        slices = [slice(0, 200)]
+        for i in range(200, 1050, 50):
+            slices.append(slice(i, i + 50))
         mean_corr = np.empty((len(slices), len(slices)))
         for i in range(len(slices)):
             for j in range(len(slices)):
                 mean_corr[i, j] = np.nanmean(corr[slices[i], slices[j]])
 
-        corr = mean_corr  # reduce_matrix(corr,2,2,np.nanmean)
-    # corr = np.corrcoef(np.array(t_neus1).T,np.array(t_neus2).T)
+        # get the max from the mean
+        slices = [slice(0, 1), slice(1, 10), slice(10, None)]
+        max_corr = np.empty((len(slices), len(slices)))
+        for i in range(len(slices)):
+            for j in range(len(slices)):
+                corr_slice = mean_corr[slices[i], slices[j]].flatten()
+                max_corr[i, j] = np.nanmean(corr_slice)
     areas = neu1["area"] + "_" + neu2["area"]
+
     return {
         "areas": areas,
         "y": neu1["id"],
         "x": neu2["id"],
-        "corr": corr,
+        "corr": max_corr,
         "fr_delay_y": np.mean(neu1["fr"][:, 650:]) * 1000,
         "fr_delay_x": np.mean(neu2["fr"][:, 650:], dtype=np.float16) * 1000,
         "fr_sample_y": np.mean(neu1["fr"][:, 200:650], dtype=np.float16) * 1000,
         "fr_sample_x": np.mean(neu2["fr"][:, 200:650], dtype=np.float16) * 1000,
-    }  # ,'p':p_val}
+    }
 
 
 # Define parameters
 # Create one population per session
 filepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/*/neurons/*neu.h5"
-outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/"
+outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/mean_significant/"
 path_list = glob.glob(filepath)
 # Group paths per session
 date_pattern = r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}"
