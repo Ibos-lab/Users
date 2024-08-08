@@ -79,7 +79,7 @@ def sort_neu_by_area(neu1, neu2):
     return n1_sorted, n2_sorted
 
 
-def compute_correlation(popu_fr, n1, n2, num_permutations=1000):
+def compute_correlation(popu_fr, n1, n2, num_permutations=100):
     rng = np.random.default_rng(seed=seed)
     neu1, neu2 = sort_neu_by_area(popu_fr[n1], popu_fr[n2])
 
@@ -208,7 +208,7 @@ for date_time in grouped_paths.keys():
             itertools.combinations(numbers, 2)
         )  # Compute each pair in parallel
         len(pairs)
-
+        print("corr")
         res = Parallel(n_jobs=-1)(
             delayed(compute_correlation)(fr_dicts_only, n1, n2)
             for n1, n2 in tqdm(pairs)

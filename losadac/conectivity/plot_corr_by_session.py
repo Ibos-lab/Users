@@ -22,8 +22,8 @@ import pickle
 pathlocs = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/*.pkl"
 )
-filepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/"
-outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/"
+filepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/mean_significant/"
+outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/correlation/mean_significant/"
 path_list = glob.glob(pathlocs)
 # Group paths per session
 date_pattern = r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}"
