@@ -20,6 +20,8 @@ def get_selectivity_info(neu: NeuronData):
     res = {}
     res["nid"] = neu.get_neuron_id()
     samples = [11, 15, 51, 55, 0]
+    inout_n0_fr = []
+    inout_nn_fr = []
     for inout in ["in", "out"]:
         mask = getattr(neu, "mask_" + inout)
         sp = getattr(neu, "sample_on_" + inout)
@@ -34,7 +36,9 @@ def get_selectivity_info(neu: NeuronData):
         sample = np.concatenate(
             (fr_samples["11"], fr_samples["15"], fr_samples["51"], fr_samples["55"])
         )
+        inout_nn_fr.append(sample)
         n0 = fr_samples["0"]
+        inout_n0_fr.append(n0)
         # Check selectivity and latency
         color_lat, color_score, color_p = smetrics.get_selectivity(
             c1, c5, win=75, scores=True
@@ -75,6 +79,32 @@ def get_selectivity_info(neu: NeuronData):
         res["neutral_p_" + inout] = neutral_p
         res["mean_fr_" + inout] = np.nanmean(sp[:, st:] * 1000)
 
+    nnpos_lat, nnpos_score, nnpos_p = smetrics.get_selectivity(
+        inout_nn_fr[0], inout_nn_fr[1], win=75, scores=True
+    )
+    nnpos_selec = (
+        np.nan
+        if np.isnan(nnpos_lat)
+        else "NNin" if nnpos_score[nnpos_lat] > 0 else "NNout"
+    )
+
+    neutralpos_lat, neutralpos_score, neutralpos_p = smetrics.get_selectivity(
+        inout_n0_fr[0], inout_n0_fr[1], win=75, scores=True
+    )
+    neutralpos_selec = (
+        np.nan
+        if np.isnan(neutralpos_lat)
+        else "Nin" if neutralpos_score[neutralpos_lat] > 0 else "Nout"
+    )
+
+    res["nnpos_lat"] = nnpos_lat
+    res["nnpos_selec"] = nnpos_selec
+    res["nnpos_score"] = nnpos_score
+    res["nnpos_p"] = nnpos_p
+    res["neutralpos_lat"] = neutralpos_lat
+    res["neutralpos_selec"] = neutralpos_selec
+    res["neutralpos_score"] = neutralpos_score
+    res["neutralpos_p"] = neutralpos_p
     return res
 
 
@@ -119,7 +149,7 @@ savepath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivi
 popu_path = {
     "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_lip.h5",
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_pfc.h5",
-    "v4": "",  # "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_v4.h5",
+    "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_v4.h5",
 }
 for area in areas:
     print(area)
