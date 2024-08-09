@@ -98,8 +98,7 @@ def compute_correlation(popu_fr, n1, n2, num_permutations=1000):
             corr_perm = corr_perm.round(decimals=3)[:trial_dur, trial_dur:].astype(
                 np.float16
             )
-            maxcorrperm = np.max((maxcorrperm, corr_perm), axis=0)
-            print(maxcorrperm[:3, :3])
+            maxcorrperm = np.nanmax((maxcorrperm, corr_perm), axis=0)
         corr = corr.round(decimals=3)[:trial_dur, trial_dur:].astype(np.float16)
         mask = np.abs(corr) <= np.percentile(maxcorrperm, 0.95)
         # p_value = np.sum((np.abs(corr_permuted) >= np.abs(corr)),axis=0) / num_permutations
