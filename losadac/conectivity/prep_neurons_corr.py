@@ -79,28 +79,33 @@ def sort_neu_by_area(neu1, neu2):
     return n1_sorted, n2_sorted
 
 
-def compute_correlation(popu_fr, n1, n2, num_permutations=100):
+def compute_correlation(popu_fr, n1, n2, num_permutations=1000):
     rng = np.random.default_rng(seed=seed)
     neu1, neu2 = sort_neu_by_area(popu_fr[n1], popu_fr[n2])
 
     trial_dur = neu1["fr"].shape[1]
+    # corr = np.corrcoef(neu1['fr'].T,neu2['fr'].T)
     corr, _ = stats.spearmanr(neu1["fr"], neu2["fr"])
     if np.all(np.isnan(corr)):
+        # corr = np.array([corr],dtype=np.float16)
+        # p_val = np.array([p_val],dtype=np.float16)
         return None
     else:
-        corr_permuted = []
+        maxcorrperm = np.zeros((trial_dur, trial_dur))
         for i in range(num_permutations):
             n1_permuted = rng.permuted(neu1["fr"], axis=0)
             corr_perm, _ = stats.spearmanr(n1_permuted, neu2["fr"])
             corr_perm = corr_perm.round(decimals=3)[:trial_dur, trial_dur:].astype(
                 np.float16
             )
-            corr_permuted.append(corr_perm)
-        corr_permuted = np.array(corr_permuted)
+            maxcorrperm = np.max((maxcorrperm, corr_perm), axis=0)
+            print(maxcorrperm[:3, :3])
         corr = corr.round(decimals=3)[:trial_dur, trial_dur:].astype(np.float16)
-        maxcorrperm = np.max((np.abs(corr_permuted)), axis=0)
         mask = np.abs(corr) <= np.percentile(maxcorrperm, 0.95)
+        # p_value = np.sum((np.abs(corr_permuted) >= np.abs(corr)),axis=0) / num_permutations
         corr = np.where(mask, np.nan, corr)
+        # p_value = np.sum((np.abs(corr_permuted) >= np.abs(corr)),axis=0) / num_permutations
+        # slices = [slice(0, 200), slice(200, 650), slice(650, None)]
         slices = [slice(0, 200)]
         for i in range(200, 1050, 50):
             slices.append(slice(i, i + 50))
@@ -115,7 +120,11 @@ def compute_correlation(popu_fr, n1, n2, num_permutations=100):
         for i in range(len(slices)):
             for j in range(len(slices)):
                 corr_slice = mean_corr[slices[i], slices[j]].flatten()
+                # idxmax = np.nanargmax(np.abs(corr_slice))
+                # max_corr[i, j] = corr_slice[idxmax]
                 max_corr[i, j] = np.nanmean(corr_slice)
+    # reduce_matrix(corr,2,2,np.nanmean)
+    # corr = np.corrcoef(np.array(t_neus1).T,np.array(t_neus2).T)
     areas = neu1["area"] + "_" + neu2["area"]
 
     return {
