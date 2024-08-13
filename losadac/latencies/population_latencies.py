@@ -122,7 +122,7 @@ def compute_distance(data, rng, min_trials, select_n_neu=100):
     }
 
 
-def population_latency(**kwargs):
+def population_latency(kwargs):
     # --------------- Set variables ------------------
     if kwargs is not None:
 
