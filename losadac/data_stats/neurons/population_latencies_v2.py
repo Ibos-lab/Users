@@ -43,30 +43,30 @@ def scrum_neutralsize_samepool(fr, ntr):
     return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
 
 
-def scrum_neutral_fixes_size(fr):
+# def scrum_neutral_fixes_size(fr):
 
-    ntr = fr["0"].shape[0]
-    nn = np.concatenate((fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
-    size_nn = nn.shape[0]
+#     ntr = fr["0"].shape[0]
+#     nn = np.concatenate((fr["11"], fr["15"], fr["51"], fr["55"]), axis=0)
+#     size_nn = nn.shape[0]
 
-    idx_tr = rng.choice(size_nn, size=ntr, replace=False)
-    nn_trs = nn[idx_tr]
+#     idx_tr = rng.choice(size_nn, size=ntr, replace=False)
+#     nn_trs = nn[idx_tr]
 
-    neutral_trs = fr["0"]
+#     neutral_trs = fr["0"]
 
-    meanfr0 = np.mean(neutral_trs, axis=0)
-    meanfr11 = np.mean(nn_trs, axis=0)
-    meanfr15 = np.mean(nn_trs, axis=0)
-    meanfr51 = np.mean(nn_trs, axis=0)
-    meanfr55 = np.mean(nn_trs, axis=0)
+#     meanfr0 = np.mean(neutral_trs, axis=0)
+#     meanfr11 = np.mean(nn_trs, axis=0)
+#     meanfr15 = np.mean(nn_trs, axis=0)
+#     meanfr51 = np.mean(nn_trs, axis=0)
+#     meanfr55 = np.mean(nn_trs, axis=0)
 
-    all_s = np.concatenate((neutral_trs, nn_trs), axis=0)
+#     all_s = np.concatenate((neutral_trs, nn_trs), axis=0)
 
-    idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
-    g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
-    g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
+#     idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
+#     g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
+#     g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
 
-    return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
+#     return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
 
 
 def from_python_hdf5(load_path: Path):
@@ -89,7 +89,7 @@ subject = "Riesling"
 avgwin = 100
 min_sp_sec = 1
 n_test = 1
-min_trials = 25
+min_trials = 30
 nonmatch = True  # if True: includes nonmatch trials
 norm = False
 zscore = True
@@ -108,14 +108,30 @@ filepaths = {
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
 }
+basepath = (
+    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/"
+)
+dataoutputpath = "popudata_no_selectivity_neutralinout/"
+
+
+if norm:
+    addpath = "_norm_"
+elif zscore:
+    addpath = "_Zscore_"
+else:
+    addpath = "_"
+
 outputpath = (
-    "./testv2_"
+    dataoutputpath
+    + "testv2_"
     + str(min_trials)
     + "tr_"
     + str(min_sp_sec)
-    + "sp_Zscore_scrum_neutralsize_samepool_selectivity>0/"
+    + "sp"
+    + addpath
+    + "scrum_neutralsize_samepool_no_selectivity_neutralinout/"
 )
-dataoutputpath = "./popudata_selectivity>0/"
+
 
 if not os.path.exists(outputpath):
     os.makedirs(outputpath)
@@ -132,13 +148,13 @@ idx_end_test = time_before_test + end_test
 trial_dur = end_sample - start_sample + end_test - start_test
 
 allspath = {
-    # "lip": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/lip_"
+    # "lip": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/popudata_no_selectivity_neutralinout/lip_"
     # + str(min_trials)
     # + "tr_1sp_Zscore.pickle",
-    # "pfc": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/pfc_"
+    # "pfc": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/popudata_no_selectivity_neutralinout/pfc_"
     # + str(min_trials)
     # + "tr_1sp_Zscore.pickle",
-    # "v4": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/preproc_data/v4_"
+    # "v4": "/envau/work/invibe/USERS/LOSADA/Users/losadac/data_stats/neurons/popudata_no_selectivity_neutralinout/v4_"
     # + str(min_trials)
     # + "tr_1sp_Zscore.pickle",
 }
@@ -149,12 +165,8 @@ if not bool(allspath):
         path = filepaths[area]
         neu_path = path + "*neu.h5"
         path_list = glob.glob(neu_path)
-        # df_sel = pd.read_pickle(
-        #     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_"
-        #     + area
-        #     + ".pkl"
-        # )
-        # include_nid = df_sel[df_sel["neutral_lat_in"] > 0]["nid"].values
+        df_sel = pd.read_csv(basepath + area + "_no_neutral_inout_selectivity.csv")
+        include_nid = df_sel["nid"].values
         data = Parallel(n_jobs=-1)(
             delayed(get_neuron_sample_test_fr)(
                 path=path,
@@ -172,6 +184,7 @@ if not bool(allspath):
                 n_sp_sec=min_sp_sec,
                 norm=norm,
                 zscore=zscore,
+                include_nid=include_nid,
             )
             for path in tqdm(path_list)
         )
@@ -183,7 +196,9 @@ if not bool(allspath):
             + str(min_trials)
             + "tr_"
             + str(min_sp_sec)
-            + "sp_Zscore.pickle"
+            + "sp_"
+            + addpath
+            + ".pickle"
         )
         allspath[area] = spath
         print("saving")
@@ -224,7 +239,7 @@ for area in areas:
             fr = asc["fr"]
             if fr is not None:
                 meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2 = (
-                    scrum_neutral_fixes_size(fr)
+                    scrum_neutralsize_samepool(fr, min_trials)
                 )
                 s0mean.append(meanfr0)
                 s11mean.append(meanfr11)
