@@ -35,7 +35,7 @@ def select_sample_test_aligned_trials(
         time_before=time_before_sample,
         error_type=error_type,
     )
-    # Select trials aligned to test onset
+    # Select trials aligned to sample onset
     sp_test_on, mask_t = align_trials.align_on(
         sp_samples=neu_data.sp_samples,
         code_samples=neu_data.code_samples,
@@ -70,12 +70,15 @@ def get_neuron_sample_test_fr(
     n_sp_sec=5,
     norm=False,
     zscore=False,
-    ind_sig=False,
     code=1,
+    include_nid=None,
 ):
     neu_data = NeuronData.from_python_hdf5(path)
+    if include_nid is not None:
+        nid = neu_data.get_neuron_id()
+        if not (nid in include_nid):
+            return {"fr": None}
     select_block = 1
-
     # Select trials aligned to sample onset
     sp_sample_on, sp_test_on, mask_s, mask_t = select_sample_test_aligned_trials(
         neu_data, select_block, code, time_before_sample, time_before_test, error_type=0
@@ -116,7 +119,6 @@ def get_neuron_sample_test_fr(
     # Check number of trials
     sample_id = neu_data.sample_id[mask_t][mask_match_neu]
     samples = [0, 11, 15, 55, 51]
-
     if min_neu:
         sample_fr = sp[np.where(sample_id == 0, True, False)]
         if sample_fr.shape[0] < min_trials:
@@ -128,8 +130,6 @@ def get_neuron_sample_test_fr(
                 return {"fr": None}
     if norm == True:
         sp = sp / np.max(sp)
-    if ind_sig == True:
-        sp = sp - np.mean(sp)
     if zscore == True:
         sp_std = np.std(sp, ddof=1, axis=0)
         sp_std = np.where(sp_std == 0, 1, sp_std)

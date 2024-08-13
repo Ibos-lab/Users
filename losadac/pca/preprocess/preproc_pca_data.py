@@ -9,7 +9,7 @@ from datetime import datetime
 import json
 
 # Define parameters
-area = "pfc"
+area = "lip"
 filepaths = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/"
     + area
@@ -20,6 +20,7 @@ subject = "Riesling"
 avgwin = 100
 min_sp_sec = 5
 n_test = 1
+code = -1
 min_trials = 10
 nonmatch = True  # if True: includes nonmatch trials
 ind_sig = True
@@ -63,6 +64,7 @@ data = Parallel(n_jobs=-1)(
         avgwin=avgwin,
         n_sp_sec=min_sp_sec,
         ind_sig=ind_sig,
+        code=code,
     )
     for path in tqdm(path_list)
 )

@@ -89,7 +89,8 @@ subject = "Riesling"
 avgwin = 100
 min_sp_sec = 1
 n_test = 1
-min_trials = 30
+min_trials = 25
+code = -1  # in out
 nonmatch = True  # if True: includes nonmatch trials
 norm = False
 zscore = True
@@ -111,7 +112,7 @@ filepaths = {
 basepath = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/"
 )
-dataoutputpath = "popudata_no_selectivity_neutralinout/"
+dataoutputpath = basepath + "popudata_no_selectivity_neutralinout_OUT/"
 
 
 if norm:
@@ -184,6 +185,7 @@ if not bool(allspath):
                 n_sp_sec=min_sp_sec,
                 norm=norm,
                 zscore=zscore,
+                code=code,
                 include_nid=include_nid,
             )
             for path in tqdm(path_list)
