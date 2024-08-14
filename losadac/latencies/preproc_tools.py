@@ -54,14 +54,12 @@ def select_sample_test_aligned_trials(
     return sp_sample_on, sp_test_on, mask_s, mask_t
 
 
-def get_neuron_sample_test_fr(
-    path,
-    time_before_sample,
-    time_before_test,
-    idx_start_sample,
-    idx_end_sample,
-    idx_start_test,
-    idx_end_test,
+def get_fr_by_sample(
+    neu,
+    start_sample,
+    end_sample,
+    start_test,
+    end_test,
     n_test,
     min_trials,
     min_neu=False,
@@ -70,38 +68,42 @@ def get_neuron_sample_test_fr(
     n_sp_sec=5,
     norm=False,
     zscore=False,
-    code=1,
     include_nid=None,
 ):
-    neu_data = NeuronData.from_python_hdf5(path)
     if include_nid is not None:
-        nid = neu_data.get_neuron_id()
+        nid = neu.get_neuron_id()
         if not (nid in include_nid):
-            return {"fr": None}
-    select_block = 1
+            return None
+
     # Select trials aligned to sample onset
-    sp_sample_on, sp_test_on, mask_s, mask_t = select_sample_test_aligned_trials(
-        neu_data, select_block, code, time_before_sample, time_before_test, error_type=0
-    )
+    sp_sample_on = neu.sp_sample
+    sp_test_on = neu.sp_test
+    mask_s = neu.mask_s
+
+    idx_start_sample = neu.time_before_sample + start_sample
+    idx_end_sample = neu.time_before_sample + end_sample
+    idx_start_test = neu.time_before_test + start_test
+    idx_end_test = neu.time_before_test + end_test
+
     # Build masks to select trials with match in the n_test
     mask_match = np.where(
-        neu_data.test_stimuli[mask_t, n_test - 1] == neu_data.sample_id[mask_t],
+        neu.test_stimuli[mask_s, n_test - 1] == neu.sample_id[mask_s],
         True,
         False,
     )
-    mask_neu = neu_data.sample_id[mask_t] == 0
+    mask_neu = neu.sample_id[mask_s] == 0
     # Build masks to select trials with the selected number of test presentations
-    max_test = neu_data.test_stimuli[mask_t].shape[1]
-    mask_ntest = (
-        max_test - np.sum(np.isnan(neu_data.test_stimuli[mask_t]), axis=1)
-    ) > (n_test - 1)
+    max_test = neu.test_stimuli[mask_s].shape[1]
+    mask_ntest = (max_test - np.sum(np.isnan(neu.test_stimuli[mask_s]), axis=1)) > (
+        n_test - 1
+    )
 
     if nonmatch:  # include nonmatch trials
         mask_match_neu = np.logical_or(mask_ntest, mask_neu)
     else:
         mask_match_neu = np.logical_or(mask_match, mask_neu)
     if np.sum(mask_match_neu) < 20:
-        return {"fr": None}
+        return None
 
     # Average fr across time
     avg_sample_on = firing_rate.moving_average(
@@ -115,19 +117,19 @@ def get_neuron_sample_test_fr(
     # Check fr
     ms_fr = np.nanmean(sp) * 1000 > n_sp_sec
     if not ms_fr:
-        return {"fr": None}
+        return None
     # Check number of trials
-    sample_id = neu_data.sample_id[mask_t][mask_match_neu]
+    sample_id = neu.sample_id[mask_s][mask_match_neu]
     samples = [0, 11, 15, 55, 51]
     if min_neu:
         sample_fr = sp[np.where(sample_id == 0, True, False)]
         if sample_fr.shape[0] < min_trials:
-            return {"fr": None}
+            return None
     else:
         for s_id in samples:
             sample_fr = sp[np.where(sample_id == s_id, True, False)]
             if sample_fr.shape[0] < min_trials:
-                return {"fr": None}
+                return None
     if norm == True:
         sp = sp / np.max(sp)
     if zscore == True:
@@ -138,5 +140,6 @@ def get_neuron_sample_test_fr(
     fr_samples = select_trials.get_sp_by_sample(sp, sample_id, samples=samples)
 
     if fr_samples is None:
-        return {"fr": None}
-    return {"fr": fr_samples}
+        return None
+
+    return fr_samples
