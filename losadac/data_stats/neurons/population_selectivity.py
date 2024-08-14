@@ -9,10 +9,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
 from ephysvibe.stats import smetrics
-from sklearn import metrics
 import os
-
-seed = 1997
 
 
 def get_selectivity_info(neu: NeuronData):
