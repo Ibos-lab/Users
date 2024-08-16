@@ -15,15 +15,15 @@ filepaths = (
     + area
     + "/neurons/"
 )
-outputpath = "./test_remove_ind_signal/"
+outputpath = "./testIN/"
 subject = "Riesling"
 avgwin = 100
 min_sp_sec = 5
 n_test = 1
-code = -1
+code = 1
 min_trials = 10
 nonmatch = True  # if True: includes nonmatch trials
-ind_sig = True
+ind_sig = False
 # sample timing
 time_before_sample = 500
 start_sample = -200
