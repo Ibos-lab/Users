@@ -72,23 +72,76 @@ def create_matrix_per_area(cell):
                 time_before = time_before_t1,
                 error_type= 0,
             )
-        sample_in_avg_sp, sample_in_std_sp  =   moving_average(data=sp_sample_in_on[:, :timetotal_sample],win=win, step=step)
-        test1_in_avg_sp, test1_in_std_sp    =   moving_average(data=sp_test_in_on[:, :timetotal_t1],win=win, step=step)
-        sample_in_avg_sp    =   sample_in_avg_sp[:,:-int(win/step)]
-        sample_in_std_sp    =   sample_in_std_sp[:,:-int(win/step)]
-        test1_in_avg_sp     =   test1_in_avg_sp[:,:-int(win/step)]
-        test1_in_std_sp     =   test1_in_std_sp[:,:-int(win/step)]
+        
+        sp_sample_out_on,mask_sample_out = align_trials.align_on(
+                sp_samples=neu_data.sp_samples,
+                code_samples=neu_data.code_samples,
+                code_numbers=neu_data.code_numbers,
+                trial_error=neu_data.trial_error,
+                block=neu_data.block,
+                pos_code=neu_data.pos_code,
+                select_block= select_block,
+                select_pos= -1,
+                event ="sample_on",
+                time_before = time_before_sample,
+                error_type= 0,
+            )
+        
+        sp_test_out_on,mask_test_out = align_trials.align_on(
+                sp_samples=neu_data.sp_samples,
+                code_samples=neu_data.code_samples,
+                code_numbers=neu_data.code_numbers,
+                trial_error=neu_data.trial_error,
+                block=neu_data.block,
+                pos_code=neu_data.pos_code,
+                select_block= select_block,
+                select_pos= -1,
+                event ="test_on_1",
+                time_before = time_before_t1,
+                error_type= 0,
+            )
+        
+        sample_in_avg_sp, sample_in_zsc_sp  =   moving_average(data=sp_sample_in_on[:, :timetotal_sample].astype(int),win=win, step=step)
+        test1_in_avg_sp, test1_in_zsc_sp    =   moving_average(data=sp_test_in_on[:, :timetotal_t1].astype(int),win=win, step=step)
 
-        sample_id           =   neu_data.sample_id[mask_sample_in]
+        sample_out_avg_sp, sample_out_zsc_sp  =   moving_average(data=sp_sample_out_on[:, :timetotal_sample].astype(int),win=win, step=step)
+        test1_out_avg_sp, test1_out_zsc_sp    =   moving_average(data=sp_test_out_on[:, :timetotal_t1].astype(int),win=win, step=step)
+
+        sample_in_avg_sp    =   sample_in_avg_sp[:,:-int(win/step)]
+        sample_in_zsc_sp    =   sample_in_zsc_sp[:,:-int(win/step)]
+        test1_in_avg_sp     =   test1_in_avg_sp[:,:-int(win/step)]
+        test1_in_zsc_sp     =   test1_in_zsc_sp[:,:-int(win/step)]
+
+        sample_out_avg_sp    =   sample_out_avg_sp[:,:-int(win/step)]
+        sample_out_zsc_sp    =   sample_out_zsc_sp[:,:-int(win/step)]
+        test1_out_avg_sp     =   test1_out_avg_sp[:,:-int(win/step)]
+        test1_out_zsc_sp     =   test1_out_zsc_sp[:,:-int(win/step)]
+
+        sample_avg_sp   =   np.concatenate([sample_in_avg_sp, sample_out_avg_sp])
+        sample_zsc_sp   =   np.concatenate([sample_in_zsc_sp, sample_out_zsc_sp])
+        test1_avg_sp    =   np.concatenate([test1_in_avg_sp, test1_out_avg_sp])
+        test1_zsc_sp    =   np.concatenate([test1_in_zsc_sp, test1_out_zsc_sp])
+
+        sample_id_in    =   neu_data.sample_id[mask_sample_in]
+        sample_id_out   =   neu_data.sample_id[mask_sample_out]
+        sample_id       =   np.concatenate([sample_id_in, sample_id_out])
+
+        test_id_in  =   neu_data.test_stimuli[mask_sample_in,:]
+        test_id_out =   neu_data.test_stimuli[mask_sample_out,:]
+        test_id     =   np.concatenate([test_id_in, test_id_out])
+
+        pos     =   np.concatenate([np.ones(sample_id_in.shape[0]),np.ones(sample_id_out.shape[0])+1])
 
         return {'name': date_time[:10] + '_'+ neu_data.cluster_group + '_'+ str(neu_data.cluster_number),
-            'Sample averaged'       :   sample_in_avg_sp,
-            'Sample zscored'            :   sample_in_std_sp,
-            'Test1 averaged'        :   test1_in_avg_sp,
-            'Test1 zscored'             :   test1_in_std_sp,
-            'Sample Id'             :   sample_id,
+            'Sample averaged'       :   sample_avg_sp,
+            'Sample zscored'        :   sample_zsc_sp,
+            'Test1 averaged'        :   test1_avg_sp,
+            'Test1 zscored'         :   test1_zsc_sp,
+            'Sample Id'             :   sample_id.astype(int),
+            'Test Id'               :   test_id,
             'time_before_sample'    :   time_before_sample,
             'timetotal_sample'      :   timetotal_sample,
+            'position'              :   pos,
             'win'                   :   win,
             'step'                  :   step}
     # return {'name': date_time[:10] + '_'+ neu_data.cluster_group + '_'+ str(neu_data.cluster_number),
@@ -119,30 +172,30 @@ neurons_lip_files     =   glob.glob(neurons_lip_directory, recursive=True)
 
 
 numcells=len(neurons_lip_files)
-lip_sample_in_avg_sp     =   Parallel(n_jobs = 6)(delayed(create_matrix_per_area)(cell) for cell in tqdm(neurons_lip_files[:numcells]))
+lip_sample_in_avg_sp     =   Parallel(n_jobs = -1)(delayed(create_matrix_per_area)(cell) for cell in tqdm(neurons_lip_files[:numcells]))
 lip_data=[]
 for i in range(len(lip_sample_in_avg_sp)):
     if lip_sample_in_avg_sp[i]['Sample averaged'].shape[0]>1:
-        lip_data.append(lip_sample_in_avg_sp)
+        lip_data.append(lip_sample_in_avg_sp[i])
 with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/averaged_structures/LIPavacti", "wb") as fp: 
     pickle.dump(lip_data, fp)
 
-# numcells=len(neurons_v4_files)
-# v4_sample_in_avg_sp     =   Parallel(n_jobs = -1)(delayed(create_matrix_per_area)(cell) for cell in tqdm(neurons_v4_files[:numcells]))
-# v4_data=[]
-# for i in range(len(v4_sample_in_avg_sp)):
-#     if v4_sample_in_avg_sp[i]['Sample averaged'].shape[0]>1:
-#         v4_data.append(v4_sample_in_avg_sp)
+numcells=len(neurons_v4_files)
+v4_sample_in_avg_sp     =   Parallel(n_jobs = -1)(delayed(create_matrix_per_area)(cell) for cell in tqdm(neurons_v4_files[:numcells]))
+v4_data=[]
+for i in range(len(v4_sample_in_avg_sp)):
+    if v4_sample_in_avg_sp[i]['Sample averaged'].shape[0]>1:
+        v4_data.append(v4_sample_in_avg_sp[i])
 
-# with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/averaged_structures/v4avacti", "wb") as fp: 
-#     pickle.dump(v4_data, fp)
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/averaged_structures/v4avacti", "wb") as fp: 
+    pickle.dump(v4_data, fp)
 
 
-# numcells=len(neurons_pfc_files)
-# pfc_sample_in_avg_sp     =   Parallel(n_jobs = -1)(delayed(create_matrix_per_area)(cell) for cell in tqdm(neurons_pfc_files[:numcells]))
-# pfc_data=[]
-# for i in range(len(pfc_sample_in_avg_sp)):
-#     if pfc_sample_in_avg_sp[i]['Sample averaged'].shape[0]>1:
-#         pfc_data.append(pfc_sample_in_avg_sp)
-# with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/averaged_structures/pfcavacti", "wb") as fp: 
-#     pickle.dump(pfc_data, fp)        
+numcells=len(neurons_pfc_files)
+pfc_sample_in_avg_sp     =   Parallel(n_jobs = -1)(delayed(create_matrix_per_area)(cell) for cell in tqdm(neurons_pfc_files[:numcells]))
+pfc_data=[]
+for i in range(len(pfc_sample_in_avg_sp)):
+    if pfc_sample_in_avg_sp[i]['Sample averaged'].shape[0]>1:
+        pfc_data.append(pfc_sample_in_avg_sp[i])
+with open("/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/averaged_structures/pfcavacti", "wb") as fp: 
+    pickle.dump(pfc_data, fp)        

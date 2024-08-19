@@ -161,7 +161,7 @@ def analyses_per_area_par(cell):
             error_type= 0,
         )
     
-    sp_t1_out_on,mask_t1_in = align_trials.align_on(
+    sp_t1_out_on,mask_t1_out = align_trials.align_on(
             sp_samples=neu_data.sp_samples,
             code_samples=neu_data.code_samples,
             code_numbers=neu_data.code_numbers,
