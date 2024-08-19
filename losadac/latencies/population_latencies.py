@@ -1,4 +1,3 @@
-# Pipeline for preprocessing data for pca analysis
 from preproc_tools import get_fr_by_sample, to_python_hdf5
 import glob
 import os

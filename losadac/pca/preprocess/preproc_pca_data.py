@@ -9,18 +9,18 @@ from datetime import datetime
 import json
 
 # Define parameters
-area = "lip"
+area = "pfc"
 filepaths = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/"
     + area
     + "/neurons/"
 )
-outputpath = "./testIN/"
+outputpath = "./testOUT/"
 subject = "Riesling"
 avgwin = 100
-min_sp_sec = 5
+min_sp_sec = 1
 n_test = 1
-code = 1
+code = -1
 min_trials = 10
 nonmatch = True  # if True: includes nonmatch trials
 ind_sig = False
