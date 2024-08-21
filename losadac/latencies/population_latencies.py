@@ -224,7 +224,7 @@ def population_latency(params, kwargs):
 
             listpopu = Parallel(n_jobs=-1)(
                 delayed(get_neu_align_sample_test)(
-                    path=path, params=kwargs, sp_sample=False, rf_loc_df=rf_loc_df
+                    path=path, params=kwargs, sp_sample=False, rf_loc=rf_loc_df
                 )
                 for path in tqdm(path_list)
             )
