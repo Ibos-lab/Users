@@ -7,7 +7,7 @@ filepaths = {
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
 }
-outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_in/"
+outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_corrected_in/"
 
 nidpath = {
     # "lip": outputpath + "lip_no_neutral_inout_selectivity.csv",
@@ -21,6 +21,11 @@ allspath = {
     # "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_in/2024-08-13_18-05-27/v4_preprocdata.pickle",
 }
 
+rf_loc_path = {
+    "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_lip.csv",
+    "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_pfc.csv",
+    "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_v4.csv",
+}
 # Define parameters
 areas = ["lip", "v4", "pfc"]
 avgwin = 100
@@ -66,6 +71,7 @@ parameters["end_test"] = end_test
 parameters["allspath"] = allspath
 parameters["nidpath"] = nidpath
 parameters["filepaths"] = filepaths
+parameters["rf_loc_path"] = rf_loc_path
 parameters["outputpath"] = outputpath
 
 preproc = {}

@@ -33,9 +33,24 @@ def from_python_hdf5(load_path: Path):
     return data
 
 
-def get_neu_align_sample_test(path, params, sp_sample=False):
+def check_fr_loc(neu: NeuronData, rf_loc: pd.DataFrame):
+    nid = neu.get_neuron_id()
+    rfloc = rf_loc[rf_loc["nid"] == nid]["rf_loc"].values[0]
+    if rfloc == "ipsi":
+        pos_code = neu.pos_code
+        mask1 = pos_code == 1
+        mask_1 = pos_code == -1
+        pos_code[mask1] = -1
+        pos_code[mask_1] = 1
+        setattr(neu, "pos_code", pos_code)
+    return neu
+
+
+def get_neu_align_sample_test(path, params, sp_sample=False, rf_loc=None):
 
     neu = NeuronData.from_python_hdf5(path)
+    if rf_loc is not None:
+        neu = check_fr_loc(neu, rf_loc)
 
     sp_sample_on, mask_s = neu.align_on(
         select_block=params["select_block"],
@@ -181,6 +196,7 @@ def population_latency(params, kwargs):
     allspath = params["allspath"]
     nidpath = params["nidpath"]
     filepaths = params["filepaths"]
+    rf_loc_path = params["rf_loc_path"]
     outputpath = params["outputpath"]
     start_sample = params["start_sample"]
     end_sample = params["end_sample"]
@@ -202,9 +218,13 @@ def population_latency(params, kwargs):
             neu_path = path + "*neu.h5"
             path_list = glob.glob(neu_path)
 
+            rf_loc_df = None
+            if bool(rf_loc_path):
+                rf_loc_df = pd.read_csv(rf_loc_path[area])
+
             listpopu = Parallel(n_jobs=-1)(
                 delayed(get_neu_align_sample_test)(
-                    path=path, params=kwargs, sp_sample=False
+                    path=path, params=kwargs, sp_sample=False, rf_loc_df=rf_loc_df
                 )
                 for path in tqdm(path_list)
             )
