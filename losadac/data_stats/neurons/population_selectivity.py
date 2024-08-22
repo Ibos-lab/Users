@@ -105,9 +105,26 @@ def get_selectivity_info(neu: NeuronData):
     return res
 
 
-def get_neu_align(path, params, sp_sample=False):
+def check_fr_loc(neu: NeuronData, rf_loc: pd.DataFrame):
+    nid = neu.get_neuron_id()
+    rfloc = rf_loc[rf_loc["nid"] == nid]["rf_loc"].values[0]
+    if rfloc == "ipsi":
+        pos_code = neu.pos_code
+        mask1 = pos_code == 1
+        mask_1 = pos_code == -1
+        pos_code[mask1] = -1
+        pos_code[mask_1] = 1
+        setattr(neu, "pos_code", pos_code)
+    return neu
+
+
+def get_neu_align(path, params, sp_sample=False, rf_loc=None):
 
     neu = NeuronData.from_python_hdf5(path)
+
+    if rf_loc is not None:
+        neu = check_fr_loc(neu, rf_loc)
+
     for it in params:
         sp, mask = neu.align_on(
             select_block=it["select_block"],
@@ -148,6 +165,14 @@ popu_path = {
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_pfc.h5",
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_v4.h5",
 }
+rf_loc_path = {
+    "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_lip.csv",
+    "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_pfc.csv",
+    "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_v4.csv",
+}
+
+if not os.path.exists(savepath):
+    os.makedirs(savepath)
 for area in areas:
     print(area)
     if not os.path.isfile(popu_path[area]):
@@ -183,8 +208,12 @@ for area in areas:
                 "dtype_mask": bool,
             },
         ]
+        rf_loc_df = None
+        if bool(rf_loc_path):
+            rf_loc_df = pd.read_csv(rf_loc_path[area])
         population_list = Parallel(n_jobs=-1)(
-            delayed(get_neu_align)(neu, params) for neu in tqdm(path_list)
+            delayed(get_neu_align)(neu, params, rf_loc=rf_loc_df)
+            for neu in tqdm(path_list)
         )
         comment = str(params)
         population = PopulationData(population_list, comment=comment)

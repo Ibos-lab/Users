@@ -7,18 +7,20 @@ filepaths = {
     "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/pfc/neurons/",
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/v4/neurons/",
 }
-outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_corrected_in/"
-
+outputpath = "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/neurons_no_selectivity_inout_out/"
+selectivity_path = (
+    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/"
+)
 nidpath = {
-    # "lip": outputpath + "lip_no_neutral_inout_selectivity.csv",
-    # "pfc": outputpath + "pfc_no_neutral_inout_selectivity.csv",
-    # "v4": outputpath + "v4_no_neutral_inout_selectivity.csv",
+    "lip": selectivity_path + "lip_no_neutral_inout_selectivity.csv",
+    "pfc": selectivity_path + "pfc_no_neutral_inout_selectivity.csv",
+    "v4": selectivity_path + "v4_no_neutral_inout_selectivity.csv",
 }
 
 allspath = {
-    # "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_in/2024-08-13_18-05-27/lip_preprocdata.pickle",
-    # "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_in/2024-08-14_11-47-12/pfc_preprocdata.h5",
-    # "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_in/2024-08-13_18-05-27/v4_preprocdata.pickle",
+    # "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_corrected_in/2024-08-21_16-50-55/lip_preprocdata.h5",
+    # "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_corrected_in/2024-08-21_16-50-55/pfc_preprocdata.h5",
+    # "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_lat/data/all_neurons_corrected_in/2024-08-21_16-50-55/v4_preprocdata.h5",
 }
 
 rf_loc_path = {
@@ -27,12 +29,12 @@ rf_loc_path = {
     "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_v4.csv",
 }
 # Define parameters
-areas = ["lip", "v4", "pfc"]
+areas = ["lip", "pfc", "v4"]
 avgwin = 100
 min_sp_sec = 1
 n_test = 1
 min_trials = 25
-inout = "in"  # in out
+inout = "out"  # in out
 select_block = 1
 nonmatch = True  # if True: includes nonmatch trials
 norm = False
