@@ -1,0 +1,34 @@
+
+_target_: preproc.compute_population.run_compute_population
+name: "population"
+area: "lip"
+output_path: ${pipelines.name}/${pipelines.area}/${now:%Y_%m_%d_%H_%M_%S}/
+
+paths:
+  input_files: "D:/data/session_struct/lip/neurons/"
+  input_rf_loc: "//envau_cifs.intlocal.univ-amu.fr/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_lip.csv"
+processing:
+  p1:
+    loc: "in"
+    event: "sample_on"
+    time_before: 500
+    time_after: 1000
+    select_block: 1
+  p2:
+    loc: "in"
+    event: "test_on_1"
+    time_before: 500
+    time_after: 600
+    select_block: 1
+  p3:
+    loc: "out"
+    event: "sample_on"
+    time_before: 500
+    time_after: 1000
+    select_block: 1
+  p4:
+    loc: "out"
+    event: "test_on_1"
+    time_before: 500
+    time_after: 600
+    select_block: 1

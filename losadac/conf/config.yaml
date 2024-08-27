@@ -1,0 +1,12 @@
+defaults:
+  - pipelines: compute_population
+  - workspace: local
+
+hydra:
+  job:
+    chdir: True # change dir before calling function
+  run:
+    dir: ${workspace.output_path}/${pipelines.output_path}
+  sweep:
+    dir: ${workspace.output_path}/${pipelines.output_path}
+    subdir: .
