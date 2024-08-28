@@ -1,5 +1,7 @@
-"""Main script to run a decoder."""
+"""Main script to run a pipeline."""
 
+# Authors: Camila Losada, camilaalosada@gmail.com
+# Date: 05/2024
 from pathlib import Path
 import hydra
 from omegaconf import DictConfig

@@ -156,14 +156,14 @@ def pick_train_test_trials(idx_trials, train_ratio, rng):
     return train, test
 
 
-def compute_decoding(
-    model, list_data, trial_duration, ntr_train, ntr_test, to_decode, seed
+def run_decoder(
+    model, list_neurons, trial_duration, ntr_train, ntr_test, to_decode, seed
 ):
     rng = np.random.default_rng(seed)
     test_train_ratio = 1 - ntr_test / ntr_train
     topred = pred_names[to_decode]
     ntopred = len(topred)
-    num_cells = len(list_data)
+    num_cells = len(list_neurons)
     # Initialize arrays to store train and test data
     data_train = np.empty([trial_duration, ntr_train * ntopred, num_cells])
     data_test = np.empty([trial_duration, ntr_test * ntopred, num_cells])
@@ -175,7 +175,7 @@ def compute_decoding(
     y_train, y_test = np.concatenate(y_train), np.concatenate(y_test)
 
     # Iterate through neurons to randomly pick trials
-    for icell, cell in enumerate(list_data):
+    for icell, cell in enumerate(list_neurons):
         trials_train, trials_test = [], []
         for ipred in topred:
             trials = cell[ipred]
@@ -203,7 +203,7 @@ def compute_decoding(
 
 
 def compute_cross_decoding(
-    model, list_data, trial_duration, ntr_train, ntr_test, to_decode, seed
+    model, list_neurons, trial_duration, ntr_train, ntr_test, to_decode, seed
 ):
     # TODO
     return

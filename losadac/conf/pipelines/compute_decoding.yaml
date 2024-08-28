@@ -1,10 +1,10 @@
-_target_: decoder.compute_decoding.run_decoding
+_target_: decoder.__main__.main
 name: "decoding"
 area: "lip"
 output_path: ${pipelines.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}/${now:%Y_%m_%d_%H_%M_%S}
 
 paths:
-  input: "C:/Users/camil/Documents/int/code/Users/losadac/decoder/test.h5"
+  input: "C:/Users/camil/Documents/int/code/Users/population/lip/2024_08_28_11_46_33/population.h5"
 preprocessing:
   to_decode: "sampleid"
   min_ntr: 25
@@ -13,11 +13,11 @@ preprocessing:
   start_test: -400
   end_test: 450
   step: 10
-  time_before_son: "time_before_son_in"
-  time_before_t1on: "time_before_t1on_in"
-  sp_son: "sp_son_in"
-  sp_t1on: "sp_t1on_in"
-  mask_son: "mask_son_in"
+  time_before_son: ${multiruns.time_before_son}
+  time_before_t1on: ${multiruns.time_before_t1on}
+  sp_son: ${multiruns.sp_son}
+  sp_t1on: ${multiruns.sp_t1on}
+  mask_son: ${multiruns.mask_son}
   no_match: False
   avgwin: 100
 decoder:

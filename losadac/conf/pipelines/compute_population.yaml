@@ -5,8 +5,8 @@ area: "lip"
 output_path: ${pipelines.name}/${pipelines.area}/${now:%Y_%m_%d_%H_%M_%S}/
 
 paths:
-  input_files: "D:/data/session_struct/lip/neurons/"
-  input_rf_loc: "//envau_cifs.intlocal.univ-amu.fr/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_lip.csv"
+  input_files: "D:/data/session_struct/${pipelines.area}/neurons/"
+  input_rf_loc: "//envau_cifs.intlocal.univ-amu.fr/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/rf_loc_df_${pipelines.area}.csv"
 processing:
   p1:
     loc: "in"

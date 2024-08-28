@@ -1,5 +1,6 @@
 defaults:
   - pipelines: compute_population
+  #- multiruns: decoding_in
   - workspace: local
 
 hydra:

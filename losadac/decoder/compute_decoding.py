@@ -13,7 +13,7 @@ from decoder import tools_decoding
 seed = 1997
 
 
-def run_decoding(preprocessing: Dict, decoder: Dict, paths: Dict, **kwargs):
+def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
     # preprocessing
     popu = PopulationData.from_python_hdf5(paths["input"])
 
@@ -48,7 +48,7 @@ def run_decoding(preprocessing: Dict, decoder: Dict, paths: Dict, **kwargs):
 
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     all_perf = Parallel(n_jobs=-1)(
-        delayed(tools_decoding.compute_decoding)(
+        delayed(tools_decoding.run_decoder)(
             model, list_data, trial_duration, ntr_train, ntr_test, to_decode, seeds[it]
         )
         for it in tqdm(range(niterations))
@@ -61,4 +61,4 @@ def run_decoding(preprocessing: Dict, decoder: Dict, paths: Dict, **kwargs):
         **preprocessing,
         **decoder,
     )
-    res.to_python_hdf5("performance.h5")
+    return res
