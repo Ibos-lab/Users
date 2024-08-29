@@ -125,7 +125,8 @@ def preproc_for_decoding(
         )
         fr = fr[mask_no_match]
         sample_id = sample_id[mask_no_match]
-
+    if len(fr) < 2:
+        return None
     if zscore:
         fr_std = np.std(fr, ddof=1, axis=0)
         fr_std = np.where(fr_std == 0, 1, fr_std)
