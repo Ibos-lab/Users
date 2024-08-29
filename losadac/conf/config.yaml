@@ -1,8 +1,9 @@
 defaults:
-  - pipelines: compute_population
-  #- multiruns: decoding_in
   - workspace: local
-
+  - pipelines: compute_population
+  # - multiruns: decoding_in
+  - override hydra/job_logging: disabled
+  - _self_
 hydra:
   job:
     chdir: True # change dir before calling function

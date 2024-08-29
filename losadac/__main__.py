@@ -15,8 +15,8 @@ from omegaconf import DictConfig
 def main(cfg: DictConfig):
     # run pipeline
     params = {}
-    if "workspace" in cfg:
-        params["workspace"] = cfg.workspace
+    # if "workspace" in cfg:
+    #     params["workspace"] = cfg.workspace
     opt = hydra.utils.call(cfg.pipelines, **params)
 
 
