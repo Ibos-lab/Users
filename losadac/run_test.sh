@@ -12,4 +12,4 @@ module purge
 module load all
 module load anaconda
 conda activate ephys
-python /envau/work/invibe/USERS/LOSADA/hello.py
+python /envau/work/invibe/USERS/LOSADA/Users/losadac/__main__.py -m multiruns=decoding_in,decoding_out pipelines.area='v4','pfc','lip' pipelines.preprocessing.to_decode='sampleid','neutral','color','orient'
