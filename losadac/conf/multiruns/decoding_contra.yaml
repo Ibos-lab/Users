@@ -1,0 +1,6 @@
+name: "contra_rf"
+time_before_son: "time_before_son_contra"
+time_before_t1on: "time_before_t1on_contra"
+sp_son: "sp_son_contra"
+sp_t1on: "sp_t1on_contra"
+mask_son: "mask_son_contra"

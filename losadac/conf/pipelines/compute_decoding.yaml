@@ -1,12 +1,12 @@
 _target_: decoder.__main__.main
 name: "decoding"
-area: "lip"
-output_path: ${pipelines.name}/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}
+area: "v4"
+output_path: ${pipelines.name}/test/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}
 
 paths:
-  input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
+  input: "${workspace.data_path}/population/contra_ipsi/${pipelines.area}/2024_08_30_10_24_04/population.h5"
 preprocessing:
-  to_decode: "sampleid"
+  to_decode: "orient"
   min_ntr: 25
   start_sample: -200
   end_sample: 850
@@ -20,9 +20,11 @@ preprocessing:
   mask_son: ${multiruns.mask_son}
   no_match: False
   avgwin: 100
+  zscore: True
 decoder:
   niterations: 1000
   ntr_train: 30
   ntr_test: 10
   svc_c: 1
+  n_neurons: 361
 
