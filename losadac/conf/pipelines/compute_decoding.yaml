@@ -11,7 +11,7 @@ preprocessing:
   start_sample: -200
   end_sample: 850
   start_test: -400
-  end_test: 550
+  end_test: 500
   step: 10
   time_before_son: ${multiruns.time_before_son}
   time_before_t1on: ${multiruns.time_before_t1on}
@@ -24,5 +24,5 @@ decoder:
   niterations: 1000
   ntr_train: 30
   ntr_test: 10
-  svc_c: 0.8
+  svc_c: 1
 

@@ -6,7 +6,7 @@ output_path: ${pipelines.name}/${pipelines.area}/${now:%Y_%m_%d_%H_%M_%S}/
 
 paths:
   input_files: "${workspace.data_path}/new_structure/session_struct/${pipelines.area}/neurons/"
-  input_rf_loc: "${workspace.output_path}/activation_index/rf_loc_df_${pipelines.area}.csv"
+  input_rf_loc: None #"${workspace.output_path}/activation_index/rf_loc_df_${pipelines.area}.csv"
 processing:
   p1:
     loc: "in"
