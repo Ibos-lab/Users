@@ -198,7 +198,7 @@ def run_decoder(
             y_predict = model.predict(data_test[time_test])
             perf[time_train, time_test] = np.where(y_predict - y_test == 0)[0].shape[
                 0
-            ] / (ntr_test * ntopred)
+            ]  # / (ntr_test * ntopred)
 
     return perf
 
