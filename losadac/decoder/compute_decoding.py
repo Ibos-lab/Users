@@ -66,7 +66,7 @@ def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
         "decode.py",
         "path",
         perf=np.array(all_perf),
-        **preprocessing,
-        **decoder,
+        # **preprocessing,
+        # **decoder,
     )
     return res
