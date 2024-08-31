@@ -1,7 +1,7 @@
 _target_: decoder.__main__.main
 name: "decoding"
 area: "lip"
-output_path: ${pipelines.name}/in_out_200neurons/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}
+output_path: ${pipelines.name}/test2/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}
 
 paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
@@ -22,9 +22,9 @@ preprocessing:
   avgwin: 100
   zscore: True
 decoder:
-  niterations: 1000
+  niterations: 2
   ntr_train: 30
   ntr_test: 10
   svc_c: 0.8
-  n_neurons: 
+  n_neurons: 10
 
