@@ -168,16 +168,18 @@ def run_decoder(
     n_neurons=None,
 ):
     rng = np.random.default_rng(seed)
-    idx_cell = np.arange(len(list_cells))
+    total_n_cells = len(list_cells)
+    idx_cell = np.arange(total_n_cells)
     if n_neurons is not None:
         idx_cell = rng.permutation(idx_cell)[:n_neurons]
+        total_n_cells = n_neurons
     test_train_ratio = 1 - ntr_test / ntr_train
     topred = pred_names[to_decode]
     ntopred = len(topred)
-    num_cells = len(list_cells)
+
     # Initialize arrays to store train and test data
-    data_train = np.empty([trial_duration, ntr_train * ntopred, num_cells])
-    data_test = np.empty([trial_duration, ntr_test * ntopred, num_cells])
+    data_train = np.empty([trial_duration, ntr_train * ntopred, total_n_cells])
+    data_test = np.empty([trial_duration, ntr_test * ntopred, total_n_cells])
     perf = np.empty([trial_duration, trial_duration])
     y_train, y_test = [], []
     for i in range(ntopred):

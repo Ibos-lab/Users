@@ -46,18 +46,22 @@ def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
     ntr_test = decoder["ntr_test"]
     to_decode = preprocessing["to_decode"]
     n_neurons = decoder["n_neurons"]
+    # check n_neurons < len(list_cells)
+    if len(list_data) < n_neurons:
+        n_neurons = None
+        print(f"{n_neurons}<{len(list_data)}")
 
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     all_perf = Parallel(n_jobs=-1)(
         delayed(tools_decoding.run_decoder)(
-            model,
-            list_data,
-            trial_duration,
-            ntr_train,
-            ntr_test,
-            to_decode,
-            seeds[it],
-            n_neurons,
+            model=model,
+            list_cells=list_data,
+            trial_duration=trial_duration,
+            ntr_train=ntr_train,
+            ntr_test=ntr_test,
+            to_decode=to_decode,
+            seed=seeds[it],
+            n_neurons=n_neurons,
         )
         for it in tqdm(range(niterations))
     )
