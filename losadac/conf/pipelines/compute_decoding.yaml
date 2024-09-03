@@ -20,7 +20,7 @@ preprocessing:
   mask_son: ${multiruns.mask_son}
   no_match: False
   avgwin: 100
-  #zscore: True
+  zscore: True
 decoder:
   niterations: 2
   ntr_train: 30
