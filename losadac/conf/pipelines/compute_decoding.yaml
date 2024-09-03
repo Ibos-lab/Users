@@ -22,7 +22,7 @@ preprocessing:
   avgwin: 100
   zscore: True
 decoder:
-  niterations: 2
+  niterations: 100
   ntr_train: 30
   ntr_test: 10
   svc_c: 0.8
