@@ -1,12 +1,12 @@
 _target_: decoder.__main__.main
 name: "decoding"
-area: "lip"
+area: "v4"
 output_path: ${pipelines.name}/contra_200cells/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}
 
 paths:
   input: "${workspace.data_path}/population/contra_ipsi/2024_08_30_10_04_40/${pipelines.area}/population.h5"
 preprocessing:
-  to_decode: "sampleid"
+  to_decode: "neutral"
   min_ntr: 25
   start_sample: -200
   end_sample: 850
