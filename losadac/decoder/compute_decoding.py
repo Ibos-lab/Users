@@ -16,12 +16,13 @@ seed = 1997
 def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
     # preprocessing
     popu = PopulationData.from_python_hdf5(paths["input"])
-    del popu
+
     list_data = popu.execute_function(
         tools_decoding.preproc_for_decoding,
         **preprocessing,
         ret_df=False,
     )
+    del popu
     list_data = [idata for idata in list_data if idata is not None]
 
     # Decode
