@@ -132,6 +132,7 @@ def preproc_for_decoding(
         fr_std = np.where(fr_std == 0, 1, fr_std)
         fr = (fr - np.mean(fr, axis=0).reshape(1, -1)) / fr_std.reshape(1, -1)
 
+    fr = np.array(fr, dtype=np.float32)
     fr_samples = select_trials.get_sp_by_sample(fr, sample_id)
 
     if to_decode == "color":
@@ -178,9 +179,13 @@ def run_decoder(
     ntopred = len(topred)
 
     # Initialize arrays to store train and test data
-    data_train = np.empty([trial_duration, ntr_train * ntopred, total_n_cells])
-    data_test = np.empty([trial_duration, ntr_test * ntopred, total_n_cells])
-    perf = np.empty([trial_duration, trial_duration])
+    data_train = np.empty(
+        [trial_duration, ntr_train * ntopred, total_n_cells], dtype=np.float32
+    )
+    data_test = np.empty(
+        [trial_duration, ntr_test * ntopred, total_n_cells], dtype=np.float32
+    )
+    perf = np.empty([trial_duration, trial_duration], dtype=np.int16)
     y_train, y_test = [], []
     for i in range(ntopred):
         y_train.append(np.zeros(ntr_train) + i)
