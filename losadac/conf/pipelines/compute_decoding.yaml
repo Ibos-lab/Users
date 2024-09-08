@@ -4,7 +4,7 @@ area: "lip"
 output_path: ${pipelines.name}/contra_200cells/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}
 
 paths:
-  input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
+  input: "${workspace.data_path}/population/contra_ipsi/${pipelines.area}/2024_08_30_10_04_40/population.h5"
 preprocessing:
   to_decode: "sampleid"
   min_ntr: 25
