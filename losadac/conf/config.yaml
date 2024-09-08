@@ -1,7 +1,7 @@
 defaults:
   - workspace: niolon
   - pipelines: compute_decoding
-  - multiruns: decoding_in
+  - multiruns: decoding_contra
   - override hydra/job_logging: disabled
   - _self_
 hydra:
