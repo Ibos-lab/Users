@@ -86,7 +86,7 @@ n_iters = len(list_it)
 lat_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 mean_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 list_n_cells = np.empty([n_iters], dtype=np.int16)
-for i in list_it:
+for i, _ in enumerate(list_it):
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=5)(
         delayed(tools_decoding.run_decoder)(
