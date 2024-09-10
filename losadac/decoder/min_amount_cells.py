@@ -24,7 +24,7 @@ import tools_decoding
 
 seed = 1997
 
-path = "./"
+path = "./2"
 totatest = 20
 args = {
     "preprocessing": {
