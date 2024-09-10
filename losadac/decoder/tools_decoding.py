@@ -219,7 +219,12 @@ def run_decoder(
                 0
             ]  # / (ntr_test * ntopred)
             if time_train == time_test:
-                weights[time_train, :] = model.coef_.astype(np.float16)
+                if model.coef_.ndim > 1:
+                    weights[time_train, :] = np.mean(model.coef_, axis=0).astype(
+                        np.float16
+                    )
+                else:
+                    weights[time_train, :] = model.coef_.astype(np.float16)
     return perf, weights
 
 
