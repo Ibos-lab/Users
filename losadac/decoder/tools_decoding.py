@@ -186,6 +186,7 @@ def run_decoder(
         [trial_duration, ntr_test * ntopred, total_n_cells], dtype=np.float32
     )
     perf = np.empty([trial_duration, trial_duration], dtype=np.int16)
+    weights = np.empty([trial_duration, total_n_cells], dtype=np.float16)
     y_train, y_test = [], []
     for i in range(ntopred):
         y_train.append(np.zeros(ntr_train) + i)
@@ -217,8 +218,9 @@ def run_decoder(
             perf[time_train, time_test] = np.where(y_predict - y_test == 0)[0].shape[
                 0
             ]  # / (ntr_test * ntopred)
-
-    return perf
+            if time_train == time_test:
+                weights[time_train, :] = model.coef_.astype(np.float16)
+    return perf, weights
 
 
 def compute_cross_decoding(
