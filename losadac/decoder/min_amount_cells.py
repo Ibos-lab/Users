@@ -40,10 +40,10 @@ args = {
         "sp_son": "sp_son_in",
         "sp_t1on": "sp_t1on_in",
         "mask_son": "mask_son_in",
-        "no_match": True,
+        "no_match": False,
     },
     # decoder
-    "decoder": {"niterations": 1000, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.8},
+    "decoder": {"niterations": 10, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.8},
     # workspace
     "workspace": {"output": "", "path": ""},
 }
@@ -63,8 +63,6 @@ model = SVC(
     kernel="linear",
     C=args["decoder"]["svc_c"],
     decision_function_shape="ovr",
-    gamma="auto",
-    degree=1,
 )
 rng = np.random.default_rng(seed)
 niterations = args["decoder"]["niterations"]
@@ -81,14 +79,12 @@ trial_duration = int(
     / args["preprocessing"]["step"]
 )
 
-list_it = np.arange(0, 200, 5)
+list_it = np.arange(0, 200, 10)
 n_iters = len(list_it)
 lat_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 mean_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 list_n_cells = np.empty([n_iters], dtype=np.int16)
 for i, _ in enumerate(list_it):
-    n_cells = len(list_data)
-    print(n_cells)
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=5)(
         delayed(tools_decoding.run_decoder)(
@@ -104,7 +100,7 @@ for i, _ in enumerate(list_it):
     all_perf = np.array(all_perf)
     weights = np.array(weights)
     # plot results
-
+    n_cells = len(list_data)
     list_n_cells[i] = n_cells
     data = all_perf.transpose(0, 2, 1)
     lat_data[i] = np.sum(data > 10, axis=0)
@@ -112,7 +108,9 @@ for i, _ in enumerate(list_it):
     # select n-1 neurons for the next iter
     mean_w = np.mean(np.abs(weights), axis=(0, 1))
     idx_sorted_w = np.argsort(mean_w)
+    print(i)
     if i == 0:
+        print(i)
         list_mean_w = mean_w[idx_sorted_w]
     idx_w = idx_sorted_w[:-5]
     new_list_data = [list_data[icell] for icell in idx_w]
@@ -124,5 +122,6 @@ res = Results(
     lat_data=lat_data,
     mean_data=mean_data,
     list_mean_w=list_mean_w,
+    list_n_cells=list_n_cells,
 )
 res.to_python_hdf5(path + "/test.h5")
