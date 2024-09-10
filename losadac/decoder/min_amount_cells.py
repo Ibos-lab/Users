@@ -43,7 +43,7 @@ args = {
         "no_match": True,
     },
     # decoder
-    "decoder": {"niterations": 10, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.8},
+    "decoder": {"niterations": 1000, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.8},
     # workspace
     "workspace": {"output": "", "path": ""},
 }
@@ -81,7 +81,7 @@ trial_duration = int(
     / args["preprocessing"]["step"]
 )
 
-n_iters = 2
+n_iters = 200
 lat_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 mean_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 list_n_cells = np.empty([n_iters], dtype=np.int8)
