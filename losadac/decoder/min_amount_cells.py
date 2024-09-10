@@ -81,11 +81,12 @@ trial_duration = int(
     / args["preprocessing"]["step"]
 )
 
-n_iters = 200
+list_it = np.arange(0, 200, 5)
+n_iters = len(list_it)
 lat_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 mean_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 list_n_cells = np.empty([n_iters], dtype=np.int16)
-for i in np.arange(n_iters):
+for i in list_it:
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=5)(
         delayed(tools_decoding.run_decoder)(
@@ -111,7 +112,7 @@ for i in np.arange(n_iters):
     idx_sorted_w = np.argsort(mean_w)
     if i == 0:
         list_mean_w = mean_w[idx_sorted_w]
-    idx_w = idx_sorted_w[:-1]
+    idx_w = idx_sorted_w[:-5]
     new_list_data = [list_data[icell] for icell in idx_w]
     list_data = new_list_data
 # save results
