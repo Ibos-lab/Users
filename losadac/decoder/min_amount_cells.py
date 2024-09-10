@@ -87,6 +87,8 @@ lat_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 mean_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 list_n_cells = np.empty([n_iters], dtype=np.int16)
 for i, _ in enumerate(list_it):
+    n_cells = len(list_data)
+    print(n_cells)
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=5)(
         delayed(tools_decoding.run_decoder)(
@@ -102,7 +104,7 @@ for i, _ in enumerate(list_it):
     all_perf = np.array(all_perf)
     weights = np.array(weights)
     # plot results
-    n_cells = len(list_data)
+
     list_n_cells[i] = n_cells
     data = all_perf.transpose(0, 2, 1)
     lat_data[i] = np.sum(data > 10, axis=0)
