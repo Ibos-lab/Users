@@ -84,7 +84,7 @@ trial_duration = int(
 n_iters = 200
 lat_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
 mean_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
-list_n_cells = np.empty([n_iters], dtype=np.int8)
+list_n_cells = np.empty([n_iters], dtype=np.int16)
 for i in np.arange(n_iters):
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=5)(
