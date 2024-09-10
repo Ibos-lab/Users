@@ -43,7 +43,7 @@ args = {
         "no_match": False,
     },
     # decoder
-    "decoder": {"niterations": 10, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.8},
+    "decoder": {"niterations": 1000, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.8},
     # workspace
     "workspace": {"output": "", "path": ""},
 }
