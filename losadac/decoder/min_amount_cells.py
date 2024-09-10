@@ -25,10 +25,10 @@ import tools_decoding
 seed = 1997
 
 path = "./"
-totatest = 20
+totatest = 40
 args = {
     "preprocessing": {
-        "to_decode": "orient",
+        "to_decode": "sampleid",
         "min_ntr": 25,
         "start_sample": -200,
         "end_sample": 850,
@@ -124,4 +124,4 @@ res = Results(
     list_mean_w=list_mean_w,
     list_n_cells=list_n_cells,
 )
-res.to_python_hdf5(path + "/test.h5")
+res.to_python_hdf5(path + "/test_sampleid.h5")
