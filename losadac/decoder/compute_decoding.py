@@ -72,15 +72,7 @@ def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
     for idata in results:
         all_perf.append(idata[0])
         weights.append(idata[1])
-    all_perf = np.array(all_perf)
-    weights = np.array(weights)
-    # plot res1ults
-    n_cells = len(list_data)
-    data = all_perf.transpose(0, 2, 1)
-    # select n-1 neurons for the next iter
-    mean_w = np.mean(np.abs(weights), axis=(0, 1))
-    idx_sorted_w = np.argsort(mean_w)
-    list_mean_w = mean_w[idx_sorted_w]
+
     res = Results(
         "decode.py",
         "path",
