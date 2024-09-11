@@ -55,7 +55,7 @@ def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
             print(f"{n_neurons}<={len(list_data)}")
 
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
-    all_perf = Parallel(n_jobs=-1)(
+    results = Parallel(n_jobs=-1)(
         delayed(tools_decoding.run_decoder)(
             model=model,
             list_cells=list_data,
@@ -68,7 +68,19 @@ def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
         )
         for it in tqdm(range(niterations))
     )
-
+    all_perf, weights = [], []
+    for idata in results:
+        all_perf.append(idata[0])
+        weights.append(idata[1])
+    all_perf = np.array(all_perf)
+    weights = np.array(weights)
+    # plot res1ults
+    n_cells = len(list_data)
+    data = all_perf.transpose(0, 2, 1)
+    # select n-1 neurons for the next iter
+    mean_w = np.mean(np.abs(weights), axis=(0, 1))
+    idx_sorted_w = np.argsort(mean_w)
+    list_mean_w = mean_w[idx_sorted_w]
     res = Results(
         "decode.py",
         "path",
