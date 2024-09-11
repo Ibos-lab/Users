@@ -23,8 +23,13 @@ from typing import Dict, List
 seed = 1997
 
 
-def check_number_of_trials(xdict, samples, min_ntr):
+def check_number_of_trials(xdict, samples, min_ntr, percentile):
+
     for key in samples:
+        if percentile is not None:
+            mean_trs = np.mean(xdict[key], axis=1)
+            qmin = np.percentile(mean_trs, [percentile])
+            xdict[key] = xdict[key][mean_trs > qmin]
         if xdict[key].shape[0] < min_ntr:
             return False
     return True
@@ -38,9 +43,9 @@ pred_names = {
 }
 
 
-def color_data(fr_samples: Dict, min_ntr: int):
+def color_data(fr_samples: Dict, min_ntr: int, percentile: list):
     samples = ["11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr, percentile)
     if not enough_tr:
         return None
     c1 = np.concatenate([fr_samples["11"], fr_samples["51"]], axis=0)
@@ -49,9 +54,9 @@ def color_data(fr_samples: Dict, min_ntr: int):
     return color
 
 
-def orient_data(fr_samples: Dict, min_ntr: int):
+def orient_data(fr_samples: Dict, min_ntr: int, percentile: list):
     samples = ["11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr, percentile)
     if not enough_tr:
         return None
     o1 = np.concatenate([fr_samples["11"], fr_samples["15"]], axis=0)
@@ -60,17 +65,17 @@ def orient_data(fr_samples: Dict, min_ntr: int):
     return orient
 
 
-def sampleid_data(fr_samples: Dict, min_ntr: int):
+def sampleid_data(fr_samples: Dict, min_ntr: int, percentile: list):
     samples = ["11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr, percentile)
     if not enough_tr:
         return None
     return fr_samples
 
 
-def neutral_data(fr_samples: Dict, min_ntr: int):
+def neutral_data(fr_samples: Dict, min_ntr: int, percentile: list):
     samples = ["0", "11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr, percentile)
     if not enough_tr:
         return None
     n = fr_samples["0"]
@@ -99,6 +104,7 @@ def preproc_for_decoding(
     zscore=True,
     no_match=False,
     return_id=False,
+    percentile: list = None,
 ):
     # Average fr across time
     idx_start_sample = int((getattr(neu, time_before_son) + start_sample) / step)
@@ -137,13 +143,13 @@ def preproc_for_decoding(
     fr_samples = select_trials.get_sp_by_sample(fr, sample_id)
 
     if to_decode == "color":
-        data = color_data(fr_samples, min_ntr)
+        data = color_data(fr_samples, min_ntr, percentile)
     elif to_decode == "orient":
-        data = orient_data(fr_samples, min_ntr)
+        data = orient_data(fr_samples, min_ntr, percentile)
     elif to_decode == "sampleid":
-        data = sampleid_data(fr_samples, min_ntr)
+        data = sampleid_data(fr_samples, min_ntr, percentile)
     elif to_decode == "neutral":
-        data = neutral_data(fr_samples, min_ntr)
+        data = neutral_data(fr_samples, min_ntr, percentile)
     else:
         raise ValueError(
             f"to_decode must be 'color' 'orient' 'sampleid' or 'neutral' but {to_decode} was given"
