@@ -27,7 +27,7 @@ seed = 1997
 path = "./"
 totatest = 20
 
-for svc_c in [1000, 100, 10, 1, 0.8, 0.6]:
+for svc_c in [10, 1, 0.8, 0.6]:
     args = {
         "preprocessing": {
             "to_decode": "orient",
