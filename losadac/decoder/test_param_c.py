@@ -62,7 +62,6 @@ for svc_c in [10, 1, 0.8, 0.6]:
     list_data = popu.execute_function(
         tools_decoding.preproc_for_decoding,
         **args["preprocessing"],
-        percentile=1,
         ret_df=False,
     )
     list_data = [idata for idata in list_data if idata is not None]
