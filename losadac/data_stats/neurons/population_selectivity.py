@@ -173,56 +173,55 @@ rf_loc_path = {
 
 if not os.path.exists(savepath):
     os.makedirs(savepath)
-#TODO: Change all this code to directily read a population 
-# for area in areas:
-#     print(area)
-#     if not os.path.isfile(popu_path[area]):
-#         path = filepaths[area]
-#         neu_path = path + "*neu.h5"
-#         path_list = glob.glob(neu_path)
+for area in areas:
+    print(area)
+    if not os.path.isfile(popu_path[area]):
+        path = filepaths[area]
+        neu_path = path + "*neu.h5"
+        path_list = glob.glob(neu_path)
 
-#         params = [
-#             {
-#                 "inout": "in",
-#                 "sp": "sample_on_in",
-#                 "mask": "mask_in",
-#                 "event": "sample_on",
-#                 "time_before": 300,
-#                 "st": 0,
-#                 "end": 1550,
-#                 "select_block": 1,
-#                 "win": 100,
-#                 "dtype_sp": np.int8,
-#                 "dtype_mask": bool,
-#             },
-#             {
-#                 "inout": "out",
-#                 "sp": "sample_on_out",
-#                 "mask": "mask_out",
-#                 "event": "sample_on",
-#                 "time_before": 300,
-#                 "st": 0,
-#                 "end": 1550,
-#                 "select_block": 1,
-#                 "win": 100,
-#                 "dtype_sp": np.int8,
-#                 "dtype_mask": bool,
-#             },
-#         ]
-#         rf_loc_df = None
-#         if bool(rf_loc_path):
-#             rf_loc_df = pd.read_csv(rf_loc_path[area])
-#         population_list = Parallel(n_jobs=-1)(
-#             delayed(get_neu_align)(neu, params, rf_loc=rf_loc_df)
-#             for neu in tqdm(path_list)
-#         )
-#         comment = str(params)
-#         population = PopulationData(population_list, comment=comment)
-#         print("Saving population.h5")
-#         population.to_python_hdf5(savepath + "population_selectivity_" + area + ".h5")
-#         population = PopulationData.from_python_hdf5(
-#             savepath + "population_selectivity_" + area + ".h5"
-#         )
+        params = [
+            {
+                "inout": "in",
+                "sp": "sample_on_in",
+                "mask": "mask_in",
+                "event": "sample_on",
+                "time_before": 300,
+                "st": 0,
+                "end": 1550,
+                "select_block": 1,
+                "win": 100,
+                "dtype_sp": np.int8,
+                "dtype_mask": bool,
+            },
+            {
+                "inout": "out",
+                "sp": "sample_on_out",
+                "mask": "mask_out",
+                "event": "sample_on",
+                "time_before": 300,
+                "st": 0,
+                "end": 1550,
+                "select_block": 1,
+                "win": 100,
+                "dtype_sp": np.int8,
+                "dtype_mask": bool,
+            },
+        ]
+        rf_loc_df = None
+        if bool(rf_loc_path):
+            rf_loc_df = pd.read_csv(rf_loc_path[area])
+        population_list = Parallel(n_jobs=-1)(
+            delayed(get_neu_align)(neu, params, rf_loc=rf_loc_df)
+            for neu in tqdm(path_list)
+        )
+        comment = str(params)
+        population = PopulationData(population_list, comment=comment)
+        print("Saving population.h5")
+        population.to_python_hdf5(savepath + "population_selectivity_" + area + ".h5")
+        population = PopulationData.from_python_hdf5(
+            savepath + "population_selectivity_" + area + ".h5"
+        )
     else:
         print("Reading population data")
         population = PopulationData.from_python_hdf5(popu_path[area])

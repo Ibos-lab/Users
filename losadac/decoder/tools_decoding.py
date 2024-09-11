@@ -98,6 +98,7 @@ def preproc_for_decoding(
     step: int = 10,
     zscore=True,
     no_match=False,
+    return_id=False,
 ):
     # Average fr across time
     idx_start_sample = int((getattr(neu, time_before_son) + start_sample) / step)
@@ -147,6 +148,8 @@ def preproc_for_decoding(
         raise ValueError(
             f"to_decode must be 'color' 'orient' 'sampleid' or 'neutral' but {to_decode} was given"
         )
+    if return_id and data is not None:
+        data = {neu.get_neuron_id(): data}
     return data
 
 
