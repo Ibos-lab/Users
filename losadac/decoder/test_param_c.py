@@ -125,4 +125,4 @@ for svc_c in [1000, 100, 10, 1, 0.8, 0.6]:
         list_mean_w=list_mean_w,
         n_cells=n_cells,
     )
-    res.to_python_hdf5(path + "/test_orient_c{svc_c}.h5")
+    res.to_python_hdf5(path + f"/test_orient_c{svc_c}.h5")
