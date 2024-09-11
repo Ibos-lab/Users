@@ -234,7 +234,7 @@ def run_decoder(
                     )
                 else:
                     weights[time_train, :] = model.coef_.astype(np.float16)
-    return perf
+    return perf, weights
 
 
 def compute_cross_decoding(
