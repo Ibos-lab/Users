@@ -24,9 +24,9 @@ import tools_decoding
 
 seed = 1997
 
-path = "./"
+path = "./v4"
 totatest = 20
-svc_c = 1
+svc_c = 0.001
 args = {
     "preprocessing": {
         "to_decode": "orient",
@@ -50,7 +50,7 @@ args = {
 }
 
 popu = PopulationData.from_python_hdf5(
-    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population/lip/2024_08_28_12_23_36/population.h5"
+    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population/v4/2024_08_28_12_23_36/population.h5"
 )
 
 list_data = popu.execute_function(
