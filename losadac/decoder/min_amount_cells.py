@@ -56,7 +56,8 @@ popu = PopulationData.from_python_hdf5(
 list_data = popu.execute_function(
     tools_decoding.preproc_for_decoding,
     **args["preprocessing"],
-    percentile=1,
+    percentile1=0.5,
+    percentile2=99.5,
     ret_df=False,
 )
 list_data = [idata for idata in list_data if idata is not None]
@@ -117,4 +118,4 @@ for i, _ in enumerate(list_it):
         list_mean_w=mean_w[idx_sorted_w],
         n_cells=n_cells,
     )
-    res.to_python_hdf5(path + f"/q1_{n_cells}cells_c{svc_c}_test_orient.h5")
+    res.to_python_hdf5(path + f"/q0.5q99.5_{n_cells}cells_c{svc_c}_test_orient.h5")
