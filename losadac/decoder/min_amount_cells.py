@@ -26,7 +26,7 @@ seed = 1997
 
 path = "./"
 totatest = 20
-svc_c = 0.001
+svc_c = 1
 args = {
     "preprocessing": {
         "to_decode": "orient",
