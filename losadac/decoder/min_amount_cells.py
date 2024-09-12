@@ -25,10 +25,10 @@ import tools_decoding
 seed = 1997
 
 path = "./"
-totatest = 40
+totatest = 20
 args = {
     "preprocessing": {
-        "to_decode": "sampleid",
+        "to_decode": "orient",
         "min_ntr": 25,
         "start_sample": -200,
         "end_sample": 850,
@@ -43,7 +43,7 @@ args = {
         "no_match": False,
     },
     # decoder
-    "decoder": {"niterations": 1000, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.8},
+    "decoder": {"niterations": 1000, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.001},
     # workspace
     "workspace": {"output": "", "path": ""},
 }
@@ -78,12 +78,8 @@ trial_duration = int(
     )
     / args["preprocessing"]["step"]
 )
-
-list_it = np.arange(0, 200, 10)
-n_iters = len(list_it)
-lat_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
-mean_data = np.empty([n_iters, trial_duration, trial_duration], dtype=np.float16)
-list_n_cells = np.empty([n_iters], dtype=np.int16)
+step = 10
+list_it = np.arange(0, 250, step)
 for i, _ in enumerate(list_it):
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=-1)(
@@ -97,31 +93,23 @@ for i, _ in enumerate(list_it):
     for idata in results:
         all_perf.append(idata[0])
         weights.append(idata[1])
-    all_perf = np.array(all_perf)
-    weights = np.array(weights)
+
+    weights = np.array(weights, dtype=np.float32)
     # plot results
     n_cells = len(list_data)
-    list_n_cells[i] = n_cells
-    data = all_perf.transpose(0, 2, 1)
-    lat_data[i] = np.sum(data > 10, axis=0)
-    mean_data[i] = np.mean(data, axis=0) / totatest
+
     # select n-1 neurons for the next iter
     mean_w = np.mean(np.abs(weights), axis=(0, 1))
     idx_sorted_w = np.argsort(mean_w)
-    print(i)
-    if i == 0:
-        print(i)
-        list_mean_w = mean_w[idx_sorted_w]
-    idx_w = idx_sorted_w[:-5]
+    idx_w = idx_sorted_w[:-step]
     new_list_data = [list_data[icell] for icell in idx_w]
     list_data = new_list_data
-# save results
-res = Results(
-    "min_amount_cells.py",
-    "path",
-    lat_data=lat_data,
-    mean_data=mean_data,
-    list_mean_w=list_mean_w,
-    list_n_cells=list_n_cells,
-)
-res.to_python_hdf5(path + "/test_sampleid.h5")
+    # save results
+    res = Results(
+        "min_amount_cells.py",
+        "path",
+        perf=np.array(all_perf, dtype=np.float32),
+        list_mean_w=mean_w[idx_sorted_w],
+        n_cells=n_cells,
+    )
+    res.to_python_hdf5(path + f"/{n_cells}_test_sampleid.h5")
