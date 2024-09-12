@@ -23,8 +23,8 @@ from typing import Dict, List
 import tools_decoding
 
 seed = 1997
-
-path = "./v4"
+area = "pfc"
+path = f"./{area}"
 totatest = 20
 svc_c = 0.001
 args = {
@@ -50,7 +50,7 @@ args = {
 }
 
 popu = PopulationData.from_python_hdf5(
-    "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population/v4/2024_08_28_12_23_36/population.h5"
+    f"/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population/{area}/2024_08_28_12_23_36/population.h5"
 )
 
 list_data = popu.execute_function(
