@@ -26,6 +26,7 @@ seed = 1997
 
 path = "./"
 totatest = 20
+svc_c = 0.001
 args = {
     "preprocessing": {
         "to_decode": "orient",
@@ -43,7 +44,7 @@ args = {
         "no_match": False,
     },
     # decoder
-    "decoder": {"niterations": 1000, "ntr_train": 30, "ntr_test": 10, "svc_c": 0.001},
+    "decoder": {"niterations": 1000, "ntr_train": 30, "ntr_test": 10, "svc_c": svc_c},
     # workspace
     "workspace": {"output": "", "path": ""},
 }
@@ -112,4 +113,4 @@ for i, _ in enumerate(list_it):
         list_mean_w=mean_w[idx_sorted_w],
         n_cells=n_cells,
     )
-    res.to_python_hdf5(path + f"/{n_cells}_test_sampleid.h5")
+    res.to_python_hdf5(path + f"/{n_cells}cells_c{svc_c}_test_orient.h5")
