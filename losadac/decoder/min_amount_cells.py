@@ -81,8 +81,8 @@ trial_duration = int(
     )
     / args["preprocessing"]["step"]
 )
-step = 10
-list_it = np.arange(0, 250, step)
+step = 30
+list_it = np.arange(0, 1800, step)
 for i, _ in enumerate(list_it):
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=-1)(
