@@ -85,7 +85,9 @@ def get_selectivity_info(
             if np.isnan(neutral_lat)
             else "NN" if neutral_score[neutral_lat] > 0 else "N"
         )
-
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            meanfrson = np.nanmean(fr_son[:, np.abs(start_sample) :] * 1000)
         res["color_lat_" + inout] = color_lat
         res["color_selec_" + inout] = color_selec
         res["color_score_" + inout] = color_score
@@ -98,7 +100,7 @@ def get_selectivity_info(
         res["neutral_selec_" + inout] = neutral_selec
         res["neutral_score_" + inout] = neutral_score
         res["neutral_p_" + inout] = neutral_p
-        res["mean_fr_" + inout] = np.nanmean(fr_son * 1000)
+        res["mean_fr_" + inout] = meanfrson
 
     nnpos_lat, nnpos_score, nnpos_p = smetrics.get_selectivity(
         inout_nn_fr[0], inout_nn_fr[1], win=75, scores=True
