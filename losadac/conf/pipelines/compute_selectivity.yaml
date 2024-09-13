@@ -1,5 +1,5 @@
 _target_: selectivity.__main__.main
-name: "decoding"
+name: "selectivity"
 area: "lip"
 output_path: ${pipelines.name}/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
 
