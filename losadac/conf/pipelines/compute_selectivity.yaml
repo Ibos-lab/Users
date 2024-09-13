@@ -1,0 +1,13 @@
+_target_: selectivity.__main__.main
+name: "decoding"
+area: "lip"
+output_path: ${pipelines.name}/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
+
+paths:
+  input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
+preprocessing:
+  start_sample: -200
+  end_sample: 850
+  start_test: -400
+  end_test: 500
+  avgwin: 100
