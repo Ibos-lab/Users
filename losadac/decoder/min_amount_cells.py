@@ -150,5 +150,5 @@ for to_decode in ["sampleid", "neutral", "color"]:
                 n_cells=n_cells,
             )
             res.to_python_hdf5(
-                path + f"/q0.5q99.5_{n_cells}cells_c{svc_c}_test_orient.h5"
+                path + f"/q0.5q99.5_{n_cells}cells_c{svc_c}_test_{to_decode}.h5"
             )
