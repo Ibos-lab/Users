@@ -137,6 +137,6 @@ def compute_selectivity(preprocessing: Dict, paths: Dict):
 
     print("Computing selectivity")
     df_selectivity = popu.execute_function(
-        get_selectivity_info, **preprocessing, n_jobs=-1, ret_df=False
+        get_selectivity_info, **preprocessing, n_jobs=-1, ret_df=True
     )
     return df_selectivity
