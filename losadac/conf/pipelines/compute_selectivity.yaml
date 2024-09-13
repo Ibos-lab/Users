@@ -10,4 +10,3 @@ preprocessing:
   end_sample: 850
   start_test: -400
   end_test: 500
-  avgwin: 100
