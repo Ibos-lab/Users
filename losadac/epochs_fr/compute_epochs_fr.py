@@ -9,7 +9,7 @@ import warnings
 
 def compute_mean(data, st, end):
     if np.all(np.isnan(data)):
-        return np.nan
+        return np.array([np.nan])
     return np.nanmean(data[:, st:end] * 1000, axis=1)
 
 
