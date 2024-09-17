@@ -7,6 +7,12 @@ from ephysvibe.trials import select_trials
 import warnings
 
 
+def compute_mean(data, st, end):
+    if np.all(np.isnan(data)):
+        return np.nan
+    return np.nanmean(data[:, st:end] * 1000, axis=1)
+
+
 def get_fr_info(neu: NeuronData, start_sample, end_sample, start_test, end_test):
     res = {}
     res["nid"] = neu.get_neuron_id()
@@ -53,50 +59,34 @@ def get_fr_info(neu: NeuronData, start_sample, end_sample, start_test, end_test)
             warnings.simplefilter("ignore", category=RuntimeWarning)
 
             # mean fr by color/orientation
-            res[f"son_c1_{loc}"] = np.nanmean(son_c1[:, sonst:soned] * 1000, axis=1)
-            res[f"son_c5_{loc}"] = np.nanmean(son_c5[:, sonst:soned] * 1000, axis=1)
-            res[f"son_o1_{loc}"] = np.nanmean(son_o1[:, sonst:soned] * 1000, axis=1)
-            res[f"son_o5_{loc}"] = np.nanmean(son_c5[:, sonst:soned] * 1000, axis=1)
-            res[f"d1_c1_{loc}"] = np.nanmean(son_c1[:, d1st:d1ed] * 1000, axis=1)
-            res[f"d1_c5_{loc}"] = np.nanmean(son_c5[:, d1st:d1ed] * 1000, axis=1)
-            res[f"d1_o1_{loc}"] = np.nanmean(son_o1[:, d1st:d1ed] * 1000, axis=1)
-            res[f"d1_o5_{loc}"] = np.nanmean(son_o5[:, d1st:d1ed] * 1000, axis=1)
-            res[f"d2_c1_{loc}"] = np.nanmean(t1on_c1[:, :d2ed] * 1000, axis=1)
-            res[f"d2_c5_{loc}"] = np.nanmean(t1on_c5[:, :d2ed] * 1000, axis=1)
-            res[f"d2_o1_{loc}"] = np.nanmean(t1on_o1[:, :d2ed] * 1000, axis=1)
-            res[f"d2_o5_{loc}"] = np.nanmean(t1on_o5[:, :d2ed] * 1000, axis=1)
+            res[f"son_c1_{loc}"] = compute_mean(son_c1, sonst, soned)
+            res[f"son_c5_{loc}"] = compute_mean(son_c5, sonst, soned)
+            res[f"son_o1_{loc}"] = compute_mean(son_o1, sonst, soned)
+            res[f"son_o5_{loc}"] = compute_mean(son_c5, sonst, soned)
+            res[f"d1_c1_{loc}"] = compute_mean(son_c1, d1st, d1ed)
+            res[f"d1_c5_{loc}"] = compute_mean(son_c5, d1st, d1ed)
+            res[f"d1_o1_{loc}"] = compute_mean(son_o1, d1st, d1ed)
+            res[f"d1_o5_{loc}"] = compute_mean(son_o5, d1st, d1ed)
+            res[f"d2_c1_{loc}"] = compute_mean(t1on_c1, 0, d2ed)
+            res[f"d2_c5_{loc}"] = compute_mean(t1on_c5, 0, d2ed)
+            res[f"d2_o1_{loc}"] = compute_mean(t1on_o1, 0, d2ed)
+            res[f"d2_o5_{loc}"] = compute_mean(t1on_o5, 0, d2ed)
             # mean fr by sample
-            res[f"son_o1c1_{loc}"] = np.nanmean(
-                son_oc["11"][:, sonst:soned] * 1000, axis=1
-            )
-            res[f"son_o1c5_{loc}"] = np.nanmean(
-                son_oc["15"][:, sonst:soned] * 1000, axis=1
-            )
-            res[f"son_o5c1_{loc}"] = np.nanmean(
-                son_oc["51"][:, sonst:soned] * 1000, axis=1
-            )
-            res[f"son_o5c5_{loc}"] = np.nanmean(
-                son_oc["55"][:, sonst:soned] * 1000, axis=1
-            )
-            res[f"son_n_{loc}"] = np.nanmean(son_oc["0"][:, sonst:soned] * 1000, axis=1)
-            res[f"d1_o1c1_{loc}"] = np.nanmean(
-                son_oc["11"][:, d1st:d1ed] * 1000, axis=1
-            )
-            res[f"d1_o1c5_{loc}"] = np.nanmean(
-                son_oc["15"][:, d1st:d1ed] * 1000, axis=1
-            )
-            res[f"d1_o5c1_{loc}"] = np.nanmean(
-                son_oc["51"][:, d1st:d1ed] * 1000, axis=1
-            )
-            res[f"d1_o5c5_{loc}"] = np.nanmean(
-                son_oc["55"][:, d1st:d1ed] * 1000, axis=1
-            )
-            res[f"d1_n_{loc}"] = np.nanmean(son_oc["0"][:, d1st:d1ed] * 1000, axis=1)
-            res[f"d2_o1c1_{loc}"] = np.nanmean(t1on_oc["11"][:, :d2ed] * 1000, axis=1)
-            res[f"d2_o1c5_{loc}"] = np.nanmean(t1on_oc["15"][:, :d2ed] * 1000, axis=1)
-            res[f"d2_o5c1_{loc}"] = np.nanmean(t1on_oc["51"][:, :d2ed] * 1000, axis=1)
-            res[f"d2_o5c5_{loc}"] = np.nanmean(t1on_oc["55"][:, :d2ed] * 1000, axis=1)
-            res[f"d2_n_{loc}"] = np.nanmean(t1on_oc["0"][:, :d2ed] * 1000, axis=1)
+            res[f"son_o1c1_{loc}"] = compute_mean(son_oc["11"], sonst, soned)
+            res[f"son_o1c5_{loc}"] = compute_mean(son_oc["15"], sonst, soned)
+            res[f"son_o5c1_{loc}"] = compute_mean(son_oc["51"], sonst, soned)
+            res[f"son_o5c5_{loc}"] = compute_mean(son_oc["55"], sonst, soned)
+            res[f"son_n_{loc}"] = compute_mean(son_oc["0"], sonst, soned)
+            res[f"d1_o1c1_{loc}"] = compute_mean(son_oc["11"], d1st, d1ed)
+            res[f"d1_o1c5_{loc}"] = compute_mean(son_oc["15"], d1st, d1ed)
+            res[f"d1_o5c1_{loc}"] = compute_mean(son_oc["51"], d1st, d1ed)
+            res[f"d1_o5c5_{loc}"] = compute_mean(son_oc["55"], d1st, d1ed)
+            res[f"d1_n_{loc}"] = compute_mean(son_oc["0"], d1st, d1ed)
+            res[f"d2_o1c1_{loc}"] = compute_mean(t1on_oc["11"], 0, d2ed)
+            res[f"d2_o1c5_{loc}"] = compute_mean(t1on_oc["15"], 0, d2ed)
+            res[f"d2_o5c1_{loc}"] = compute_mean(t1on_oc["51"], 0, d2ed)
+            res[f"d2_o5c5_{loc}"] = compute_mean(t1on_oc["55"], 0, d2ed)
+            res[f"d2_n_{loc}"] = compute_mean(t1on_oc["0"], 0, d2ed)
 
     return res
 
