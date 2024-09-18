@@ -28,13 +28,13 @@ seed = 1997
 svc_c = 0.001
 
 itinfo = {
-    "lip": {"step": 10, "maxit": 250},
+    "lip": {"step": 10, "maxit": 210},
     "pfc": {"step": 30, "maxit": 1700},
     "v4": {"step": 30, "maxit": 1500},
 }
 
 
-for to_decode in ["sampleid", "neutral", "color"]:
+for to_decode in ["color"]:
     for area in ["lip", "pfc", "v4"]:
         path = f"./{area}/q0.5q99.5c{svc_c}/{to_decode}"
 
