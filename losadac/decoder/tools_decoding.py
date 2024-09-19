@@ -28,6 +28,8 @@ def check_number_of_trials(
 ):
 
     for key in samples:
+        if xdict[key].shape[0] < min_ntr:
+            return False
         mean_trs = np.mean(xdict[key], axis=1)
         if percentile1 is not None:
             qmin = np.percentile(mean_trs, [percentile1])
