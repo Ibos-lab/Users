@@ -34,7 +34,7 @@ itinfo = {
 }
 
 
-for to_decode in ["color"]:
+for to_decode in ["neutral"]:
     for area in ["lip", "pfc", "v4"]:
         path = f"./{area}/q0.5q99.5c{svc_c}/{to_decode}"
 
