@@ -171,7 +171,7 @@ savepath = (
     "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/"
 )
 popu_path = {
-    # "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_lip.h5",
+    "lip": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/activation_index/population_selectivity_lip.h5",
     # "pfc": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_pfc.h5",
     # "v4": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/population_selectivity_v4.h5",
 }
