@@ -15,12 +15,14 @@ def select_trials_by_percentile(x: np.ndarray, percentile1: list, percentile2: l
 
     mean_trs = np.mean(x, axis=1)
     if percentile1 is not None:
-        qmin = np.percentile(mean_trs, [percentile1])
-        q1mask = mean_trs > qmin
+        qmin, q50 = np.percentile(mean_trs, [percentile1, 50])
+        if qmin != q50:
+            q1mask = mean_trs > qmin
     if percentile2 is not None:
-        qmax = np.percentile(mean_trs, [percentile2])
-        mean_trs = np.mean(x, axis=1)
-        q2mask = mean_trs < qmax
+        qmax, q50 = np.percentile(mean_trs, [percentile2, 50])
+        if qmax != q50:
+            mean_trs = np.mean(x, axis=1)
+            q2mask = mean_trs < qmax
     idx = np.where(np.logical_and(q1mask, q2mask))
     return idx
 
