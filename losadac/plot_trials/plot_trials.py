@@ -208,7 +208,7 @@ def plot_trials(
 
     fig = neu.plot_sp_b1(sp, conv)
     fig.savefig(
-        f"{nid}.{format}",
+        f"./{nid}.{format}",
         format=format,
         bbox_inches="tight",
         transparent=False,

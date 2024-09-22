@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 def main(paths: Dict, params, **kwargs):
     print("start plot trials")
-    path_list = glob.glob(paths["input"])
+    path_list = glob.glob(paths["input"])[520:]
 
     Parallel(n_jobs=-1)(
         delayed(plot_trials.plot_trials)(
