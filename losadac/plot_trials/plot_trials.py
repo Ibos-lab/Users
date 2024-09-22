@@ -191,6 +191,11 @@ def plot_trials(
         percentile=percentile,
         cerotr=cerotr,
     )
+    for key in sp.keys():
+        if sp[key].ndim != 2:
+            sp[key] = np.zeros((1, 1950))
+            conv[key] = np.zeros((1, 1950))
+
     fig = neu.plot_sp_b1(sp, conv)
     fig.savefig(
         f"{nid}.{format}",
