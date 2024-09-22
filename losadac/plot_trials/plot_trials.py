@@ -194,8 +194,8 @@ def plot_trials(
     for key1 in sp.keys():
         for key2 in sp[key1].keys():
             if sp[key1][key2].ndim != 2:
-                sp[key1][key2] = np.zeros((1, 1950))
-                conv[key1][key2] = np.zeros((1, 1950))
+                sp[key1][key2] = np.zeros((2, 1950))
+                conv[key1][key2] = np.zeros((2, 1950))
 
     fig = neu.plot_sp_b1(sp, conv)
     fig.savefig(
