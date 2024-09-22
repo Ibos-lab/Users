@@ -13,7 +13,10 @@ def main(paths: Dict, params, **kwargs):
 
     Parallel(n_jobs=-1)(
         delayed(plot_trials.plot_trials)(
-            neupath=path, format=params["format"], q1=params["q1"], q2=params["q2"]
+            neupath=path,
+            format=params["format"],
+            percentile=params["percentile"],
+            cerotr=params["cerotr"],
         )
         for path in tqdm(path_list)
     )
