@@ -9,7 +9,7 @@ from omegaconf import DictConfig
 
 @hydra.main(
     version_base=None,
-    config_path="/home/INT/losada.c/Documents/codes/Users/losadac/conf/",  # "/envau/work/invibe/USERS/LOSADA/Users/losadac/conf/",
+    config_path="/envau/work/invibe/USERS/LOSADA/Users/losadac/conf/",
     config_name="config.yaml",
 )
 def main(cfg: DictConfig):
