@@ -1,5 +1,5 @@
 from typing import Dict
-from . import plot_trials
+import plot_trials
 import glob
 from joblib import Parallel, delayed
 from tqdm import tqdm
@@ -19,10 +19,6 @@ from tqdm import tqdm
 #         for path in tqdm(path_list)
 #     )
 
-paths = {
-    "input": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/lip/neurons/*neu.h5"
-}
-params = {"format": "png", "percentile": False, "cerotr": False}
 
 """Execute main function of the module plot_trials."""
 
@@ -41,4 +37,8 @@ def main(paths: Dict, params, **kwargs):
 
 
 if __name__ == "__main__":
-    main()
+    paths = {
+        "input": "/envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/new_structure/session_struct/lip/neurons/*neu.h5"
+    }
+    params = {"format": "png", "percentile": False, "cerotr": False}
+    main(paths, params)
