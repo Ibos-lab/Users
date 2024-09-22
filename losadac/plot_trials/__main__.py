@@ -33,7 +33,3 @@ def main(paths: Dict, params, **kwargs):
             percentile=params["percentile"],
             cerotr=params["cerotr"],
         )
-
-
-if __name__ == "__main__":
-    main()
