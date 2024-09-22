@@ -7,5 +7,5 @@ paths:
   input: "${workspace.data_path}/new_structure/session_struct/${pipelines.area}/neurons/*neu.h5"
 params:
   format: 'png'
-  q1:
-  q2:
+  percentile: False
+  cerotr: False

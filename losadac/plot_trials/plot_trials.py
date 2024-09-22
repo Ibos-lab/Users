@@ -7,28 +7,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def select_trials_by_percentile(x: np.ndarray, percentile1: list, percentile2: list):
+def select_trials_by_percentile(x: np.ndarray):
     ntr = x.shape[0]
-    if ntr < 10:
-        return np.arange(ntr)
-    q1mask, q2mask = np.full(ntr, True), np.full(ntr, True)
-
+    if ntr < 2:
+        return np.full(ntr, True)
     mean_trs = np.mean(x, axis=1)
-    if percentile1 is not None:
-        qmin, q50 = np.percentile(mean_trs, [percentile1, 50])
-        if qmin != q50:
-            q1mask = mean_trs > qmin
-    if percentile2 is not None:
-        qmax, q50 = np.percentile(mean_trs, [percentile2, 50])
-        if qmax != q50:
-            mean_trs = np.mean(x, axis=1)
-            q2mask = mean_trs < qmax
-    idx = np.where(np.logical_and(q1mask, q2mask))
-    return idx
+
+    q25, q75 = np.percentile(mean_trs, [25, 75])
+    iqr = q75 - q25
+    upper_limit = q75 + 1.5 * iqr
+    lower_limit = q25 - 1.5 * iqr
+
+    q1mask = mean_trs > lower_limit
+    q2mask = mean_trs < upper_limit
+
+    mask = np.logical_and(q1mask, q2mask)
+    return mask
 
 
 def prepare_data_plotb1(
-    neu, rf_stim_loc: list = ["contra", "ipsi"], q1: float = None, q2: float = None
+    neu,
+    rf_stim_loc: list = ["contra", "ipsi"],
+    percentile: bool = False,
+    cerotr: bool = False,
 ):
     samples = [0, 11, 15, 55, 51]
     # IN
@@ -75,7 +76,7 @@ def prepare_data_plotb1(
     )
 
     # Check trials
-    if (q1 is not None) or (q2 is not None):
+    if percentile or cerotr:
         for sample in samples_sampleon_0.keys():
             temp = np.concatenate(
                 (
@@ -84,9 +85,18 @@ def prepare_data_plotb1(
                 ),
                 axis=1,
             )
-            idx = select_trials_by_percentile(temp, q1, q2)
-            samples_sampleon_0[sample] = samples_sampleon_0[sample][idx]
-            samples_test_0[sample] = samples_test_0[sample][idx]
+
+            masknocero = np.full(temp.shape[0], True)
+            maskper = np.full(temp.shape[0], True)
+            if cerotr:
+                masknocero = np.sum(temp, axis=1) != 0
+            if percentile:
+                maskper = select_trials_by_percentile(temp)
+            mask = np.logical_and(masknocero, maskper)
+            if np.sum(mask) < 10:
+                mask = np.full(temp.shape[0], True)
+            samples_sampleon_0[sample] = samples_sampleon_0[sample][mask]
+            samples_test_0[sample] = samples_test_0[sample][mask]
 
             temp = np.concatenate(
                 (
@@ -95,9 +105,17 @@ def prepare_data_plotb1(
                 ),
                 axis=1,
             )
-            idx = select_trials_by_percentile(temp, q1, q2)
-            samples_sampleon_1[sample] = samples_sampleon_1[sample][idx]
-            samples_test_1[sample] = samples_test_1[sample][idx]
+            masknocero = np.full(temp.shape[0], True)
+            maskper = np.full(temp.shape[0], True)
+            if cerotr:
+                masknocero = np.sum(temp, axis=1) != 0
+            if percentile:
+                maskper = select_trials_by_percentile(temp)
+            mask = np.logical_and(masknocero, maskper)
+            if np.sum(mask) < 10:
+                mask = np.full(temp.shape[0], True)
+            samples_sampleon_1[sample] = samples_sampleon_1[sample][mask]
+            samples_test_1[sample] = samples_test_1[sample][mask]
 
     # Start convolution
     fs_ds = config.FS / config.DOWNSAMPLE
@@ -160,12 +178,19 @@ def prepare_data_plotb1(
     return sp, conv
 
 
-def plot_trials(neupath: Path, format: str = "png", q1: float = None, q2: float = None):
+def plot_trials(
+    neupath: Path, format: str = "png", percentile: bool = False, cerotr: bool = False
+):
 
     neu = NeuronData.from_python_hdf5(neupath)
     nid = neu.get_neuron_id()
     print(nid)
-    sp, conv = prepare_data_plotb1(neu, rf_stim_loc=["contra", "ipsi"], q1=q1, q2=q2)
+    sp, conv = prepare_data_plotb1(
+        neu,
+        rf_stim_loc=["contra", "ipsi"],
+        percentile=percentile,
+        cerotr=cerotr,
+    )
     fig = neu.plot_sp_b1(sp, conv)
     fig.savefig(
         f"{nid}.{format}",
