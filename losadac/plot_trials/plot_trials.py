@@ -78,44 +78,50 @@ def prepare_data_plotb1(
     # Check trials
     if percentile or cerotr:
         for sample in samples_sampleon_0.keys():
-            temp = np.concatenate(
-                (
-                    samples_sampleon_0[sample][:, 300 : 500 + 450 + 400],
-                    samples_test_0[sample][:, 100 : 500 + 500],
-                ),
-                axis=1,
-            )
+            if ~np.all((np.isnan(samples_sampleon_0[sample]))):
+                temp = np.concatenate(
+                    (
+                        samples_sampleon_0[sample][:, 300 : 500 + 450 + 400],
+                        samples_test_0[sample][:, 100 : 500 + 500],
+                    ),
+                    axis=1,
+                )
+                masknocero = np.full(temp.shape[0], True)
+                maskper = np.full(temp.shape[0], True)
+                if cerotr:
+                    masknocero = np.sum(temp, axis=1) != 0
+                if percentile:
+                    maskper = select_trials_by_percentile(temp)
+                mask = np.logical_and(masknocero, maskper)
+                if np.sum(mask) < 10:
+                    mask = np.full(temp.shape[0], True)
+                samples_sampleon_0[sample] = samples_sampleon_0[sample][mask]
+                samples_test_0[sample] = samples_test_0[sample][mask]
 
-            masknocero = np.full(temp.shape[0], True)
-            maskper = np.full(temp.shape[0], True)
-            if cerotr:
-                masknocero = np.sum(temp, axis=1) != 0
-            if percentile:
-                maskper = select_trials_by_percentile(temp)
-            mask = np.logical_and(masknocero, maskper)
-            if np.sum(mask) < 10:
-                mask = np.full(temp.shape[0], True)
-            samples_sampleon_0[sample] = samples_sampleon_0[sample][mask]
-            samples_test_0[sample] = samples_test_0[sample][mask]
+                if np.all(np.isnan(samples_sampleon_1[sample])):
+                    samples_sampleon_1[sample] = np.zeros((2, 1950))
+                if np.all(np.isnan(samples_test_1[sample])):
+                    samples_test_1[sample] = np.zeros((2, 1950))
 
-            temp = np.concatenate(
-                (
-                    samples_sampleon_1[sample][:, 300 : 500 + 450 + 400],
-                    samples_test_1[sample][:, 100 : 500 + 500],
-                ),
-                axis=1,
-            )
-            masknocero = np.full(temp.shape[0], True)
-            maskper = np.full(temp.shape[0], True)
-            if cerotr:
-                masknocero = np.sum(temp, axis=1) != 0
-            if percentile:
-                maskper = select_trials_by_percentile(temp)
-            mask = np.logical_and(masknocero, maskper)
-            if np.sum(mask) < 10:
-                mask = np.full(temp.shape[0], True)
-            samples_sampleon_1[sample] = samples_sampleon_1[sample][mask]
-            samples_test_1[sample] = samples_test_1[sample][mask]
+            if ~np.all((np.isnan(samples_sampleon_1[sample]))):
+                temp = np.concatenate(
+                    (
+                        samples_sampleon_1[sample][:, 300 : 500 + 450 + 400],
+                        samples_test_1[sample][:, 100 : 500 + 500],
+                    ),
+                    axis=1,
+                )
+                masknocero = np.full(temp.shape[0], True)
+                maskper = np.full(temp.shape[0], True)
+                if cerotr:
+                    masknocero = np.sum(temp, axis=1) != 0
+                if percentile:
+                    maskper = select_trials_by_percentile(temp)
+                mask = np.logical_and(masknocero, maskper)
+                if np.sum(mask) < 10:
+                    mask = np.full(temp.shape[0], True)
+                samples_sampleon_1[sample] = samples_sampleon_1[sample][mask]
+                samples_test_1[sample] = samples_test_1[sample][mask]
 
     # Start convolution
     fs_ds = config.FS / config.DOWNSAMPLE
@@ -127,6 +133,10 @@ def prepare_data_plotb1(
     conv_0 = {}
     samples_0 = {}
     for sample in samples_sampleon_0.keys():
+        if np.all((np.isnan(samples_sampleon_0[sample]))):
+            conv_0[sample] = np.zeros((1, 1950))
+            samples_0[sample] = np.zeros((1, 1950))
+            continue
         conv_sonin = (
             np.convolve(
                 np.mean(samples_sampleon_0[sample], axis=0), kernel, mode="same"
@@ -152,7 +162,10 @@ def prepare_data_plotb1(
     conv_1 = {}
     samples_1 = {}
     for sample in samples_sampleon_1.keys():
+
         if np.all((np.isnan(samples_sampleon_1[sample]))):
+            conv_0[sample] = np.zeros((1, 1950))
+            samples_0[sample] = np.zeros((1, 1950))
             continue
         conv_sonin = (
             np.convolve(
@@ -172,8 +185,8 @@ def prepare_data_plotb1(
             ),
             axis=1,
         )
-        sp = {rf_stim_loc[0]: samples_0, rf_stim_loc[1]: samples_1}
-        conv = {rf_stim_loc[0]: conv_0, rf_stim_loc[1]: conv_1}
+    sp = {rf_stim_loc[0]: samples_0, rf_stim_loc[1]: samples_1}
+    conv = {rf_stim_loc[0]: conv_0, rf_stim_loc[1]: conv_1}
 
     return sp, conv
 
@@ -191,11 +204,6 @@ def plot_trials(
         percentile=percentile,
         cerotr=cerotr,
     )
-    for key1 in sp.keys():
-        for key2 in sp[key1].keys():
-            if sp[key1][key2].ndim != 2:
-                sp[key1][key2] = np.zeros((2, 1950))
-                conv[key1][key2] = np.zeros((2, 1950))
 
     fig = neu.plot_sp_b1(sp, conv)
     fig.savefig(
