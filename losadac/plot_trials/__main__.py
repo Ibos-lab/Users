@@ -7,29 +7,33 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 
-# def main(paths: Dict, params, **kwargs):
-#     print("start plot trials")
-#     path_list = glob.glob(paths["input"])
-
-#     Parallel(n_jobs=-1)(
-#         delayed(plot_trials.plot_trials)(
-#             neupath=path,
-#             format=params["format"],
-#             percentile=params["percentile"],
-#             cerotr=params["cerotr"],
-#         )
-#         for path in tqdm(path_list)
-#     )
-
-
 def main(paths: Dict, params, **kwargs):
     print("start plot trials")
     path_list = glob.glob(paths["input"])
 
-    for path in tqdm(path_list):
-        plot_trials.plot_trials(
+    Parallel(n_jobs=-1)(
+        delayed(plot_trials.plot_trials)(
             neupath=path,
             format=params["format"],
             percentile=params["percentile"],
             cerotr=params["cerotr"],
         )
+        for path in tqdm(path_list)
+    )
+
+
+# def main(paths: Dict, params, **kwargs):
+#     print("start plot trials")
+#     path_list = glob.glob(paths["input"])
+
+#     for path in tqdm(path_list):
+#         plot_trials.plot_trials(
+#             neupath=path,
+#             format=params["format"],
+#             percentile=params["percentile"],
+#             cerotr=params["cerotr"],
+#         )
+
+
+if __name__ == "__main__":
+    main()
