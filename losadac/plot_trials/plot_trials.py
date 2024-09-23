@@ -82,12 +82,12 @@ def prepare_data_plotb1(
 
     # Check trials
     if percentile or cerotr:
-        for sample in samples_sampleon_0.keys():
-            if ~np.all((np.isnan(samples_sampleon_0[sample]))):
+        for isamp in samples:
+            if ~np.all((np.isnan(samples_sampleon_0[isamp]))):
                 temp = np.concatenate(
                     (
-                        samples_sampleon_0[sample][:, 300 : 500 + 450 + 400],
-                        samples_test_0[sample][:, 100 : 500 + 500],
+                        samples_sampleon_0[isamp][:, 300 : 500 + 450 + 400],
+                        samples_test_0[isamp][:, 100 : 500 + 500],
                     ),
                     axis=1,
                 )
@@ -100,19 +100,19 @@ def prepare_data_plotb1(
                 mask = np.logical_and(masknocero, maskper)
                 if np.sum(mask) < 10:
                     mask = np.full(temp.shape[0], True)
-                samples_sampleon_0[sample] = samples_sampleon_0[sample][mask]
-                samples_test_0[sample] = samples_test_0[sample][mask]
+                samples_sampleon_0[isamp] = samples_sampleon_0[isamp][mask]
+                samples_test_0[isamp] = samples_test_0[isamp][mask]
 
-                # if np.all(np.isnan(samples_sampleon_1[sample])):
-                #     samples_sampleon_1[sample] = np.zeros((2, 1950))
-                # if np.all(np.isnan(samples_test_1[sample])):
-                #     samples_test_1[sample] = np.zeros((2, 1950))
+                # if np.all(np.isnan(samples_sampleon_1[isamp])):
+                #     samples_sampleon_1[isamp] = np.zeros((2, 1950))
+                # if np.all(np.isnan(samples_test_1[isamp])):
+                #     samples_test_1[isamp] = np.zeros((2, 1950))
 
-            if ~np.all((np.isnan(samples_sampleon_1[sample]))):
+            if ~np.all((np.isnan(samples_sampleon_1[isamp]))):
                 temp = np.concatenate(
                     (
-                        samples_sampleon_1[sample][:, 300 : 500 + 450 + 400],
-                        samples_test_1[sample][:, 100 : 500 + 500],
+                        samples_sampleon_1[isamp][:, 300 : 500 + 450 + 400],
+                        samples_test_1[isamp][:, 100 : 500 + 500],
                     ),
                     axis=1,
                 )
@@ -125,8 +125,8 @@ def prepare_data_plotb1(
                 mask = np.logical_and(masknocero, maskper)
                 if np.sum(mask) < 10:
                     mask = np.full(temp.shape[0], True)
-                samples_sampleon_1[sample] = samples_sampleon_1[sample][mask]
-                samples_test_1[sample] = samples_test_1[sample][mask]
+                samples_sampleon_1[isamp] = samples_sampleon_1[isamp][mask]
+                samples_test_1[isamp] = samples_test_1[isamp][mask]
 
     # Start convolution
     fs_ds = config.FS / config.DOWNSAMPLE
@@ -137,28 +137,26 @@ def prepare_data_plotb1(
     # IN
     conv_0 = {}
     samples_0 = {}
-    for sample in samples_sampleon_0.keys():
-        if np.all((np.isnan(samples_sampleon_0[sample]))):
-            conv_0[sample] = np.zeros((1, 1950))
-            samples_0[sample] = np.zeros((1, 1950))
+    for isamp in samples_sampleon_0.keys():
+        if np.all((np.isnan(samples_sampleon_0[isamp]))):
+            conv_0[isamp] = np.zeros((1, 1950))
+            samples_0[isamp] = np.zeros((1, 1950))
             continue
         conv_sonin = (
-            np.convolve(
-                np.mean(samples_sampleon_0[sample], axis=0), kernel, mode="same"
-            )
+            np.convolve(np.mean(samples_sampleon_0[isamp], axis=0), kernel, mode="same")
             * fs_ds
         )[300 : 500 + 450 + 400]
 
         conv_testin = (
-            np.convolve(np.mean(samples_test_0[sample], axis=0), kernel, mode="same")
+            np.convolve(np.mean(samples_test_0[isamp], axis=0), kernel, mode="same")
             * fs_ds
         )[100 : 500 + 500]
 
-        conv_0[sample] = np.concatenate((conv_sonin, conv_testin))
-        samples_0[sample] = np.concatenate(
+        conv_0[isamp] = np.concatenate((conv_sonin, conv_testin))
+        samples_0[isamp] = np.concatenate(
             (
-                samples_sampleon_0[sample][:, 300 : 500 + 450 + 400],
-                samples_test_0[sample][:, 100 : 500 + 500],
+                samples_sampleon_0[isamp][:, 300 : 500 + 450 + 400],
+                samples_test_0[isamp][:, 100 : 500 + 500],
             ),
             axis=1,
         )
@@ -166,27 +164,25 @@ def prepare_data_plotb1(
     # OUT
     conv_1 = {}
     samples_1 = {}
-    for sample in samples_sampleon_1.keys():
+    for isamp in samples_sampleon_1.keys():
 
-        if np.all((np.isnan(samples_sampleon_1[sample]))):
-            conv_0[sample] = np.zeros((1, 1950))
-            samples_0[sample] = np.zeros((1, 1950))
+        if np.all((np.isnan(samples_sampleon_1[isamp]))):
+            conv_0[isamp] = np.zeros((1, 1950))
+            samples_0[isamp] = np.zeros((1, 1950))
             continue
         conv_sonin = (
-            np.convolve(
-                np.mean(samples_sampleon_1[sample], axis=0), kernel, mode="same"
-            )
+            np.convolve(np.mean(samples_sampleon_1[isamp], axis=0), kernel, mode="same")
             * fs_ds
         )[300 : 500 + 450 + 400]
         conv_testin = (
-            np.convolve(np.mean(samples_test_1[sample], axis=0), kernel, mode="same")
+            np.convolve(np.mean(samples_test_1[isamp], axis=0), kernel, mode="same")
             * fs_ds
         )[100 : 500 + 500]
-        conv_1[sample] = np.concatenate((conv_sonin, conv_testin))
-        samples_1[sample] = np.concatenate(
+        conv_1[isamp] = np.concatenate((conv_sonin, conv_testin))
+        samples_1[isamp] = np.concatenate(
             (
-                samples_sampleon_1[sample][:, 300 : 500 + 450 + 400],
-                samples_test_1[sample][:, 100 : 500 + 500],
+                samples_sampleon_1[isamp][:, 300 : 500 + 450 + 400],
+                samples_test_1[isamp][:, 100 : 500 + 500],
             ),
             axis=1,
         )
