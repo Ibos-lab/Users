@@ -1,5 +1,5 @@
 defaults:
-  - workspace: vpn_local
+  - workspace: niolon
   - pipelines: compute_selectivity
   # - multiruns: decoding_in
   - override hydra/job_logging: disabled
