@@ -7,13 +7,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def select_trials_by_percentile(x: np.ndarray):
+def select_trials_by_percentile(x: np.ndarray, mask: np.ndarray = None):
     ntr = x.shape[0]
-    if ntr < 2:
+    if mask is None:
+        mask = np.full(ntr, True)
+
+    mntr = x[mask].shape[0]
+
+    if mntr < 2:
         return np.full(ntr, True)
     mean_trs = np.mean(x, axis=1)
 
-    q25, q75 = np.percentile(mean_trs, [25, 75])
+    q25, q75 = np.percentile(mean_trs[mask], [25, 75])
     iqr = q75 - q25
     upper_limit = q75 + 1.5 * iqr
     lower_limit = q25 - 1.5 * iqr
@@ -21,8 +26,8 @@ def select_trials_by_percentile(x: np.ndarray):
     q1mask = mean_trs > lower_limit
     q2mask = mean_trs < upper_limit
 
-    mask = np.logical_and(q1mask, q2mask)
-    return mask
+    qmask = np.logical_and(q1mask, q2mask)
+    return qmask
 
 
 def prepare_data_plotb1(
@@ -91,7 +96,7 @@ def prepare_data_plotb1(
                 if cerotr:
                     masknocero = np.sum(temp, axis=1) != 0
                 if percentile:
-                    maskper = select_trials_by_percentile(temp)
+                    maskper = select_trials_by_percentile(temp, masknocero)
                 mask = np.logical_and(masknocero, maskper)
                 if np.sum(mask) < 10:
                     mask = np.full(temp.shape[0], True)
@@ -116,7 +121,7 @@ def prepare_data_plotb1(
                 if cerotr:
                     masknocero = np.sum(temp, axis=1) != 0
                 if percentile:
-                    maskper = select_trials_by_percentile(temp)
+                    maskper = select_trials_by_percentile(temp, masknocero)
                 mask = np.logical_and(masknocero, maskper)
                 if np.sum(mask) < 10:
                     mask = np.full(temp.shape[0], True)
