@@ -81,8 +81,9 @@ def prepare_data_plotb1(
     )
 
     # Check trials
+    samplesstr = ["0", "11", "15", "55", "51"]
     if percentile or cerotr:
-        for isamp in samples:
+        for isamp in samplesstr:
             if ~np.all((np.isnan(samples_sampleon_0[isamp]))):
                 temp = np.concatenate(
                     (
@@ -103,10 +104,10 @@ def prepare_data_plotb1(
                 samples_sampleon_0[isamp] = samples_sampleon_0[isamp][mask]
                 samples_test_0[isamp] = samples_test_0[isamp][mask]
 
-                if np.all(np.isnan(samples_sampleon_1[isamp])):
-                    samples_sampleon_1[isamp] = np.zeros((2, 1950))
-                if np.all(np.isnan(samples_test_1[isamp])):
-                    samples_test_1[isamp] = np.zeros((2, 1950))
+                # if np.all(np.isnan(samples_sampleon_1[isamp])):
+                #     samples_sampleon_1[isamp] = np.zeros((2, 1950))
+                # if np.all(np.isnan(samples_test_1[isamp])):
+                #     samples_test_1[isamp] = np.zeros((2, 1950))
 
             if ~np.all((np.isnan(samples_sampleon_1[isamp]))):
                 temp = np.concatenate(
