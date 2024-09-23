@@ -16,8 +16,50 @@ import seaborn as sns
 import os
 
 
+def select_trials_by_percentile(x: np.ndarray, mask: np.ndarray = None):
+    ntr = x.shape[0]
+    if mask is None:
+        mask = np.full(ntr, True)
+
+    mntr = x[mask].shape[0]
+
+    if mntr < 2:
+        return np.full(ntr, True)
+    mean_trs = np.mean(x, axis=1)
+
+    q25, q75 = np.percentile(mean_trs[mask], [25, 75])
+    iqr = q75 - q25
+    upper_limit = q75 + 1.5 * iqr
+    lower_limit = q25 - 1.5 * iqr
+
+    q1mask = mean_trs > lower_limit
+    q2mask = mean_trs < upper_limit
+
+    qmask = np.logical_and(q1mask, q2mask)
+    return qmask
+
+
+def check_trials(x, cerotr, percentile):
+    masknocero = np.full(x.shape[0], True)
+    maskper = np.full(x.shape[0], True)
+    if cerotr:
+        masknocero = np.sum(x, axis=1) != 0
+    if percentile:
+        maskper = select_trials_by_percentile(x, masknocero)
+    mask = np.logical_and(masknocero, maskper)
+    if np.sum(mask) < 10:
+        mask = np.full(x.shape[0], True)
+    return mask
+
+
 def get_selectivity_info(
-    neu: NeuronData, start_sample, end_sample, start_test, end_test
+    neu: NeuronData,
+    start_sample,
+    end_sample,
+    start_test,
+    end_test,
+    cerotr: bool,
+    percentile: bool,
 ):
     res = {}
     res["nid"] = neu.get_neuron_id()
@@ -47,8 +89,10 @@ def get_selectivity_info(
         ]
 
         fr = np.concatenate([fr_son, fr_ton], axis=1)
-
-        sample_id = neu.sample_id[mask]
+        # check number of trials
+        masktr = check_trials(fr, cerotr, percentile)
+        fr = fr[masktr]
+        sample_id = neu.sample_id[mask][masktr]
         fr_samples = select_trials.get_sp_by_sample(fr, sample_id, samples)
         o1 = np.concatenate((fr_samples["11"], fr_samples["15"]))
         o5 = np.concatenate((fr_samples["51"], fr_samples["55"]))

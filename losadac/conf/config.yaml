@@ -1,6 +1,6 @@
 defaults:
   - workspace: niolon
-  - pipelines: plot_trials
+  - pipelines: compute_selectivity
   # - multiruns: decoding_in
   - override hydra/job_logging: disabled
   - _self_
