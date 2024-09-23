@@ -103,10 +103,10 @@ def prepare_data_plotb1(
                 samples_sampleon_0[sample] = samples_sampleon_0[sample][mask]
                 samples_test_0[sample] = samples_test_0[sample][mask]
 
-                if np.all(np.isnan(samples_sampleon_1[sample])):
-                    samples_sampleon_1[sample] = np.zeros((2, 1950))
-                if np.all(np.isnan(samples_test_1[sample])):
-                    samples_test_1[sample] = np.zeros((2, 1950))
+                # if np.all(np.isnan(samples_sampleon_1[sample])):
+                #     samples_sampleon_1[sample] = np.zeros((2, 1950))
+                # if np.all(np.isnan(samples_test_1[sample])):
+                #     samples_test_1[sample] = np.zeros((2, 1950))
 
             if ~np.all((np.isnan(samples_sampleon_1[sample]))):
                 temp = np.concatenate(

@@ -89,11 +89,14 @@ def get_selectivity_info(
         ]
 
         fr = np.concatenate([fr_son, fr_ton], axis=1)
-        # check number of trials
-        masktr = check_trials(fr, cerotr, percentile)
-        fr = fr[masktr]
-        sample_id = neu.sample_id[mask][masktr]
+        sample_id = neu.sample_id[mask]
         fr_samples = select_trials.get_sp_by_sample(fr, sample_id, samples)
+        # check number of trials
+        for isamp in fr_samples.keys():
+            if ~np.all((np.isnan(fr_samples[isamp]))):
+                masktr = check_trials(fr_samples[isamp], cerotr, percentile)
+                fr_samples[isamp] = fr_samples[isamp][masktr]
+
         o1 = np.concatenate((fr_samples["11"], fr_samples["15"]))
         o5 = np.concatenate((fr_samples["51"], fr_samples["55"]))
         c1 = np.concatenate((fr_samples["11"], fr_samples["51"]))
