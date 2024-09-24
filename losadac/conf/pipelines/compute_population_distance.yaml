@@ -7,6 +7,7 @@ paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
   nidpath:
   # "${workspace.data_path}/selectivity/all_trials/2024_09_13_11_38_12/${pipelines.area}_no_neutral_inout_selectivity.csv"
+  # "${workspace.data_path}/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/${pipelines.area}_no_neutral_inout_selectivity.csv"
 preprocessing:
   time_before_son: ${multiruns.time_before_son}
   time_before_t1on: ${multiruns.time_before_t1on}
@@ -25,5 +26,5 @@ preprocessing:
   norm : False
   zscore : True
   select_n_neu : 100
-  cerotr: False
-  percentile: False
+  cerotr: True
+  percentile: True
