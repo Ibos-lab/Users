@@ -1,16 +1,12 @@
-from preproc_tools import get_fr_by_sample, to_python_hdf5
+from population_distance import preproc_tools
 import glob
 import os
 import numpy as np
 from joblib import Parallel, delayed
 from tqdm import tqdm
-import json
 from pathlib import Path
 import h5py
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 from scipy.spatial.distance import pdist
-import pickle
 import pandas as pd
 from datetime import datetime
 from ephysvibe.structures.population_data import PopulationData
@@ -18,20 +14,6 @@ from ephysvibe.structures.neuron_data import NeuronData
 from ephysvibe.structures.results import Results
 
 seed = 1997
-
-
-def from_python_hdf5(load_path: Path):
-    """Load data from a file in hdf5 format from Python."""
-    with h5py.File(load_path, "r") as f:
-        data = []
-        for i_g in f.keys():
-            group = f[i_g]
-            dataset = {}
-            for key, value in zip(group.keys(), group.values()):
-                dataset[key] = np.array(value)
-            data.append(dataset)
-    f.close()
-    return data
 
 
 def check_fr_loc(neu: NeuronData, rf_loc: pd.DataFrame):
@@ -216,7 +198,7 @@ def compute_distance(
         df_sel = pd.read_csv(nidpath)
         include_nid = df_sel["nid"].values
     all_fr_samples = popu.execute_function(
-        get_fr_by_sample,
+        preproc_tools.get_fr_by_sample,
         time_before_son=time_before_son,
         time_before_t1on=time_before_t1on,
         sp_son=sp_son,
