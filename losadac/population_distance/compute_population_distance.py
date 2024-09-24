@@ -185,6 +185,8 @@ def compute_distance(
     zscore,
     select_n_neu,
     nidpath,
+    percentile,
+    cerotr,
 ):
 
     # ------------------------------------------ Start preprocessing ----------------------------------------
@@ -219,6 +221,8 @@ def compute_distance(
         include_nid=include_nid,
         n_jobs=-1,
         ret_df=False,
+        cerotr=cerotr,
+        percentile=percentile,
     )
 
     fr_dicts_only = [item for item in all_fr_samples if isinstance(item, dict)]

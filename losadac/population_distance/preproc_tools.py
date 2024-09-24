@@ -7,6 +7,42 @@ from pathlib import Path
 from typing import Dict, List
 
 
+def select_trials_by_percentile(x: np.ndarray, mask: np.ndarray = None):
+    ntr = x.shape[0]
+    if mask is None:
+        mask = np.full(ntr, True)
+
+    mntr = x[mask].shape[0]
+
+    if mntr < 2:
+        return np.full(ntr, True)
+    mean_trs = np.mean(x, axis=1)
+
+    q25, q75 = np.percentile(mean_trs[mask], [25, 75])
+    iqr = q75 - q25
+    upper_limit = q75 + 1.5 * iqr
+    lower_limit = q25 - 1.5 * iqr
+
+    q1mask = mean_trs > lower_limit
+    q2mask = mean_trs < upper_limit
+
+    qmask = np.logical_and(q1mask, q2mask)
+    return qmask
+
+
+def check_trials(x, cerotr, percentile):
+    masknocero = np.full(x.shape[0], True)
+    maskper = np.full(x.shape[0], True)
+    if cerotr:
+        masknocero = np.sum(x, axis=1) != 0
+    if percentile:
+        maskper = select_trials_by_percentile(x, masknocero)
+    mask = np.logical_and(masknocero, maskper)
+    if np.sum(mask) < 5:
+        mask = np.full(x.shape[0], True)
+    return mask
+
+
 def to_python_hdf5(dat: List, save_path: Path):
     """Save data in hdf5 format."""
     # save the data
@@ -74,6 +110,8 @@ def get_fr_by_sample(
     norm=False,
     zscore=False,
     include_nid=None,
+    cerotr=False,
+    percentile=False,
 ):
     if include_nid is not None:
         nid = neu.get_neuron_id()
@@ -145,6 +183,14 @@ def get_fr_by_sample(
         sp = (sp - np.mean(sp, axis=0).reshape(1, -1)) / sp_std.reshape(1, -1)
     # Get trials grouped by sample
     fr_samples = select_trials.get_sp_by_sample(sp, sample_id, samples=samples)
+
+    # check trials
+    for isamp in fr_samples.keys():
+        if ~np.all((np.isnan(fr_samples[isamp]))):
+            masktr = check_trials(fr_samples[isamp], cerotr, percentile)
+            fr_samples[isamp] = fr_samples[isamp][masktr]
+            if fr_samples[isamp].shape[0] < min_trials:
+                return None
 
     if fr_samples is None:
         return None
