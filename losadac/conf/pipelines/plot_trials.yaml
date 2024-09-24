@@ -1,10 +1,10 @@
 _target_: plot_trials.__main__.main
 name: "plot_trials"
 area: "lip"
-output_path: ${pipelines.name}/percentile_without_nonzero/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}
+output_path: ${pipelines.name}/nonzero/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}
 paths:
   input: "${workspace.data_path}/new_structure/session_struct/${pipelines.area}/neurons/*neu.h5"
 params:
   format: 'png'
-  percentile: True
+  percentile: False
   cerotr: True
