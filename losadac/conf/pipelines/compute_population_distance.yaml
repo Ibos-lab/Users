@@ -1,7 +1,7 @@
 _target_: population_distance.__main__.main
 name: "population_distance"
 area: "lip"
-output_path: ${pipelines.name}/all_trials/all_neurons/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
+output_path: ${pipelines.name}/percentile_with_nonzero/all_neurons/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
 
 paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
