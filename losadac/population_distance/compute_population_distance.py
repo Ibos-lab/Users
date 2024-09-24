@@ -15,6 +15,7 @@ import pandas as pd
 from datetime import datetime
 from ephysvibe.structures.population_data import PopulationData
 from ephysvibe.structures.neuron_data import NeuronData
+from ephysvibe.structures.results import Results
 
 seed = 1997
 
@@ -119,7 +120,7 @@ def scrum_neutralsize_samepool(data, ntr, rng):
     return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
 
 
-def compute_distance(data, rng, min_trials, select_n_neu=100):
+def get_distance(data, rng, min_trials, select_n_neu=100):
 
     g1mean, g2mean = [], []
     s0mean, s11mean, s15mean, s51mean, s55mean = [], [], [], [], []
@@ -182,117 +183,85 @@ def compute_distance(data, rng, min_trials, select_n_neu=100):
     }
 
 
-def population_latency(params, kwargs):
-    # --------------- Set variables ------------------
-    areas = params["areas"]
-    avgwin = params["avgwin"]
-    min_sp_sec = params["min_sp_sec"]
-    n_test = params["n_test"]
-    min_trials = params["min_trials"]
-    nonmatch = params["nonmatch"]
-    norm = params["norm"]
-    zscore = params["zscore"]
-    select_n_neu = params["select_n_neu"]
-    allspath = params["allspath"]
-    nidpath = params["nidpath"]
-    filepaths = params["filepaths"]
-    rf_loc_path = params["rf_loc_path"]
-    outputpath = params["outputpath"]
-    start_sample = params["start_sample"]
-    end_sample = params["end_sample"]
-    start_test = params["start_test"]
-    end_test = params["end_test"]
-
-    # --------------- Set variables ------------------
-    date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+def compute_distance(
+    input,
+    sp_son,
+    sp_t1on,
+    mask_son,
+    start_sample,
+    end_sample,
+    start_test,
+    end_test,
+    time_before_son,
+    time_before_t1on,
+    avgwin,
+    min_sp_sec,
+    n_test,
+    min_trials,
+    nonmatch,
+    norm,
+    zscore,
+    select_n_neu,
+    nidpath,
+):
 
     # ------------------------------------------ Start preprocessing ----------------------------------------
-    if not bool(allspath) and kwargs is not None:
-        outputpath = outputpath + date + "/"
-
-        if not os.path.exists(outputpath):
-            os.makedirs(outputpath)
-        for area in areas:
-            print(area)
-            path = filepaths[area]
-            neu_path = path + "*neu.h5"
-            path_list = glob.glob(neu_path)
-
-            rf_loc_df = None
-            if bool(rf_loc_path):
-                rf_loc_df = pd.read_csv(rf_loc_path[area])
-
-            listpopu = Parallel(n_jobs=-1)(
-                delayed(get_neu_align_sample_test)(
-                    path=path, params=kwargs, sp_sample=False, rf_loc=rf_loc_df
-                )
-                for path in tqdm(path_list)
-            )
-            comment = str(kwargs)
-            spath = outputpath + area + "_preprocdata.h5"
-            allspath[area] = spath
-            print("saving")
-            popu = PopulationData(listpopu, comment=comment)
-            popu.to_python_hdf5(spath)
-
     print("Compute distances")
     rng = np.random.default_rng(seed)
-    res = {"lip": {}, "v4": {}, "pfc": {}}
+    res = {}
 
-    for area in areas:
-        print(area)
-        path = allspath[area]
-        popu = PopulationData.from_python_hdf5(path)
-        include_nid = None
-        if bool(nidpath):
-            df_sel = pd.read_csv(nidpath[area])
-            include_nid = df_sel["nid"].values
-        all_fr_samples = popu.execute_function(
-            get_fr_by_sample,
-            start_sample=start_sample,
-            end_sample=end_sample,
-            start_test=start_test,
-            end_test=end_test,
-            n_test=n_test,
+    popu = PopulationData.from_python_hdf5(input)
+    include_nid = None
+    if nidpath is not None:
+        df_sel = pd.read_csv(nidpath)
+        include_nid = df_sel["nid"].values
+    all_fr_samples = popu.execute_function(
+        get_fr_by_sample,
+        time_before_son=time_before_son,
+        time_before_t1on=time_before_t1on,
+        sp_son=sp_son,
+        sp_t1on=sp_t1on,
+        mask_son=mask_son,
+        start_sample=start_sample,
+        end_sample=end_sample,
+        start_test=start_test,
+        end_test=end_test,
+        n_test=n_test,
+        min_trials=min_trials,
+        min_neu=False,
+        nonmatch=nonmatch,
+        avgwin=avgwin,
+        n_sp_sec=min_sp_sec,
+        norm=norm,
+        zscore=zscore,
+        include_nid=include_nid,
+        n_jobs=-1,
+        ret_df=False,
+    )
+
+    fr_dicts_only = [item for item in all_fr_samples if isinstance(item, dict)]
+
+    print("start iterations")
+    distance_data = []
+    for _ in tqdm(range(1000)):
+        dist = get_distance(
+            fr_dicts_only,
+            rng=rng,
             min_trials=min_trials,
-            min_neu=False,
-            nonmatch=nonmatch,
-            avgwin=avgwin,
-            n_sp_sec=min_sp_sec,
-            norm=norm,
-            zscore=zscore,
-            include_nid=include_nid,
-            n_jobs=-1,
-            ret_df=False,
+            select_n_neu=select_n_neu,
         )
+        distance_data.append(dist)
 
-        fr_dicts_only = [item for item in all_fr_samples if isinstance(item, dict)]
+    all_dist_n_nn = []
+    all_dist_fake_n_nn = []
+    for asc in distance_data:
+        all_dist_n_nn.append(asc["dist_n_nn"])
+        all_dist_fake_n_nn.append(asc["dist_fake_n_nn"])
+    all_dist_n_nn = np.array(all_dist_n_nn, dtype=np.float32)
+    all_dist_fake_n_nn = np.array(all_dist_fake_n_nn, dtype=np.float32)
+    res["dist_n_nn"] = all_dist_n_nn
+    res["dist_fake_n_nn"] = all_dist_fake_n_nn
+    res["n_neurons"] = asc["n_neurons"]
 
-        print("start iterations")
-        distance_data = []
-        for _ in tqdm(range(1000)):
-            dist = compute_distance(
-                fr_dicts_only,
-                rng=rng,
-                min_trials=min_trials,
-                select_n_neu=select_n_neu,
-            )
-            distance_data.append(dist)
-
-        all_dist_n_nn = []
-        all_dist_fake_n_nn = []
-        for asc in distance_data:
-            all_dist_n_nn.append(asc["dist_n_nn"])
-            all_dist_fake_n_nn.append(asc["dist_fake_n_nn"])
-        all_dist_n_nn = np.array(all_dist_n_nn)
-        all_dist_fake_n_nn = np.array(all_dist_fake_n_nn)
-        res[area]["dist_n_nn"] = all_dist_n_nn
-        res[area]["dist_fake_n_nn"] = all_dist_fake_n_nn
-        res[area]["n_neurons"] = asc["n_neurons"]
-        print("saving")
-        to_python_hdf5(
-            dat=[res[area]], save_path=outputpath + area + "_population_dist.h5"
-        )
-    params["script"] = "population_latencies.py"
-    with open(outputpath + "pipeline_parameters.json", "w") as f:
-        json.dump(params, f, indent=4, sort_keys=True)
+    res = Results("population_distance.py", input, distance=res)
+    return res

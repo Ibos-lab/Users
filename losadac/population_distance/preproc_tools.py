@@ -56,10 +56,15 @@ def select_sample_test_aligned_trials(
 
 def get_fr_by_sample(
     neu,
-    start_sample,
-    end_sample,
-    start_test,
-    end_test,
+    time_before_son: str,
+    time_before_t1on: str,
+    sp_son: str,
+    sp_t1on: str,
+    mask_son: str,
+    start_sample: int,
+    end_sample: int,
+    start_test: int,
+    end_test: int,
     n_test,
     min_trials,
     min_neu=False,
@@ -75,26 +80,28 @@ def get_fr_by_sample(
         if not (nid in include_nid):
             return None
 
-    # Select trials aligned to sample onset
-    sp_sample_on = neu.sp_sample
-    sp_test_on = neu.sp_test
-    mask_s = neu.mask_s
+    idx_start_sample = int((getattr(neu, time_before_son) + start_sample))
+    idx_end_sample = int((getattr(neu, time_before_son) + end_sample))
+    idx_start_test = int((getattr(neu, time_before_t1on) + start_test))
+    idx_end_test = int((getattr(neu, time_before_t1on) + end_test))
+    sampleon = getattr(neu, sp_son)
+    t1on = getattr(neu, sp_t1on)
+    mask_son = getattr(neu, mask_son)
 
-    idx_start_sample = neu.time_before_sample + start_sample
-    idx_end_sample = neu.time_before_sample + end_sample
-    idx_start_test = neu.time_before_test + start_test
-    idx_end_test = neu.time_before_test + end_test
+    # Select trials aligned to sample onset
+
+    sample_id = neu.sample_id[mask_son]
 
     # Build masks to select trials with match in the n_test
     mask_match = np.where(
-        neu.test_stimuli[mask_s, n_test - 1] == neu.sample_id[mask_s],
+        neu.test_stimuli[mask_son, n_test - 1] == neu.sample_id[mask_son],
         True,
         False,
     )
-    mask_neu = neu.sample_id[mask_s] == 0
+    mask_neu = neu.sample_id[mask_son] == 0
     # Build masks to select trials with the selected number of test presentations
-    max_test = neu.test_stimuli[mask_s].shape[1]
-    mask_ntest = (max_test - np.sum(np.isnan(neu.test_stimuli[mask_s]), axis=1)) > (
+    max_test = neu.test_stimuli[mask_son].shape[1]
+    mask_ntest = (max_test - np.sum(np.isnan(neu.test_stimuli[mask_son]), axis=1)) > (
         n_test - 1
     )
 
@@ -107,11 +114,11 @@ def get_fr_by_sample(
 
     # Average fr across time
     avg_sample_on = firing_rate.moving_average(
-        sp_sample_on[mask_match_neu], win=avgwin, step=1
+        sampleon[mask_match_neu], win=avgwin, step=1
     )[:, idx_start_sample:idx_end_sample]
-    avg_test1_on = firing_rate.moving_average(
-        sp_test_on[mask_match_neu], win=avgwin, step=1
-    )[:, idx_start_test:idx_end_test]
+    avg_test1_on = firing_rate.moving_average(t1on[mask_match_neu], win=avgwin, step=1)[
+        :, idx_start_test:idx_end_test
+    ]
     # Concatenate sample and test aligned data
     sp = np.concatenate((avg_sample_on, avg_test1_on), axis=1)
     # Check fr
@@ -119,7 +126,7 @@ def get_fr_by_sample(
     if not ms_fr:
         return None
     # Check number of trials
-    sample_id = neu.sample_id[mask_s][mask_match_neu]
+    sample_id = neu.sample_id[mask_son][mask_match_neu]
     samples = [0, 11, 15, 55, 51]
     if min_neu:
         sample_fr = sp[np.where(sample_id == 0, True, False)]

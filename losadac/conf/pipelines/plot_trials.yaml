@@ -7,4 +7,4 @@ paths:
 params:
   format: 'png'
   percentile: True
-  cerotr: False
+  cerotr: True
