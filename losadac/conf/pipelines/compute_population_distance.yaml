@@ -18,7 +18,6 @@ preprocessing:
   end_test : 550
   n_test : 1
   min_trials : 25
-  min_neu: False
   nonmatch: True
   avgwin : 100
   min_sp_sec : 1
