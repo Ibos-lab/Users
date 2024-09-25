@@ -143,9 +143,9 @@ def get_fr_by_sample(
         n_test - 1
     )
 
-    if nonmatch:  # include nonmatch trials
+    if nonmatch:  # include neutral and trials without a match before n_ntest (included)
         mask_match_neu = np.logical_or(mask_ntest, mask_neu)
-    else:
+    else:  # include neutral and trials with a match in the n_test
         mask_match_neu = np.logical_or(mask_match, mask_neu)
     if np.sum(mask_match_neu) < 20:
         return None

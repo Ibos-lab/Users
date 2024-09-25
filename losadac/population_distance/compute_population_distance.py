@@ -102,7 +102,7 @@ def scrum_neutralsize_samepool(data, ntr, rng):
     return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
 
 
-def get_distance(data, rng, min_trials, select_n_neu=100):
+def get_distance(data, rng, min_trials, metric, select_n_neu=100):
 
     g1mean, g2mean = [], []
     s0mean, s11mean, s15mean, s51mean, s55mean = [], [], [], [], []
@@ -155,8 +155,12 @@ def get_distance(data, rng, min_trials, select_n_neu=100):
     dist_fake_n_nn = []
     for i in range(reshape_pc.shape[-1]):
 
-        dist_n_nn.append(pdist(np.array((reshape_pc[:, 0, i], reshape_pc[:, 1, i]))))
-        dist_fake_n_nn.append(pdist(np.array((fr_groups[:, 0, i], fr_groups[:, 1, i]))))
+        dist_n_nn.append(
+            pdist(np.array((reshape_pc[:, 0, i], reshape_pc[:, 1, i])), metric=metric)
+        )
+        dist_fake_n_nn.append(
+            pdist(np.array((fr_groups[:, 0, i], fr_groups[:, 1, i])), metric=metric)
+        )
 
     return {
         "dist_n_nn": np.array(dist_n_nn).reshape(-1),
@@ -187,6 +191,7 @@ def compute_distance(
     nidpath,
     percentile,
     cerotr,
+    metric,
 ):
 
     # ------------------------------------------ Start preprocessing ----------------------------------------
@@ -235,6 +240,7 @@ def compute_distance(
             rng=rng,
             min_trials=min_trials,
             select_n_neu=select_n_neu,
+            metric=metric,
         )
         distance_data.append(dist)
 
