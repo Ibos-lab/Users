@@ -1,13 +1,13 @@
 _target_: population_distance.__main__.main
 name: "population_distance"
 area: "lip"
-output_path: ${pipelines.name}/percentile_with_nonzero/all_neurons/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
+output_path: ${pipelines.name}/percentile_with_nonzero/no_neutral_inout_selectivity/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
 
 paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
-  nidpath:
+  nidpath: "${workspace.data_path}/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/${pipelines.area}_no_neutral_inout_selectivity.csv"
   # "${workspace.data_path}/selectivity/all_trials/2024_09_13_11_38_12/${pipelines.area}_no_neutral_inout_selectivity.csv"
-  # "${workspace.data_path}/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/${pipelines.area}_no_neutral_inout_selectivity.csv"
+  # 
 preprocessing:
   time_before_son: ${multiruns.time_before_son}
   time_before_t1on: ${multiruns.time_before_t1on}
