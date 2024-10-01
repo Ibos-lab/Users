@@ -168,8 +168,8 @@ def prepare_data_plotb1(
     for isamp in samples_sampleon_1.keys():
 
         if np.all((np.isnan(samples_sampleon_1[isamp]))):
-            conv_0[isamp] = np.zeros((1, 1950))
-            samples_0[isamp] = np.zeros((1, 1950))
+            conv_1[isamp] = np.zeros((1, 1950))
+            samples_1[isamp] = np.zeros((1, 1950))
             continue
         conv_sonin = (
             np.convolve(np.mean(samples_sampleon_1[isamp], axis=0), kernel, mode="same")
