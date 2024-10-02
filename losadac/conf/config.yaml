@@ -1,6 +1,6 @@
 defaults:
   - workspace: niolon
-  - pipelines: population_distance
+  - pipelines: compute_population_distance
   - multiruns: in
   - override hydra/job_logging: disabled
   - _self_
