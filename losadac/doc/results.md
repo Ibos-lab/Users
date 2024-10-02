@@ -5,15 +5,15 @@ Results using non zero and inside 1.5 iqr trials
 ### All neurons
 V4
 
-![all neurons non zero percentile trials V4](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/v4_selectivity.jpg)
+![selectivity all neurons non zero percentile trials V4](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/v4_selectivity.jpg)
 
 LIP
 
-![all neurons non zero percentile trials LIP](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/lip_selectivity.jpg)
+![selectivity all neurons non zero percentile trials LIP](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/lip_selectivity.jpg)
 
 PFC
 
-![all neurons non zero percentile trials PFC](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/pfc_selectivity.jpg)
+![selectivity all neurons non zero percentile trials PFC](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/pfc_selectivity.jpg)
 
 
 * **Neutral status**:
@@ -38,21 +38,22 @@ Here we remove neurons showing selectivity to neutral IN vs neutral OUT to disca
 
 V4
 
-![no selective nIN nOUT neurons non zero percentile trials V4](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/v4_selectivity_no_selective_neutral_inout.jpg)
+![selectivity no selective nIN nOUT neurons non zero percentile trials V4](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/v4_selectivity_no_selective_neutral_inout.jpg)
 
 LIP
 
-![no selective nIN nOUT neurons non zero percentile trials LIP](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/lip_selectivity_no_selective_neutral_inout.jpg)
+![selectivity no selective nIN nOUT neurons non zero percentile trials LIP](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/lip_selectivity_no_selective_neutral_inout.jpg)
 
 PFC
 
-![no selective nIN nOUT neurons non zero percentile trials PFC](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/pfc_selectivity_no_selective_neutral_inout.jpg)
+![selectivity no selective nIN nOUT neurons non zero percentile trials PFC](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/pfc_selectivity_no_selective_neutral_inout.jpg)
 
-By removing visual nerons we observe that LIP selectivity for orientation ouside the RF is a sensory response (very few neurons remain). This is not the case for PFC which has a larger proportion of no sensory units selective to orientation outside the RF.  
-
+ 
 #### Latencies
 
 ![all neurons non zero percentile trials latencies](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/latencies_no_selective_neutral_inout.jpg)
+
+The order of the latencies remains the same as when using all the neurons. There is an increase in the difference between LIP and PFC for neutral (IN).
 
 ### Neurons with selectivity to neutral in vs neutral out
 * V4
@@ -63,9 +64,30 @@ By removing visual nerons we observe that LIP selectivity for orientation ouside
 
 #### Latencies
 
+## Euclidean distance between neutral and non neutral in the population space
+Results using non zero and inside 1.5 iqr trials
+### All neurons
+IN 
+![latencies all neurons IN](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_distance/euclidean/percentile_with_nonzero/all_neurons/2024_09_24_21_18_55/in_rf/distance.png)
+
+OUT 
+![latencies all neurons OUT](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_distance/euclidean/percentile_with_nonzero/all_neurons/2024_09_24_21_18_55/out_rf/distance.png)
+
+Here we measure the distance between neural population representations of neutral vs non neutral stimuli. 
+Latencies are the same in the three areas in the IN case but for OUT the order is PFC, LIP and V4. 
+The magnitude is by far PFC the largest, followed by LIP and V4. 
+
+### Neurons without selectivity to neutral in vs neutral out
+IN 
+![latencies neurons without selectivity to neutral in vs neutral out IN](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_distance/euclidean/percentile_with_nonzero/no_neutral_inout_selectivity/2024_09_25_09_50_13/in_rf/distance.png)
+
+OUT 
+![latencies neurons without selectivity to neutral in vs neutral out OUT](../../../../../../../../envau/work/invibe/USERS/IBOS/data/Riesling/TSCM/OpenEphys/population_distance/euclidean/percentile_with_nonzero/no_neutral_inout_selectivity/2024_09_25_09_50_13/out_rf/distance.png)
+
+
 ### Conclusion/ideas
 
 * Changes in selectivity in V4 during the delay could be produced by top-down modulations comming from PFC where these changes are stronger.  
-* Selectivity of V4 neurons during the delay, toghether with the decoding sample id results using the full population -> distributed wm/ attentional / preparatory modulations ???  
+* Selectivity of V4 neurons during the delay, toghether with the decoding sample id results using the full population -> distributed wm (attentional / preparatory modulations ???)
 * The order of the latencies show visual information (color and orientation) is encoded first in V4, LIP and last PFC. But the neutral information is first encoded by PFC. This could be an engagement signal comming from PFC to V4, gating the information to LIP.
 * The idea of top-down modulations gating the information to LIP is based on tuning shifts towards the relevant stimuli *Ibos and Freedman [2014](https://www.cell.com/neuron/fulltext/S0896-6273(14)00695-3),[2016](https://www.cell.com/neuron/fulltext/S0896-6273(16)30410-X)* and the stable state observed when decoding from this area neutral vs non neutral.

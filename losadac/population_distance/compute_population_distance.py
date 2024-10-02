@@ -76,26 +76,56 @@ def get_neu_align_sample_test(path, params, sp_sample=False, rf_loc=None):
     return neu
 
 
+# def scrum_neutralsize_samepool(data, ntr, rng):
+
+#     nn = np.concatenate((data["11"], data["15"], data["51"], data["55"]), axis=0)
+#     size_nn = nn.shape[0]
+
+#     idx_tr = rng.choice(size_nn, size=ntr, replace=False)
+#     nn_trs = nn[idx_tr]
+
+#     idx_tr = rng.choice(data["0"].shape[0], size=ntr, replace=False)
+#     neutral_trs = data["0"][idx_tr]
+
+#     meanfr0 = np.mean(neutral_trs, axis=0)
+#     meanfr11 = np.mean(nn_trs, axis=0)
+#     meanfr15 = np.mean(nn_trs, axis=0)
+#     meanfr51 = np.mean(nn_trs, axis=0)
+#     meanfr55 = np.mean(nn_trs, axis=0)
+
+#     all_s = np.concatenate((neutral_trs, nn_trs), axis=0)
+
+#     idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
+#     g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
+#     g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
+
+#     return meanfr0, meanfr11, meanfr15, meanfr51, meanfr55, g1, g2
+
+
 def scrum_neutralsize_samepool(data, ntr, rng):
-
-    nn = np.concatenate((data["11"], data["15"], data["51"], data["55"]), axis=0)
-    size_nn = nn.shape[0]
-
-    idx_tr = rng.choice(size_nn, size=ntr, replace=False)
-    nn_trs = nn[idx_tr]
 
     idx_tr = rng.choice(data["0"].shape[0], size=ntr, replace=False)
     neutral_trs = data["0"][idx_tr]
-
     meanfr0 = np.mean(neutral_trs, axis=0)
-    meanfr11 = np.mean(nn_trs, axis=0)
-    meanfr15 = np.mean(nn_trs, axis=0)
-    meanfr51 = np.mean(nn_trs, axis=0)
-    meanfr55 = np.mean(nn_trs, axis=0)
 
-    all_s = np.concatenate((neutral_trs, nn_trs), axis=0)
+    nn_trs = []
 
-    idx_tr = rng.choice(len(all_s), size=ntr * 2, replace=False)
+    idx_tr = rng.choice(data["11"].shape[0], size=int(ntr / 4), replace=False)
+    nn_trs.append(data["11"][idx_tr])
+    meanfr11 = np.mean(data["11"][idx_tr], axis=0)
+    idx_tr = rng.choice(data["15"].shape[0], size=int(ntr / 4), replace=False)
+    nn_trs.append(data["15"][idx_tr])
+    meanfr15 = np.mean(data["15"][idx_tr], axis=0)
+    idx_tr = rng.choice(data["51"].shape[0], size=int(ntr / 4), replace=False)
+    nn_trs.append(data["51"][idx_tr])
+    meanfr51 = np.mean(data["51"][idx_tr], axis=0)
+    idx_tr = rng.choice(data["55"].shape[0], size=int(ntr / 4), replace=False)
+    nn_trs.append(data["55"][idx_tr])
+    meanfr55 = np.mean(data["55"][idx_tr], axis=0)
+
+    all_s = np.concatenate((neutral_trs, np.concatenate(nn_trs, axis=0)), axis=0)
+
+    idx_tr = rng.choice(len(all_s), size=len(all_s), replace=False)
     g1 = np.mean(all_s[idx_tr[:ntr]], axis=0)
     g2 = np.mean(all_s[idx_tr[ntr:]], axis=0)
 
