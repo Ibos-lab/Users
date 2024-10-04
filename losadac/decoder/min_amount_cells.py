@@ -34,9 +34,9 @@ itinfo = {
 }
 
 
-for to_decode in ["neutral"]:
+for to_decode in ["sampleid"]:
     for area in ["lip", "pfc", "v4"]:
-        path = f"./{area}/q0.5q99.5c{svc_c}/{to_decode}"
+        path = f".percentile_with_nonzero/{area}/q0.5q99.5c{svc_c}/{to_decode}"
 
         if not os.path.exists(path):
             os.makedirs(path)
@@ -75,7 +75,8 @@ for to_decode in ["neutral"]:
         list_data = popu.execute_function(
             tools_decoding.preproc_for_decoding,
             **args["preprocessing"],
-            percentile1=0.5,
+            percentile=True,
+            cerotr=True,
             percentile2=99.5,
             ret_df=False,
         )
