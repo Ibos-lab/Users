@@ -77,7 +77,6 @@ for to_decode in ["sampleid"]:
             **args["preprocessing"],
             percentile=True,
             cerotr=True,
-            percentile2=99.5,
             ret_df=False,
         )
         list_data = [idata for idata in list_data if idata is not None]
