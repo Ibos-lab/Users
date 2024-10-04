@@ -21,8 +21,8 @@ preprocessing:
   no_match: False
   avgwin: 100
   zscore: True
-  percentile: False
-  cerotr: False
+  percentile: True
+  cerotr: True
 decoder:
   niterations: 1000
   ntr_train: 30
