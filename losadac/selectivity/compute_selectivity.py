@@ -91,7 +91,7 @@ def get_selectivity_info(
         fr = np.concatenate([fr_son, fr_ton], axis=1)
         sample_id = neu.sample_id[mask]
         fr_samples = select_trials.get_sp_by_sample(fr, sample_id, samples)
-        # check number of trials
+        # check trials fr
         for isamp in fr_samples.keys():
             if ~np.all((np.isnan(fr_samples[isamp]))):
                 masktr = check_trials(fr_samples[isamp], cerotr, percentile)

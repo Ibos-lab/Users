@@ -53,6 +53,8 @@ def compute_decoding(preprocessing: Dict, decoder: Dict, paths: Dict):
         if len(list_data) <= n_neurons:
             n_neurons = None
             print(f"{n_neurons}<={len(list_data)}")
+    else:
+        decoder["n_neurons"] = len(list_data)
 
     seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
     results = Parallel(n_jobs=-1)(

@@ -1,12 +1,12 @@
 _target_: decoder.__main__.main
 name: "decoding"
 area: "lip"
-output_path: ${pipelines.name}/test_c_param/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}/${pipelines.decoder.svc_c}
+output_path: ${pipelines.name}/percentile_with_nonzero/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}/${pipelines.decoder.svc_c}
 
 paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
 preprocessing:
-  to_decode: "orient"
+  to_decode: "sampleid"
   min_ntr: 25
   start_sample: -200
   end_sample: 850
@@ -21,9 +21,11 @@ preprocessing:
   no_match: False
   avgwin: 100
   zscore: True
+  percentile: True
+  cerotr: True
 decoder:
   niterations: 1000
   ntr_train: 30
   ntr_test: 10
-  svc_c: 0.1
+  svc_c: 0.001
   n_neurons:

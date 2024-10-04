@@ -23,22 +23,9 @@ from typing import Dict, List
 seed = 1997
 
 
-def check_number_of_trials(
-    xdict, samples, min_ntr, percentile1: list, percentile2: list
-):
+def check_number_of_trials(xdict, samples, min_ntr):
 
     for key in samples:
-        if xdict[key].shape[0] < min_ntr:
-            return False
-        mean_trs = np.mean(xdict[key], axis=1)
-        if percentile1 is not None:
-            qmin = np.percentile(mean_trs, [percentile1])
-            xdict[key] = xdict[key][mean_trs > qmin]
-        if percentile2 is not None:
-            qmax = np.percentile(mean_trs, [percentile2])
-            mean_trs = np.mean(xdict[key], axis=1)
-            xdict[key] = xdict[key][mean_trs < qmax]
-
         if xdict[key].shape[0] < min_ntr:
             return False
     return True
@@ -52,11 +39,9 @@ pred_names = {
 }
 
 
-def color_data(fr_samples: Dict, min_ntr: int, percentile1: list, percentile2: list):
+def color_data(fr_samples: Dict, min_ntr: int):
     samples = ["11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(
-        fr_samples, samples, min_ntr, percentile1, percentile2
-    )
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
     if not enough_tr:
         return None
     c1 = np.concatenate([fr_samples["11"], fr_samples["51"]], axis=0)
@@ -65,11 +50,9 @@ def color_data(fr_samples: Dict, min_ntr: int, percentile1: list, percentile2: l
     return color
 
 
-def orient_data(fr_samples: Dict, min_ntr: int, percentile1: list, percentile2: list):
+def orient_data(fr_samples: Dict, min_ntr: int):
     samples = ["11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(
-        fr_samples, samples, min_ntr, percentile1, percentile2
-    )
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
     if not enough_tr:
         return None
     o1 = np.concatenate([fr_samples["11"], fr_samples["15"]], axis=0)
@@ -78,21 +61,17 @@ def orient_data(fr_samples: Dict, min_ntr: int, percentile1: list, percentile2: 
     return orient
 
 
-def sampleid_data(fr_samples: Dict, min_ntr: int, percentile1: list, percentile2: list):
+def sampleid_data(fr_samples: Dict, min_ntr: int):
     samples = ["11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(
-        fr_samples, samples, min_ntr, percentile1, percentile2
-    )
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
     if not enough_tr:
         return None
     return fr_samples
 
 
-def neutral_data(fr_samples: Dict, min_ntr: int, percentile1: list, percentile2: list):
+def neutral_data(fr_samples: Dict, min_ntr: int):
     samples = ["0", "11", "15", "51", "55"]
-    enough_tr = check_number_of_trials(
-        fr_samples, samples, min_ntr, percentile1, percentile2
-    )
+    enough_tr = check_number_of_trials(fr_samples, samples, min_ntr)
     if not enough_tr:
         return None
     n = fr_samples["0"]
@@ -101,6 +80,44 @@ def neutral_data(fr_samples: Dict, min_ntr: int, percentile1: list, percentile2:
     )
     neutral = {"n": n, "nn": nn}
     return neutral
+
+
+def select_trials_by_percentile(
+    x: np.ndarray, min_ntr: int = 2, mask: np.ndarray = None
+):
+    ntr = x.shape[0]
+    if mask is None:
+        mask = np.full(ntr, True)
+
+    mntr = x[mask].shape[0]
+
+    if mntr < min_ntr:
+        return np.full(ntr, True)
+    mean_trs = np.mean(x, axis=1)
+
+    q25, q75 = np.percentile(mean_trs[mask], [25, 75])
+    iqr = q75 - q25
+    upper_limit = q75 + 1.5 * iqr
+    lower_limit = q25 - 1.5 * iqr
+
+    q1mask = mean_trs > lower_limit
+    q2mask = mean_trs < upper_limit
+
+    qmask = np.logical_and(q1mask, q2mask)
+    return qmask
+
+
+def check_trials(x, min_ntr, cerotr, percentile):
+    masknocero = np.full(x.shape[0], True)
+    maskper = np.full(x.shape[0], True)
+    if cerotr:
+        masknocero = np.sum(x, axis=1) != 0
+    if percentile:
+        maskper = select_trials_by_percentile(x, min_ntr, masknocero)
+    mask = np.logical_and(masknocero, maskper)
+    if np.sum(mask) < min_ntr:
+        mask = np.full(x.shape[0], True)
+    return mask
 
 
 def preproc_for_decoding(
@@ -121,8 +138,8 @@ def preproc_for_decoding(
     zscore=True,
     no_match=False,
     return_id=False,
-    percentile1: list = None,
-    percentile2: list = None,
+    percentile: list = False,
+    cerotr: list = False,
 ):
     # Average fr across time
     idx_start_sample = int((getattr(neu, time_before_son) + start_sample) / step)
@@ -152,6 +169,7 @@ def preproc_for_decoding(
         sample_id = sample_id[mask_no_match]
     if len(fr) < 2:
         return None
+
     if zscore:
         fr_std = np.std(fr, ddof=1, axis=0)
         fr_std = np.where(fr_std == 0, 1, fr_std)
@@ -159,15 +177,20 @@ def preproc_for_decoding(
 
     fr = np.array(fr, dtype=np.float32)
     fr_samples = select_trials.get_sp_by_sample(fr, sample_id)
+    # check trials fr
+    for isamp in fr_samples.keys():
+        if ~np.all((np.isnan(fr_samples[isamp]))):
+            masktr = check_trials(fr_samples[isamp], min_ntr, cerotr, percentile)
+            fr_samples[isamp] = fr_samples[isamp][masktr]
 
     if to_decode == "color":
-        data = color_data(fr_samples, min_ntr, percentile1, percentile2)
+        data = color_data(fr_samples, min_ntr)
     elif to_decode == "orient":
-        data = orient_data(fr_samples, min_ntr, percentile1, percentile2)
+        data = orient_data(fr_samples, min_ntr)
     elif to_decode == "sampleid":
-        data = sampleid_data(fr_samples, min_ntr, percentile1, percentile2)
+        data = sampleid_data(fr_samples, min_ntr)
     elif to_decode == "neutral":
-        data = neutral_data(fr_samples, min_ntr, percentile1, percentile2)
+        data = neutral_data(fr_samples, min_ntr)
     else:
         raise ValueError(
             f"to_decode must be 'color' 'orient' 'sampleid' or 'neutral' but {to_decode} was given"
