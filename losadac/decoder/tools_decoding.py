@@ -170,18 +170,22 @@ def preproc_for_decoding(
     if len(fr) < 2:
         return None
 
-    if zscore:
-        fr_std = np.std(fr, ddof=1, axis=0)
-        fr_std = np.where(fr_std == 0, 1, fr_std)
-        fr = (fr - np.mean(fr, axis=0).reshape(1, -1)) / fr_std.reshape(1, -1)
-
     fr = np.array(fr, dtype=np.float32)
     fr_samples = select_trials.get_sp_by_sample(fr, sample_id)
     # check trials fr
+    fr_new = []
     for isamp in fr_samples.keys():
         if ~np.all((np.isnan(fr_samples[isamp]))):
             masktr = check_trials(fr_samples[isamp], min_ntr, cerotr, percentile)
             fr_samples[isamp] = fr_samples[isamp][masktr]
+            fr_new.append(fr_samples[isamp])
+    fr_new = np.concatenate(fr_new, axis=0)
+    if zscore:
+        fr_std = np.std(fr_new, ddof=1, axis=0)
+        fr_std = np.where(fr_std == 0, 1, fr_std)
+        fr_mean = np.mean(fr_new, axis=0).reshape(1, -1)
+        for isamp in fr_samples.keys():
+            fr_samples[isamp] = (fr_samples[isamp] - fr_mean) / fr_std.reshape(1, -1)
 
     if to_decode == "color":
         data = color_data(fr_samples, min_ntr)
