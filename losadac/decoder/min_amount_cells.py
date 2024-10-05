@@ -34,7 +34,7 @@ itinfo = {
 }
 
 
-for to_decode in ["neutral"]:
+for to_decode in ["sampleid"]:
     for area in ["lip", "pfc", "v4"]:
         path = f"percentile_with_nonzero/{area}/{svc_c}/{to_decode}"
 
