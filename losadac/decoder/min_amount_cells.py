@@ -35,7 +35,7 @@ itinfo = {
 
 
 for to_decode in ["sampleid"]:
-    for area in ["lip", "pfc", "v4"]:
+    for area in ["pfc", "v4"]:
         path = f"percentile_with_nonzero/{area}/{svc_c}/{to_decode}"
 
         if not os.path.exists(path):
