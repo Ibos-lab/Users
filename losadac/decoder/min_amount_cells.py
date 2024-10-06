@@ -29,7 +29,7 @@ svc_c = 0.001
 
 itinfo = {
     "lip": {"step": 10, "maxit": 350},  # 210
-    "pfc": {"step": 30, "maxit": 1900},  # 1700
+    "pfc": {"step": 60, "maxit": 1900},  # 1700
     "v4": {"step": 30, "maxit": 1800},  # 1500
 }
 
