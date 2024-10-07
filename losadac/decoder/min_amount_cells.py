@@ -34,8 +34,8 @@ itinfo = {
 }
 
 
-for to_decode in ["sampleid"]:
-    for area in ["pfc", "v4"]:
+for to_decode in ["sampleid", "neutral", "orient", "color"]:
+    for area in ["lip", "pfc", "v4"]:
         path = f"percentile_with_nonzero/{area}/{svc_c}/{to_decode}"
 
         if not os.path.exists(path):
@@ -107,8 +107,8 @@ for to_decode in ["sampleid"]:
             / args["preprocessing"]["step"]
         )
 
-        list_it = np.arange(0, itinfo[area]["maxit"], itinfo[area]["step"])
-        for i, _ in enumerate(list_it):
+        list_it = np.arange(5)  # (0, itinfo[area]["maxit"], itinfo[area]["step"])
+        for _ in list_it:
             seeds = rng.choice(np.arange(0, 3000), size=niterations, replace=False)
             results = Parallel(n_jobs=-1)(
                 delayed(tools_decoding.run_decoder)(
