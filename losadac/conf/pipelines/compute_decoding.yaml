@@ -6,7 +6,7 @@ output_path: ${pipelines.name}/percentile_with_nonzero/300_cells/${now:%Y_%m_%d_
 paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
 preprocessing:
-  to_decode: "orient"
+  to_decode: "sampleid"
   min_ntr: 25
   start_sample: -200
   end_sample: 850
@@ -28,4 +28,4 @@ decoder:
   ntr_train: 30
   ntr_test: 10
   svc_c: 0.001
-  n_neurons: 300
+  n_neurons:
