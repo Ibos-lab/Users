@@ -1,7 +1,7 @@
 _target_: decoder.__main__.main
 name: "decoding"
 area: "lip"
-output_path: ${pipelines.name}/percentile_with_nonzero/all_cells_in_areas/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}/${pipelines.decoder.svc_c}
+output_path: ${pipelines.name}/percentile_with_nonzero/all_cells_in_areas/no_match/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.preprocessing.to_decode}/${pipelines.area}/${pipelines.decoder.svc_c}
 
 paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
@@ -18,7 +18,7 @@ preprocessing:
   sp_son: ${multiruns.sp_son}
   sp_t1on: ${multiruns.sp_t1on}
   mask_son: ${multiruns.mask_son}
-  no_match: False
+  no_match: True
   avgwin: 100
   zscore: True
   percentile: True
