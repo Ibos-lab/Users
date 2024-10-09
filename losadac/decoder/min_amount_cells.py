@@ -29,13 +29,13 @@ svc_c = 0.001
 
 itinfo = {
     "lip": {"step": 10, "maxit": 350},  # 210
-    "pfc": {"step": 60, "maxit": 1900},  # 1700
+    "pfc": {"step": 30, "maxit": 1900},  # 1700
     "v4": {"step": 30, "maxit": 1800},  # 1500
 }
 
 
-for to_decode in ["sampleid", "neutral", "orient", "color"]:
-    for area in ["lip", "pfc", "v4"]:
+for to_decode in ["neutral", "orient", "color"]:
+    for area in ["pfc"]:
         path = f"percentile_with_nonzero/{area}/{svc_c}/{to_decode}"
 
         if not os.path.exists(path):
