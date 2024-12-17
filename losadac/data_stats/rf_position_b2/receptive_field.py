@@ -4,12 +4,14 @@ from tqdm import tqdm
 from pathlib import Path
 from typing import Dict, List
 from ephysvibe.structures.neuron_data import NeuronData
+from plot_trials import plot_trials
 from scipy import stats
 import pandas as pd
 import glob
+import os
 
 
-def get_v_resp_loc(neu, params, rf_loc=None):
+def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     # Check rf of the neurons
     if rf_loc is not None:
         neu.check_fr_loc(rf_loc)
@@ -49,10 +51,6 @@ def get_v_resp_loc(neu, params, rf_loc=None):
     x_pos_b2 = abs(u_pos[idx, 0]) * np.sign(x_pos_b1)
     y_pos_b2 = abs(u_pos[idx, 1]) * np.sign(y_pos_b1)
     idx_in = np.logical_and(u_pos[:, 0] == x_pos_b2, u_pos[:, 1] == y_pos_b2)
-    # if np.sum(idx_in)==0:
-    #     x_pos = get_aprox_pos(x_pos)
-    #     y_pos = get_aprox_pos(y_pos)
-    #     idx_in = np.logical_and(u_pos[:,0]==x_pos, u_pos[:,1]==y_pos)
     code_in = str(int(u_pos[idx_in][0][2]))
     idx_out = np.logical_and(u_pos[:, 0] == -x_pos_b2, u_pos[:, 1] == -y_pos_b2)
     code_out = str(int(u_pos[idx_out][0][2]))
@@ -110,6 +108,15 @@ def get_v_resp_loc(neu, params, rf_loc=None):
         "op_code": code_out,
         "fr": fr,
     }
+    if plot == True and v_resp_out:
+        path = "./v_resp_out"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        sp, conv = plot_trials.prepare_data_plotb1(
+            neu, rf_stim_loc=["contra", "ipsi"], cerotr=True, percentile=True
+        )
+        fig = neu.plot_sp_b1(sp, conv)
+        fig.savefig(f"{path}/{nid}.jpg", format="jpg")
     return results
 
 
