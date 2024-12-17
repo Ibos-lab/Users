@@ -1,9 +1,10 @@
 defaults:
   - workspace: niolon # vpn_local # 
   - pipelines: compute_receptive_field_b2
+  - _self_
   #- multiruns: in
   #- override hydra/job_logging: disabled
-  # - _self_
+  
 hydra:
   job:
     chdir: True # change dir before calling function
