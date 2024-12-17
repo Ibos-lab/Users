@@ -134,4 +134,4 @@ def run_rf(paths, processing, **kwargs):
     )
 
     df = pd.DataFrame(res)
-    df.to_csv("rf.csv")
+    df.to_csv("rf_b2.csv")
