@@ -57,7 +57,7 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     code_out = str(int(u_pos[idx_out][0][2]))
     # Align spikes to target onset and get trials by code
     align_sp, alig_mask = neu.align_on(
-        select_block=2, event="target_on", time_before=200, error_type=0
+        select_block=2, event="target_on", time_before=400, error_type=0
     )
     pos_code = neu.pos_code[alig_mask]
     sp_pos = {}
