@@ -4,7 +4,8 @@ from tqdm import tqdm
 from pathlib import Path
 from typing import Dict, List
 from ephysvibe.structures.neuron_data import NeuronData
-from plot_trials import plot_trials
+from ephysvibe.plot_trials import plot_trials
+from ephysvibe.trials.spikes import firing_rate
 from scipy import stats
 import pandas as pd
 import glob
@@ -60,9 +61,20 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     )
     pos_code = neu.pos_code[alig_mask]
     sp_pos = {}
+    conv_pos = {}
+    v_resp = {}
+    conv_all, n_trials = [], []
     for code in np.unique(pos_code):
         code_mask = pos_code == code
-        sp_pos[str(int(code))] = align_sp[code_mask]
+        sp_pos[str(int(code))] = align_sp[code_mask][:, 200:1900]
+        mean_fr = np.mean(align_sp[code_mask], axis=0)[:2100]
+        conv_fr = firing_rate.convolve_signal(mean_fr, axis=0)[200:1900]
+        conv_pos[str(int(code))] = conv_fr
+        conv_all.append(np.max(conv_fr))
+        n_trials.append(align_sp[code_mask].shape[0])
+
+    max_n_tr = np.max(n_trials)
+    conv_max = np.max(conv_all)
     # Compute t-test comparing baseline with target presentation (in vs opposite loc)
     sp = sp_pos[code_in]
     sp_op = sp_pos[code_out]
@@ -89,12 +101,14 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     p_op = p_op[1] < 0.05
     v_resp_out = True
     # check loc of rf in b1
+    inout = 1
     if p == False and p_op == False:
         v_resp_out = False
     elif np.all(neu.rf_loc[b1_mask] == neu.pos_code[b1_mask]):
         if p and p_op == False:
             v_resp_out = False
     else:
+        inout = -1
         if p_op and p == False:
             v_resp_out = False
     results = {
@@ -108,15 +122,30 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
         "op_code": code_out,
         "fr": fr,
     }
-    if plot == True and v_resp_out:
-        path = "./v_resp_out"
-        if not os.path.exists(path):
-            os.makedirs(path)
+    if plot == True:
         sp, conv = plot_trials.prepare_data_plotb1(
             neu, rf_stim_loc=["contra", "ipsi"], cerotr=True, percentile=True
         )
-        fig = neu.plot_sp_b1(sp, conv)
-        fig.savefig(f"{path}/{nid}.jpg", format="jpg")
+        figb1 = neu.plot_sp_b1(sp, conv)
+        figb2 = neu.plot_sp_b2(
+            sp_pos, conv_pos, max_n_tr, conv_max, visual_rf=True, inout=inout
+        )
+        if v_resp_out:
+            path1 = "./v_resp_out/b1"
+            path2 = "./v_resp_out/b2"
+        elif v_resp_out == False:
+            path1 = "./v_resp_in/b1"
+            path2 = "./v_resp_in/b2"
+        else:
+            path1 = "./nan/b1"
+            path2 = "./nan/b2"
+        if not os.path.exists(path1):
+            os.makedirs(path1)
+        if not os.path.exists(path2):
+            os.makedirs(path2)
+        figb1.savefig(f"{path1}/{nid}.jpg", format="jpg")
+        figb2.savefig(f"{path2}/{nid}.jpg", format="jpg")
+
     return results
 
 
