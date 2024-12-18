@@ -139,10 +139,10 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
         else:
             path1 = "./nan/b1"
             path2 = "./nan/b2"
-        if not os.path.exists(path1):
-            os.makedirs(path1)
-        if not os.path.exists(path2):
-            os.makedirs(path2)
+        # if not os.path.exists(path1):
+        #     os.makedirs(path1)
+        # if not os.path.exists(path2):
+        #     os.makedirs(path2)
         figb1.savefig(f"{path1}/{nid}.jpg", format="jpg")
         figb2.savefig(f"{path2}/{nid}.jpg", format="jpg")
 
@@ -164,7 +164,17 @@ def run_rf(paths, processing, **kwargs):
     rf_loc = None
     if paths["input_rf_loc"] is not None:
         rf_loc = pd.read_csv(paths["input_rf_loc"])
-
+    listpaths = [
+        "./v_resp_out/b1",
+        "./v_resp_out/b2",
+        "./v_resp_in/b1",
+        "./v_resp_in/b2",
+        "./nan/b1",
+        "./nan/b2",
+    ]
+    for path in listpaths:
+        if not os.path.exists(path):
+            os.makedirs(path)
     res = Parallel(n_jobs=-1)(
         delayed(read_and_compute)(path, params, rf_loc) for path in tqdm(path_list)
     )
