@@ -78,9 +78,11 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     # Compute t-test comparing baseline with target presentation (in vs opposite loc)
     sp = sp_pos[code_in]
     sp_op = sp_pos[code_out]
+    ntrin = sp.shape[0]
+    ntrout = sp.shape[0]
     # Check fr
     fr = np.nanmean(sp[:, :1000]) * 1000
-    if fr < 1:
+    if fr < 1 or ntrin < 5 or ntrout < 5:
         results = {
             "nid": nid,
             "v_resp_out": np.nan,
