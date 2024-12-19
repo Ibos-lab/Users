@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 
-def main(paths: Dict, params, **kwargs):
+def main(paths: Dict, params: Dict, **kwargs):
     print("start plot trials")
     path_list = glob.glob(paths["input"])
 
