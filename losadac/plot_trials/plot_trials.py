@@ -5,6 +5,7 @@ from ephysvibe.spike_sorting import config
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 
 def select_trials_by_percentile(x: np.ndarray, mask: np.ndarray = None):
@@ -241,8 +242,9 @@ def plot_trials(
         fig = neu.plot_sp_b2(
             sp_pos, conv_pos, max_n_tr, conv_max, visual_rf=True, inout=1
         )
+    print(f"Current working directory : {os.getcwd()}")
     fig.savefig(
-        f"./{nid}.{format}",
+        f"{os.getcwd()}/{nid}.{format}",
         format=format,
         bbox_inches="tight",
         transparent=False,
