@@ -10,3 +10,4 @@ params:
   percentile: False
   cerotr: False
   b: 1
+  hydra: True
