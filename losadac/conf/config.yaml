@@ -11,4 +11,4 @@ hydra:
     dir: ${workspace.output_path}/${pipelines.output_path}
   sweep:
     dir: ${workspace.output_path}/${pipelines.output_path}
-    subdir: .
+    subdir: ${hydra.job.override_dirname}
