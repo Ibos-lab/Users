@@ -17,6 +17,7 @@ def main(paths: Dict, params, **kwargs):
             format=params["format"],
             percentile=params["percentile"],
             cerotr=params["cerotr"],
+            b=params["b"],
         )
         for path in tqdm(path_list)
     )
