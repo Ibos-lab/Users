@@ -215,13 +215,14 @@ def plot_trials(
     format: str = "png",
     percentile: bool = False,
     cerotr: bool = False,
-    b=1,
+    b: int = 1,
 ):
 
     neu = NeuronData.from_python_hdf5(neupath)
     nid = neu.get_neuron_id()
     # nid = f"{neu.subject}_{neu.area.upper()}_{neu.date_time}_{neu.cluster_group}{int(neu.cluster_number)}"
     print(nid)
+    print(b)
     if b == 1:
         sp, conv = prepare_data_plotb1(
             neu,
