@@ -5,11 +5,15 @@ from . import plot_trials
 import glob
 from joblib import Parallel, delayed
 from tqdm import tqdm
+import os
+import numpy as np
 
 
 def main(paths: Dict, params: Dict, **kwargs):
     print("start plot trials")
     path_list = glob.glob(paths["input"])
+    np.save("test.py", np.array([0, 9]))
+    print(f"Current working directory : {os.getcwd()}")
 
     Parallel(n_jobs=-1)(
         delayed(plot_trials.plot_trials)(

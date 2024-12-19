@@ -242,7 +242,7 @@ def plot_trials(
         fig = neu.plot_sp_b2(
             sp_pos, conv_pos, max_n_tr, conv_max, visual_rf=True, inout=1
         )
-    print(f"Current working directory : {os.getcwd()}")
+
     fig.savefig(
         f"{os.getcwd()}/{nid}.{format}",
         format=format,
