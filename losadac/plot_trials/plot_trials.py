@@ -196,6 +196,8 @@ def prepare_data_plotb2(neu):
     sp_pos = {}
     conv_pos = {}
     conv_all, n_trials = [], []
+    max_n_tr = 0
+    conv_max = 0
     for code in np.unique(pos_code):
         code_mask = pos_code == code
         sp_pos[str(int(code))] = align_sp[code_mask][:, 200:1900]
@@ -205,8 +207,9 @@ def prepare_data_plotb2(neu):
         conv_all.append(np.max(conv_fr))
         n_trials.append(align_sp[code_mask].shape[0])
 
-    max_n_tr = np.max(n_trials)
-    conv_max = np.max(conv_all)
+    if len(n_trials) > 0:
+        max_n_tr = np.max(n_trials)
+        conv_max = np.max(conv_all)
     return sp_pos, conv_pos, max_n_tr, conv_max
 
 
