@@ -62,7 +62,6 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     pos_code = neu.pos_code[alig_mask]
     sp_pos = {}
     conv_pos = {}
-    v_resp = {}
     conv_all, n_trials = [], []
     for code in np.unique(pos_code):
         code_mask = pos_code == code

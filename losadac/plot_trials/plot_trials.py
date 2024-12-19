@@ -188,22 +188,55 @@ def prepare_data_plotb1(
     return sp, conv
 
 
+def prepare_data_plotb2(neu):
+    align_sp, alig_mask = neu.align_on(
+        select_block=2, event="target_on", time_before=400, error_type=0
+    )
+    pos_code = neu.pos_code[alig_mask]
+    sp_pos = {}
+    conv_pos = {}
+    conv_all, n_trials = [], []
+    for code in np.unique(pos_code):
+        code_mask = pos_code == code
+        sp_pos[str(int(code))] = align_sp[code_mask][:, 200:1900]
+        mean_fr = np.mean(align_sp[code_mask], axis=0)[:2100]
+        conv_fr = firing_rate.convolve_signal(mean_fr, axis=0)[200:1900]
+        conv_pos[str(int(code))] = conv_fr
+        conv_all.append(np.max(conv_fr))
+        n_trials.append(align_sp[code_mask].shape[0])
+
+    max_n_tr = np.max(n_trials)
+    conv_max = np.max(conv_all)
+    return sp_pos, conv_pos, max_n_tr, conv_max
+
+
 def plot_trials(
-    neupath: Path, format: str = "png", percentile: bool = False, cerotr: bool = False
+    neupath: Path,
+    format: str = "png",
+    percentile: bool = False,
+    cerotr: bool = False,
+    b=1,
 ):
 
     neu = NeuronData.from_python_hdf5(neupath)
-    # nid = neu.get_neuron_id()
-    nid = f"{neu.subject}_{neu.area.upper()}_{neu.date_time}_{neu.cluster_group}{int(neu.cluster_number)}"
+    nid = neu.get_neuron_id()
+    # nid = f"{neu.subject}_{neu.area.upper()}_{neu.date_time}_{neu.cluster_group}{int(neu.cluster_number)}"
     print(nid)
-    sp, conv = prepare_data_plotb1(
-        neu,
-        rf_stim_loc=["contra", "ipsi"],
-        percentile=percentile,
-        cerotr=cerotr,
-    )
+    if b == 1:
+        sp, conv = prepare_data_plotb1(
+            neu,
+            rf_stim_loc=["contra", "ipsi"],
+            percentile=percentile,
+            cerotr=cerotr,
+        )
 
-    fig = neu.plot_sp_b1(sp, conv)
+        fig = neu.plot_sp_b1(sp, conv)
+
+    elif b == 2:
+        sp_pos, conv_pos, max_n_tr, conv_max = prepare_data_plotb2(neu)
+        fig = neu.plot_sp_b2(
+            sp_pos, conv_pos, max_n_tr, conv_max, visual_rf=True, inout=1
+        )
     fig.savefig(
         f"./{nid}.{format}",
         format=format,
