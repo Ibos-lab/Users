@@ -8,7 +8,7 @@ hydra:
   job:
     chdir: True # change dir before calling function
   run:
-    dir: ${workspace.output_path}/${pipelines.output_path}/b${pipelines.params.b}/${pipelines.area}/
+    dir: ${workspace.output_path}/${pipelines.output_path}
   sweep:
-    dir: ${workspace.output_path}/${pipelines.output_path}/b${pipelines.params.b}/${pipelines.area}/
-    subdir: .
+    dir: ${workspace.output_path}/${pipelines.output_path}
+    subdir: ./
