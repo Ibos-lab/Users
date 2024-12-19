@@ -1,7 +1,7 @@
 _target_: plot_trials.__main__.main
 name: "plot_trials"
 area: "lip"
-output_path: ${pipelines.name}/all_trials/${now:%Y_%m_%d_%H_%M_%S}/b${b}/${pipelines.area}/
+output_path: ${pipelines.name}/all_trials/${now:%Y_%m_%d_%H_%M_%S}/
 
 paths:
   input: "${workspace.data_path}/new_structure/session_struct/${pipelines.area}/neurons/*neu.h5"
