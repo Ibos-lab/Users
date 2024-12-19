@@ -6,9 +6,9 @@ defaults:
   - _self_
 hydra:
   job:
-    chdir: False # change dir before calling function
+    chdir: True # change dir before calling function
   run:
     dir: ${workspace.output_path}/${pipelines.output_path}
   sweep:
     dir: ${workspace.output_path}/${pipelines.output_path}
-    subdir: .
+    subdir: ${hydra.job.override_dirname} #.
