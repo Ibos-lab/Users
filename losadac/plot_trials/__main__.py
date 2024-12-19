@@ -12,9 +12,12 @@ import numpy as np
 def main(paths: Dict, params: Dict, **kwargs):
     print("start plot trials")
     path_list = glob.glob(paths["input"])
-    np.save("test.py", np.array([0, 9]))
-    print(f"Current working directory : {os.getcwd()}")
-
+    if "hydra" in params and params["hydra"]:
+        output_dir = os.getcwd()
+    elif "output_dir" in params:
+        output_dir = params["output_dir"]
+    else:
+        output_dir = "./"
     Parallel(n_jobs=-1)(
         delayed(plot_trials.plot_trials)(
             neupath=path,
@@ -22,9 +25,11 @@ def main(paths: Dict, params: Dict, **kwargs):
             percentile=params["percentile"],
             cerotr=params["cerotr"],
             b=params["b"],
+            output_dir=output_dir,
         )
         for path in tqdm(path_list)
     )
+    print(f"Current working directory : {os.getcwd()}")
 
 
 if __name__ == "__main__":
