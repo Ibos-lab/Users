@@ -1,4 +1,4 @@
-_target_: plot_trials.__main__.main
+_target_: plot_trials.run_pipeline.plot_trials
 name: "plot_trials"
 area: "lip"
 output_path: ${pipelines.name}/percentile_with_nonzero/${now:%Y_%m_%d_%H_%M_%S}/b${pipelines.params.b}/${pipelines.area}/
