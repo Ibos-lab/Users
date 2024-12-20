@@ -214,7 +214,7 @@ def prepare_data_plotb2(neu):
     return sp_pos, conv_pos, max_n_tr, conv_max
 
 
-def plot_trials(
+def prepare_and_plot(
     neupath: Path,
     format: str = "png",
     percentile: bool = False,

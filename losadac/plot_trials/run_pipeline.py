@@ -1,7 +1,7 @@
 """Execute main function of the module plot_trials."""
 
 from typing import Dict
-from . import plot_trials
+from . import _pipeline
 import glob
 from joblib import Parallel, delayed
 from tqdm import tqdm
@@ -9,7 +9,7 @@ import os
 import numpy as np
 
 
-def main(paths: Dict, params: Dict, **kwargs):
+def plot_trials(paths: Dict, params: Dict, **kwargs):
     print("start plot trials")
     path_list = glob.glob(paths["input"])
     if "hydra" in params and params["hydra"]:
@@ -19,7 +19,7 @@ def main(paths: Dict, params: Dict, **kwargs):
     else:
         output_dir = "./"
     Parallel(n_jobs=-1)(
-        delayed(plot_trials.plot_trials)(
+        delayed(_pipeline.prepare_and_plot)(
             neupath=path,
             format=params["format"],
             percentile=params["percentile"],
@@ -32,5 +32,6 @@ def main(paths: Dict, params: Dict, **kwargs):
     print(f"Current working directory : {os.getcwd()}")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+
+#     main()
