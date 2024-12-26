@@ -1,4 +1,4 @@
-_target_: selectivity.compute_selectivity.__main__
+_target_: selectivity.__main__.main
 name: "selectivity"
 area: "lip"
 output_path: ${pipelines.name}/percentile_with_nonzero/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
