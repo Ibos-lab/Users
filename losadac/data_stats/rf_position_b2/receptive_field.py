@@ -4,7 +4,7 @@ from tqdm import tqdm
 from pathlib import Path
 from typing import Dict, List
 from ephysvibe.structures.neuron_data import NeuronData
-from ephysvibe.plot_trials import plot_trials
+from ephysvibe.dataviz import plot_raster
 from ephysvibe.trials.spikes import firing_rate
 from scipy import stats
 import pandas as pd
@@ -124,12 +124,12 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
         "fr": fr,
     }
     if plot == True:
-        sp, conv = plot_trials.prepare_data_plotb1(
+        sp, conv = plot_raster.prepare_data_plotb1(
             neu, rf_stim_loc=["contra", "ipsi"], cerotr=True, percentile=True
         )
-        figb1 = neu.plot_sp_b1(sp, conv)
-        figb2 = neu.plot_sp_b2(
-            sp_pos, conv_pos, max_n_tr, conv_max, visual_rf=True, inout=inout
+        figb1 = plot_raster.plot_sp_b1(neu, sp, conv)
+        figb2 = plot_raster.plot_sp_b2(
+            neu, sp_pos, conv_pos, max_n_tr, conv_max, visual_rf=True, inout=inout
         )
         if v_resp_out:
             path1 = "./v_resp_out/b1"

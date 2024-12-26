@@ -1,7 +1,7 @@
 _target_: selectivity.__main__.main
 name: "selectivity"
 area: "lip"
-output_path: ${pipelines.name}/nonzero/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
+output_path: ${pipelines.name}/percentile_with_nonzero/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
 
 paths:
   input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
@@ -10,5 +10,5 @@ preprocessing:
   end_sample: 850
   start_test: -400
   end_test: 500
-  percentile: False
+  percentile: True
   cerotr: True
