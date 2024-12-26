@@ -4,8 +4,7 @@ from typing import Dict, List
 from ephysvibe.structures.neuron_data import NeuronData
 from ephysvibe.structures.population_data import PopulationData
 from ephysvibe.structures.results import Results
-from ephysvibe.trials.spikes import firing_rate
-from ephysvibe.trials import align_trials, select_trials
+from ephysvibe.trials import firing_rate, select_trials
 import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
