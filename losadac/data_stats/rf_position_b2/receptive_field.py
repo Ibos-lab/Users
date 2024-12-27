@@ -152,8 +152,8 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
 
 def read_and_compute(path, params, rf_loc=None):
     neu = NeuronData.from_python_hdf5(path)
-    neu = get_v_resp_loc(params=params, neu=neu, rf_loc=rf_loc)
-    return neu
+    res = get_v_resp_loc(params=params, neu=neu, rf_loc=rf_loc)
+    return res
 
 
 def run_rf(paths, processing, **kwargs):

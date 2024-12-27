@@ -61,7 +61,9 @@ def get_selectivity_info(
     percentile: bool,
 ):
     res = {}
-    res["nid"] = neu.get_neuron_id()
+    nid = neu.get_neuron_id()
+    res["nid"] = nid
+    print(nid)
     samples = [11, 15, 51, 55, 0]
     inout_n0_fr = []
     inout_nn_fr = []
