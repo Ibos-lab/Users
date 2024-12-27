@@ -2,11 +2,12 @@
 _target_: data_stats.rf_position_b2.receptive_field.run_rf
 name: "receptive_field_b2"
 area: "pfc"
-output_path: ${pipelines.name}/${pipelines.area}/${now:%Y_%m_%d_%H_%M_%S}/
+output_path: ${pipelines.name}/${pipelines.area}/n_nn_out_selectivity/${now:%Y_%m_%d_%H_%M_%S}/
 
 paths:
   input_files: "${workspace.data_path}/new_structure/session_struct/${pipelines.area}/neurons/"
   input_rf_loc: "${workspace.data_path}/activation_index/rf_loc_df_${pipelines.area}.csv"
+  units_nid: "${workspace.data_path}/selectivity/percentile_with_nonzero/2024_12_26_12_41_59/${pipelines.area}_n_nn_out_selectivity.csv"
 processing:
   pp: 5
 

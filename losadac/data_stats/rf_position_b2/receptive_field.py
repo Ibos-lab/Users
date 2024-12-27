@@ -25,14 +25,14 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     if np.sum(b2_mask) == 0:
         results = {
             "nid": nid,
-            "v_resp_out": np.nan,
-            "x_pos_b2": np.nan,
-            "y_pos_b2": np.nan,
-            "x_pos_b1": np.nan,
-            "y_pos_b1": np.nan,
-            "code": np.nan,
-            "op_code": np.nan,
-            "fr": np.nan,
+            # "v_resp_out": np.nan,
+            # "x_pos_b2": np.nan,
+            # "y_pos_b2": np.nan,
+            # "x_pos_b1": np.nan,
+            # "y_pos_b1": np.nan,
+            # "code": np.nan,
+            # "op_code": np.nan,
+            # "fr": np.nan,
         }
         return results
     # get the screen position of sample in b1 in contralateral trials
@@ -84,13 +84,13 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     if fr < 1 or ntrin < 5 or ntrout < 5:
         results = {
             "nid": nid,
-            "v_resp_out": np.nan,
-            "x_pos_b2": np.nan,
-            "y_pos_b2": np.nan,
-            "x_pos_b1": np.nan,
-            "y_pos_b1": np.nan,
-            "code": np.nan,
-            "op_code": np.nan,
+            # "v_resp_out": np.nan,
+            # "x_pos_b2": np.nan,
+            # "y_pos_b2": np.nan,
+            # "x_pos_b1": np.nan,
+            # "y_pos_b1": np.nan,
+            # "code": np.nan,
+            # "op_code": np.nan,
             "fr": fr,
         }
         return results
@@ -150,8 +150,10 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     return results
 
 
-def read_and_compute(path, params, rf_loc=None):
+def read_and_compute(path, params, rf_loc=None, units_nid=None):
     neu = NeuronData.from_python_hdf5(path)
+    if units_nid is not None and neu.get_neuron_id() not in units_nid:
+        return {}
     res = get_v_resp_loc(params=params, neu=neu, rf_loc=rf_loc)
     return res
 
@@ -163,8 +165,12 @@ def run_rf(paths, processing, **kwargs):
     neu_path = paths["input_files"] + "*neu.h5"
     path_list = glob.glob(neu_path)
     rf_loc = None
+    units_nid = None
     if paths["input_rf_loc"] is not None:
         rf_loc = pd.read_csv(paths["input_rf_loc"])
+    if paths["units_nid"] is not None:
+        units_nid = pd.read_csv(paths["units_nid"])
+        units_nid = units_nid["nid"].values
     listpaths = [
         "./v_resp_out/b1",
         "./v_resp_out/b2",
@@ -177,7 +183,8 @@ def run_rf(paths, processing, **kwargs):
         if not os.path.exists(path):
             os.makedirs(path)
     res = Parallel(n_jobs=-1)(
-        delayed(read_and_compute)(path, params, rf_loc) for path in tqdm(path_list)
+        delayed(read_and_compute)(path, params, rf_loc, units_nid)
+        for path in tqdm(path_list)
     )
 
     df = pd.DataFrame(res)
