@@ -13,7 +13,10 @@ import glob
 import os
 
 
-def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
+def get_v_resp_loc(
+    neu, bl_st=0, bl_end=200, tg_st=200, tg_end=400, rf_loc=None, plot=True
+):
+
     # Check rf of the neurons
     if rf_loc is not None:
         neu.check_fr_loc(rf_loc)
@@ -26,14 +29,6 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     if np.sum(b2_mask) == 0:
         results = {
             "nid": nid,
-            # "v_resp_out": np.nan,
-            # "x_pos_b2": np.nan,
-            # "y_pos_b2": np.nan,
-            # "x_pos_b1": np.nan,
-            # "y_pos_b1": np.nan,
-            # "code": np.nan,
-            # "op_code": np.nan,
-            # "fr": np.nan,
         }
         return results
     # get the screen position of sample in b1 in contralateral trials
@@ -85,22 +80,15 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     if fr < 1 or ntrin < 5 or ntrout < 5:
         results = {
             "nid": nid,
-            # "v_resp_out": np.nan,
-            # "x_pos_b2": np.nan,
-            # "y_pos_b2": np.nan,
-            # "x_pos_b1": np.nan,
-            # "y_pos_b1": np.nan,
-            # "code": np.nan,
-            # "op_code": np.nan,
             "fr": fr,
         }
         return results
     p = stats.ttest_rel(
-        np.mean(sp[:, 100:200], axis=1), np.mean(sp[:, 250:400], axis=1)
+        np.mean(sp[:, bl_st:bl_end], axis=1), np.mean(sp[:, tg_st:tg_end], axis=1)
     )
     p = p[1] < 0.05
     p_op = stats.ttest_rel(
-        np.mean(sp_op[:, 100:200], axis=1), np.mean(sp_op[:, 250:400], axis=1)
+        np.mean(sp_op[:, bl_st:bl_end], axis=1), np.mean(sp_op[:, tg_st:tg_end], axis=1)
     )
     p_op = p_op[1] < 0.05
     v_resp_out = True
@@ -132,7 +120,17 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
         )
         figb1 = plot_raster.plot_sp_b1(neu, sp, conv)
         figb2 = plot_raster.plot_sp_b2(
-            neu, sp_pos, conv_pos, max_n_tr, conv_max, visual_rf=True, inout=inout
+            neu,
+            sp_pos,
+            conv_pos,
+            max_n_tr,
+            conv_max,
+            visual_rf=True,
+            inout=inout,
+            bl_st=bl_st,
+            bl_end=bl_end,
+            tg_st=tg_st,
+            tg_end=tg_end,
         )
         if v_resp_out:
             path1 = "./v_resp_out/b1"
@@ -154,18 +152,16 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
     return results
 
 
-def read_and_compute(path, params, rf_loc=None, units_nid=None):
+def read_and_compute(path, processing, rf_loc=None, units_nid=None):
     neu = NeuronData.from_python_hdf5(path)
     if units_nid is not None and neu.get_neuron_id() not in units_nid:
         return {}
-    res = get_v_resp_loc(params=params, neu=neu, rf_loc=rf_loc)
+    res = get_v_resp_loc(**processing, neu=neu, rf_loc=rf_loc)
     return res
 
 
 def run_rf(paths, processing, **kwargs):
-    params = []
-    for idict in processing:
-        params.append(processing[idict])
+
     neu_path = paths["input_files"] + "*neu.h5"
     path_list = glob.glob(neu_path)
     rf_loc = None
@@ -187,7 +183,7 @@ def run_rf(paths, processing, **kwargs):
         if not os.path.exists(path):
             os.makedirs(path)
     res = Parallel(n_jobs=-1)(
-        delayed(read_and_compute)(path, params, rf_loc, units_nid)
+        delayed(read_and_compute)(path, processing, rf_loc, units_nid)
         for path in tqdm(path_list)
     )
 

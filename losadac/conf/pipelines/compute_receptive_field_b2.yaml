@@ -9,5 +9,8 @@ paths:
   input_rf_loc: "${workspace.data_path}/activation_index/rf_loc_df_${pipelines.area}.csv"
   units_nid: "${workspace.data_path}/selectivity/percentile_with_nonzero/2024_12_26_12_41_59/${pipelines.area}_n_nn_out_selectivity.csv"
 processing:
-  pp: 5
+  bl_st: 100
+  bl_end: 200
+  tg_st: 250
+  tg_end: 350
 
