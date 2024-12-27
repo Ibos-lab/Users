@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 from tqdm import tqdm
 from pathlib import Path
@@ -94,10 +95,12 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
             "fr": fr,
         }
         return results
-    p = stats.ttest_rel(np.mean(sp[:, :200], axis=1), np.mean(sp[:, 200:400], axis=1))
+    p = stats.ttest_rel(
+        np.mean(sp[:, 100:200], axis=1), np.mean(sp[:, 250:400], axis=1)
+    )
     p = p[1] < 0.05
     p_op = stats.ttest_rel(
-        np.mean(sp_op[:, :200], axis=1), np.mean(sp_op[:, 200:400], axis=1)
+        np.mean(sp_op[:, 100:200], axis=1), np.mean(sp_op[:, 250:400], axis=1)
     )
     p_op = p_op[1] < 0.05
     v_resp_out = True
@@ -146,6 +149,7 @@ def get_v_resp_loc(neu, params, rf_loc=None, plot=True):
         #     os.makedirs(path2)
         figb1.savefig(f"{path1}/{nid}.jpg", format="jpg")
         figb2.savefig(f"{path2}/{nid}.jpg", format="jpg")
+        plt.close()
 
     return results
 
