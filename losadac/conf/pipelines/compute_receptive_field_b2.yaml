@@ -2,7 +2,7 @@
 _target_: data_stats.rf_position_b2.receptive_field.run_rf
 name: "receptive_field_b2"
 area: "pfc"
-output_path: ${pipelines.name}/${pipelines.area}/n_nn_out_selectivity/${now:%Y_%m_%d_%H_%M_%S}/
+output_path: ${pipelines.name}/n_nn_out_selectivity/${pipelines.area}/${now:%Y_%m_%d_%H_%M_%S}/
 
 paths:
   input_files: "${workspace.data_path}/new_structure/session_struct/${pipelines.area}/neurons/"

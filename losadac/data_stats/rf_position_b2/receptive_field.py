@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, List
 from ephysvibe.structures.neuron_data import NeuronData
 from ephysvibe.dataviz import plot_raster
-from ephysvibe.trials.spikes import firing_rate
+from ephysvibe.trials import firing_rate
 from scipy import stats
 import pandas as pd
 import glob
