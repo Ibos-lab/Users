@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import glob
 from ephysvibe.trials import align_trials
-from ephysvibe.trials.spikes import firing_rate
+from ephysvibe.trials import firing_rate
 import platform
 from joblib import Parallel, delayed
 from tqdm import tqdm
