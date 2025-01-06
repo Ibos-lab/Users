@@ -5,7 +5,7 @@ output_path: ${pipelines.name}/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
 
 paths:
   input: "${workspace.data_path}/population/in_out_b1_b2/2025_01_03_12_05_07/${pipelines.area}/population.h5"
-preprocessing:
+params:
   start_sample: 0
   end_sample: 400
   st_target: 0
