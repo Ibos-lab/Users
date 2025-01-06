@@ -18,6 +18,7 @@ def check_trials(x, cerotr, percentile):
 
 
 def compute_roc_neutral(sp_son, sample_id, idx_start, idx_end, cerotr, percentile):
+    roc_neutral = np.nan
     fr_son = firing_rate.moving_average(data=sp_son, win=100, step=1)[
         :, idx_start:idx_end
     ]
@@ -32,9 +33,13 @@ def compute_roc_neutral(sp_son, sample_id, idx_start, idx_end, cerotr, percentil
     sample = np.concatenate(
         (fr_samples["11"], fr_samples["15"], fr_samples["51"], fr_samples["55"])
     )
+    if sample.shape[0] < 10:
+        return roc_neutral
     n0 = fr_samples["0"]
     if np.all(np.isnan(n0)):
-        return np.nan
+        return roc_neutral
+    if n0.shape[0] < 10:
+        return roc_neutral
     # Check selectivity and latency
     _, neutral_score, neutral_p = smetrics.get_selectivity(
         sample, n0, win=75, scores=True, sacale=False
