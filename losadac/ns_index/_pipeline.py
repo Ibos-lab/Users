@@ -76,7 +76,7 @@ def get_screen_pos_b1b2(pos_b1, pos_b2, poscode_b2):
                 pos_code_b2.append(true_code_pos)
             else:
                 pos_code_b2.append(u_pos_b2[u_pos_b2[:, 2] == ic][0])
-        pos_code_b2 = np.array(pos_code_b2)
+        u_pos_b2 = np.array(pos_code_b2)
 
     # Find the closest screen position to b1 in b2
     diff = abs(u_pos_b2[:, :2] - np.array([x_pos_b1, y_pos_b1]))
