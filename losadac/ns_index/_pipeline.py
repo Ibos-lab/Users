@@ -56,6 +56,18 @@ def compute_roc_neutral(sp_son, sample_id, idx_start, idx_end, cerotr, percentil
 
 
 def get_screen_pos_b1b2(pos_b1, pos_b2, poscode_b2):
+    code_op = np.array(
+        [
+            [124, 120.0],
+            [125, 121.0],
+            [126, 122.0],
+            [127, 123.0],
+            [120, 124.0],
+            [121, 125.0],
+            [122, 126.0],
+            [123, 127.0],
+        ]
+    )
     # get the screen position of sample in b1 in contralateral trials
     u_pos_b1, u_count = np.unique(pos_b1, axis=0, return_counts=True)
     imax = np.argmax(u_count)
@@ -85,8 +97,10 @@ def get_screen_pos_b1b2(pos_b1, pos_b2, poscode_b2):
     y_pos_b2 = u_pos_b2[idx, 1]  # * np.sign(y_pos_b1)
     idx_in = np.logical_and(u_pos_b2[:, 0] == x_pos_b2, u_pos_b2[:, 1] == y_pos_b2)
     code_in = int(u_pos_b2[idx_in][0][2])
-    idx_out = np.logical_and(u_pos_b2[:, 0] == -x_pos_b2, u_pos_b2[:, 1] == -y_pos_b2)
-    code_out = int(u_pos_b2[idx_out][0][2])
+    # idx_out = np.logical_and(u_pos_b2[:, 0] == -x_pos_b2, u_pos_b2[:, 1] == -y_pos_b2)
+    # code_out = int(u_pos_b2[idx_out][0][2])
+    idx_out = np.where(code_in == code_op[:, 0])[0]
+    code_out = code_op[idx_out, 1]
     return code_in, code_out
 
 
