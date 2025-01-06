@@ -62,12 +62,27 @@ def get_screen_pos_b1b2(pos_b1, pos_b2, poscode_b2):
     x_pos_b1, y_pos_b1 = u_pos_b1[imax][0][0], u_pos_b1[imax][0][1]
     # Concatenate and get unique position and code during b2 trials
     pos_and_code_b2 = np.concatenate([pos_b2[:, 0], poscode_b2.reshape(-1, 1)], axis=1)
-    u_pos_b2 = np.unique(pos_and_code_b2, axis=0)
+    u_pos_b2, u_count_b2 = np.unique(pos_and_code_b2, axis=0, return_counts=True)
+    # check if repeated code
+    pos_code_b2 = []
+    if u_pos_b2.shape[0] > 8:
+        ucodes, code_count = np.unique(u_pos_b2[:, 2], return_counts=True)
+        idx_codes_r = np.where(code_count > 1)[0]
+        for ic in ucodes:
+            if ic in ucodes[idx_codes_r]:
+                idxallcodes = np.where(u_pos_b2[:, 2] == ic)[0]
+                imax = np.argmax(u_count_b2[idxallcodes])
+                true_code_pos = u_pos_b2[idxallcodes[imax]]
+                pos_code_b2.append(true_code_pos)
+            else:
+                pos_code_b2.append(u_pos_b2[u_pos_b2[:, 2] == ic][0])
+        pos_code_b2 = np.array(pos_code_b2)
+
     # Find the closest screen position to b1 in b2
     diff = abs(u_pos_b2[:, :2] - np.array([x_pos_b1, y_pos_b1]))
     idx = np.argmin(np.sum(diff, axis=1))
-    x_pos_b2 = abs(u_pos_b2[idx, 0]) * np.sign(x_pos_b1)
-    y_pos_b2 = abs(u_pos_b2[idx, 1]) * np.sign(y_pos_b1)
+    x_pos_b2 = u_pos_b2[idx, 0]  # * np.sign(x_pos_b1)
+    y_pos_b2 = u_pos_b2[idx, 1]  # * np.sign(y_pos_b1)
     idx_in = np.logical_and(u_pos_b2[:, 0] == x_pos_b2, u_pos_b2[:, 1] == y_pos_b2)
     code_in = int(u_pos_b2[idx_in][0][2])
     idx_out = np.logical_and(u_pos_b2[:, 0] == -x_pos_b2, u_pos_b2[:, 1] == -y_pos_b2)
