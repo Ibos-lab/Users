@@ -1,6 +1,6 @@
 defaults:
   - workspace: niolon # vpn_local # 
-  - pipelines: compute_population
+  - pipelines: compute_ns_idx
   #- multiruns: in
   - override hydra/job_logging: disabled
   - _self_
