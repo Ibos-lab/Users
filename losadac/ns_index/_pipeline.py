@@ -141,6 +141,7 @@ def get_space_neutral_roc(
     # check b2
     if np.sum(b2_mask) == 0:
         print("no block 2 trials")  # return results
+        return res
     pos_b1 = neu.position[b1in_mask]
     pos_b2 = neu.position[b2_mask]
     poscode_b2 = neu.pos_code[b2_mask]
@@ -156,3 +157,4 @@ def get_space_neutral_roc(
             sp_pos, ist_tg, iend_tg, ist_bl, iend_bl, cerotr, percentile
         )
         res["space_" + in_out] = roc_spatial
+    return res
