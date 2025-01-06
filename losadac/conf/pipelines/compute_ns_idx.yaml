@@ -1,4 +1,4 @@
-_target_: ns_idx.run_pipeline.compute_ns_roc
+_target_: ns_index.run_pipeline.compute_ns_roc
 name: "neutral_space_idx"
 area: "pfc"
 output_path: ${pipelines.name}/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
