@@ -57,21 +57,21 @@ def compute_roc_neutral(sp_son, sample_id, idx_start, idx_end, cerotr, percentil
 
 def get_screen_pos_b1b2(pos_b1, pos_b2, poscode_b2):
     # get the screen position of sample in b1 in contralateral trials
-    u_pos, u_count = np.unique(pos_b1, axis=0, return_counts=True)
+    u_pos_b1, u_count = np.unique(pos_b1, axis=0, return_counts=True)
     imax = np.argmax(u_count)
-    x_pos_b1, y_pos_b1 = u_pos[imax][0][0], u_pos[imax][0][1]
+    x_pos_b1, y_pos_b1 = u_pos_b1[imax][0][0], u_pos_b1[imax][0][1]
     # Concatenate and get unique position and code during b2 trials
-    pos_and_code = np.concatenate([pos_b2[:, 0], poscode_b2.reshape(-1, 1)], axis=1)
-    u_pos = np.unique(pos_and_code, axis=0)
+    pos_and_code_b2 = np.concatenate([pos_b2[:, 0], poscode_b2.reshape(-1, 1)], axis=1)
+    u_pos_b2 = np.unique(pos_and_code_b2, axis=0)
     # Find the closest screen position to b1 in b2
-    diff = abs(abs(u_pos[:, :2]) - abs(np.array([x_pos_b1, y_pos_b1])))
+    diff = abs(abs(u_pos_b2[:, :2]) - abs(np.array([x_pos_b1, y_pos_b1])))
     idx = np.argmin(np.sum(diff, axis=1))
-    x_pos_b2 = abs(u_pos[idx, 0]) * np.sign(x_pos_b1)
-    y_pos_b2 = abs(u_pos[idx, 1]) * np.sign(y_pos_b1)
-    idx_in = np.logical_and(u_pos[:, 0] == x_pos_b2, u_pos[:, 1] == y_pos_b2)
-    code_in = int(u_pos[idx_in][0][2])
-    idx_out = np.logical_and(u_pos[:, 0] == -x_pos_b2, u_pos[:, 1] == -y_pos_b2)
-    code_out = int(u_pos[idx_out][0][2])
+    x_pos_b2 = abs(u_pos_b2[idx, 0]) * np.sign(x_pos_b1)
+    y_pos_b2 = abs(u_pos_b2[idx, 1]) * np.sign(y_pos_b1)
+    idx_in = np.logical_and(u_pos_b2[:, 0] == x_pos_b2, u_pos_b2[:, 1] == y_pos_b2)
+    code_in = int(u_pos_b2[idx_in][0][2])
+    idx_out = np.logical_and(u_pos_b2[:, 0] == -x_pos_b2, u_pos_b2[:, 1] == -y_pos_b2)
+    code_out = int(u_pos_b2[idx_out][0][2])
     return code_in, code_out
 
 
