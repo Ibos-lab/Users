@@ -17,7 +17,9 @@ def check_trials(x, cerotr, percentile):
     return mask
 
 
-def compute_roc_neutral(sp_son, sample_id, idx_start, idx_end, cerotr, percentile):
+def compute_roc_neutral(
+    sp_son, sample_id, idx_start, idx_end, cerotr, percentile, inout, lat_in=np.nan
+):
     roc_neutral = np.nan
     fr_son = firing_rate.moving_average(data=sp_son, win=100, step=1)[
         :, idx_start:idx_end
@@ -34,25 +36,31 @@ def compute_roc_neutral(sp_son, sample_id, idx_start, idx_end, cerotr, percentil
         (fr_samples["11"], fr_samples["15"], fr_samples["51"], fr_samples["55"])
     )
     if sample.shape[0] < 10:
-        return roc_neutral
+        return roc_neutral, lat
     n0 = fr_samples["0"]
     if np.all(np.isnan(n0)):
-        return roc_neutral
+        return roc_neutral, lat
     if n0.shape[0] < 10:
-        return roc_neutral
+        return roc_neutral, lat
     # Check selectivity and latency
-    _, neutral_score, neutral_p = smetrics.get_selectivity(
+    lat, neutral_score, neutral_p = smetrics.get_selectivity(
         sample, n0, win=75, scores=True, sacale=False
     )
     neutral_score = neutral_score - 0.5
-    sig_mask = neutral_p < 0.05
-    if np.sum(sig_mask) != 0:
-        iscore = np.argmax(np.abs(neutral_score))
-        roc_neutral = neutral_score[iscore]
-    else:  # Not sure if not set it to zero directly or search the max in all the epoch
+    # sig_mask = neutral_p < 0.05
+
+    if np.isnan(lat):
+        # Not sure if not set it to zero directly or search the max in all the epoch
         # iscore = np.argmax(np.abs(neutral_score[sig_mask]))
         roc_neutral = 0
-    return roc_neutral
+    elif np.logical_and(inout == "out", ~np.isnan(lat_in)):
+        iscore = np.argmax(np.abs(neutral_score[lat_in - 10 : lat_in + 10]))
+        roc_neutral = neutral_score[iscore]
+    else:
+        iscore = np.argmax(np.abs(neutral_score[lat : lat + 50]))
+        roc_neutral = neutral_score[iscore]
+        lat = iscore
+    return roc_neutral, lat
 
 
 def get_screen_pos_b1b2(pos_b1, pos_b2, poscode_b2):
@@ -104,13 +112,15 @@ def get_screen_pos_b1b2(pos_b1, pos_b2, poscode_b2):
     return code_in, code_out
 
 
-def compute_roc_space(sp_pos, st_tg, end_tg, st_bl, end_bl, cerotr, percentile):
+def compute_roc_space(
+    sp_pos, st_tg, end_tg, st_bl, end_bl, cerotr, percentile, inout, lat_in=np.nan
+):
     fr = firing_rate.moving_average(data=sp_pos, win=100, step=1)
     roc_spatial = np.nan
     if ~np.all((np.isnan(fr))):
         masktr = check_trials(fr, cerotr, percentile)
         if np.sum(masktr) < 5:
-            return roc_spatial
+            return roc_spatial, lat
         else:
             fr = fr[masktr]
             bl = (
@@ -119,18 +129,23 @@ def compute_roc_space(sp_pos, st_tg, end_tg, st_bl, end_bl, cerotr, percentile):
                 .repeat(fr.shape[1], axis=1)
             )
 
-            _, spatial_score, spatial_p = smetrics.get_selectivity(
+            lat, spatial_score, spatial_p = smetrics.get_selectivity(
                 fr[:, st_tg:end_tg], bl, win=75, scores=True, sacale=False
             )
             spatial_score = spatial_score - 0.5
-            sig_mask = spatial_p < 0.05
-            if np.sum(sig_mask) != 0:
-                iscore = np.argmax(np.abs(spatial_score))
-                roc_spatial = spatial_score[iscore]
-            else:  # Not sure if not set it to zero directly or search the max in all the epoch
-                # iscore = np.argmax(np.abs(spatial_score[sig_mask]))
+            # sig_mask = spatial_p < 0.05
+            if np.isnan(lat):
+                # Not sure if not set it to zero directly or search the max in all the epoch
+                # iscore = np.argmax(np.abs(neutral_score[sig_mask]))
                 roc_spatial = 0
-    return roc_spatial
+            elif np.logical_and(inout == "out", ~np.isnan(lat_in)):
+                iscore = np.argmax(np.abs(spatial_score[lat_in - 10 : lat_in + 10]))
+                roc_spatial = spatial_score[iscore]
+            else:
+                iscore = np.argmax(np.abs(spatial_score[lat : lat + 50]))
+                roc_spatial = spatial_score[iscore]
+                lat = iscore
+    return roc_spatial, lat
 
 
 def get_space_neutral_roc(
@@ -147,6 +162,7 @@ def get_space_neutral_roc(
     res = {}
     nid = neu.get_neuron_id()
     res["nid"] = nid
+    lat = np.nan
     # Neutral roc
     for inout in ["in", "out"]:
         mask = getattr(neu, "mask_son_" + inout)
@@ -156,12 +172,13 @@ def get_space_neutral_roc(
         idx_start = time_before_son + start_sample
         idx_end = time_before_son + end_sample
         sample_id = neu.sample_id[mask]
-        roc_neutral = compute_roc_neutral(
-            sp_son, sample_id, idx_start, idx_end, cerotr, percentile
+        roc_neutral, lat = compute_roc_neutral(
+            sp_son, sample_id, idx_start, idx_end, cerotr, percentile, inout, lat_in=lat
         )
 
         res["neutral_" + inout] = roc_neutral
     # Space roc
+    lat = np.nan
     b1in_mask = getattr(neu, "mask_son_in")
     b2_mask = getattr(neu, "mask_ton_")
     sp = getattr(neu, "sp_ton_")
@@ -187,8 +204,16 @@ def get_space_neutral_roc(
     for in_out, code in zip(["in", "out"], [code_in, code_out]):
         code_mask = poscode_b2 == code
         sp_pos = sp[code_mask]
-        roc_spatial = compute_roc_space(
-            sp_pos, ist_tg, iend_tg, ist_bl, iend_bl, cerotr, percentile
+        roc_spatial, lat = compute_roc_space(
+            sp_pos,
+            ist_tg,
+            iend_tg,
+            ist_bl,
+            iend_bl,
+            cerotr,
+            percentile,
+            in_out,
+            lat_in=lat,
         )
         res["space_" + in_out] = roc_spatial
     return res
