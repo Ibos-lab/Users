@@ -7,10 +7,10 @@ paths:
   input: "${workspace.data_path}/population/in_out_b1_b2/2025_01_03_12_05_07/${pipelines.area}/population.h5"
 params:
   start_sample: 0
-  end_sample: 400
+  end_sample: 450
   st_target: 0
-  end_target: 400
-  st_bl: -100
+  end_target: 450
+  st_bl: -150
   end_bl: 0
   percentile: True
   cerotr: True
