@@ -56,6 +56,7 @@ def compute_roc_neutral(
     elif np.logical_and(inout == "out", ~np.isnan(lat_in)):
         iscore = np.argmax(np.abs(neutral_score[lat_in - 10 : lat_in + 10]))
         roc_neutral = neutral_score[iscore]
+        lat = iscore
     else:
         iscore = np.argmax(np.abs(neutral_score[lat : lat + 50]))
         roc_neutral = neutral_score[iscore]
@@ -141,6 +142,7 @@ def compute_roc_space(
             elif np.logical_and(inout == "out", ~np.isnan(lat_in)):
                 iscore = np.argmax(np.abs(spatial_score[lat_in - 10 : lat_in + 10]))
                 roc_spatial = spatial_score[iscore]
+                lat = iscore
             else:
                 iscore = np.argmax(np.abs(spatial_score[lat : lat + 50]))
                 roc_spatial = spatial_score[iscore]
@@ -177,6 +179,7 @@ def get_space_neutral_roc(
         )
 
         res["neutral_" + inout] = roc_neutral
+        res["neutral_lat" + inout] = lat
     # Space roc
     lat = np.nan
     b1in_mask = getattr(neu, "mask_son_in")
@@ -216,4 +219,5 @@ def get_space_neutral_roc(
             lat_in=lat,
         )
         res["space_" + in_out] = roc_spatial
+        res["space_lat" + in_out] = lat
     return res
