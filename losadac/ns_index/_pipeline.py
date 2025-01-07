@@ -20,7 +20,7 @@ def check_trials(x, cerotr, percentile):
 def compute_roc_neutral(
     sp_son, sample_id, idx_start, idx_end, cerotr, percentile, inout, lat_in=np.nan
 ):
-    roc_neutral = np.nan
+    roc_neutral, lat = np.nan, np.nan
     fr_son = firing_rate.moving_average(data=sp_son, win=100, step=1)[
         :, idx_start:idx_end
     ]
@@ -117,7 +117,7 @@ def compute_roc_space(
     sp_pos, st_tg, end_tg, st_bl, end_bl, cerotr, percentile, inout, lat_in=np.nan
 ):
     fr = firing_rate.moving_average(data=sp_pos, win=100, step=1)
-    roc_spatial = np.nan
+    roc_spatial, lat = np.nan, np.nan
     if ~np.all((np.isnan(fr))):
         masktr = check_trials(fr, cerotr, percentile)
         if np.sum(masktr) < 5:
