@@ -154,7 +154,7 @@ def compute_roc_space(
                 if lat_end > len(spatial_score):
                     lat_end = len(spatial_score)
                 iscore = np.argmax(np.abs(spatial_score[lat_st:lat_end]))
-                lat = iscore + lat
+                lat = iscore + lat_st
                 roc_spatial = spatial_score[lat]
             else:
                 iscore = np.argmax(np.abs(spatial_score[lat : lat + 50]))
