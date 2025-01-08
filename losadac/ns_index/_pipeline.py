@@ -138,7 +138,7 @@ def compute_roc_space(
             )
 
             lat, spatial_score, spatial_p = smetrics.get_selectivity(
-                fr[:, st_tg:end_tg], bl, win=50, scores=True, sacale=False
+                fr[:, st_tg:end_tg], bl, win=75, scores=True, sacale=False
             )
             spatial_score = spatial_score - 0.5
             # sig_mask = spatial_p < 0.05
