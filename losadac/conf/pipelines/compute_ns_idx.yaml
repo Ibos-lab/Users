@@ -9,8 +9,8 @@ params:
   start_sample: 0
   end_sample: 300
   st_target: 0
-  end_target: 200
-  st_bl: -150
+  end_target: 150
+  st_bl: -200
   end_bl: 0
   percentile: True
   cerotr: True
