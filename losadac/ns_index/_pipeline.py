@@ -61,7 +61,7 @@ def compute_roc_neutral(
         if lat_end > len(neutral_score):
             lat_end = len(neutral_score)
         iscore = np.argmax(np.abs(neutral_score[lat_st:lat_end]))
-        lat = iscore + lat
+        lat = iscore + lat_st
         roc_neutral = neutral_score[lat]
     else:
         iscore = np.argmax(np.abs(neutral_score[lat : lat + 50]))
