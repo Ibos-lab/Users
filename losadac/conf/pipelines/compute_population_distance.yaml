@@ -1,11 +1,11 @@
 _target_: population_distance.__main__.main
 name: "population_distance"
-area: "lip"
-output_path: ${pipelines.name}/${pipelines.preprocessing.metric}/zscore/percentile_with_nonzero/no_neutral_inout_selectivity/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
+area: "pfc"
+output_path: ${pipelines.name}/${pipelines.preprocessing.metric}/zscore/percentile_with_nonzero/ns_idx_std3/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
 
 paths:
-  input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
-  nidpath: "${workspace.data_path}/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/${pipelines.area}_no_neutral_inout_selectivity.csv"
+  input: "${workspace.data_path}/population/in_out_b1_b2/2025_01_03_12_05_07/${pipelines.area}/population.h5"
+  nidpath: '${workspace.data_path}/neutral_space_idx/2025_01_08_16_17_29/${pipelines.area}/out_1st/nid_out_std3.csv'
   # "${workspace.data_path}/selectivity/all_trials/2024_09_13_11_38_12/${pipelines.area}_no_neutral_inout_selectivity.csv"
   # "${workspace.data_path}/selectivity/percentile_with_nonzero/2024_09_23_17_09_29/${pipelines.area}_no_neutral_inout_selectivity.csv"
 preprocessing:

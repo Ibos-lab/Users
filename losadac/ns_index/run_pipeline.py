@@ -14,12 +14,6 @@ import pandas as pd
 def compute_ns_roc(paths: Dict, params: Dict, **kwargs):
     print("start compute neutral and space roc")
 
-    if "hydra" in params and params["hydra"]:
-        output_dir = os.getcwd()
-    elif "output_dir" in params:
-        output_dir = params["output_dir"]
-    else:
-        output_dir = "./"
     popu = PopulationData.from_python_hdf5(paths["input"])
     res = Parallel(n_jobs=-1)(
         delayed(_pipeline.get_space_neutral_roc)(
