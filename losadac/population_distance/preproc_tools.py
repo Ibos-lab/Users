@@ -1,6 +1,5 @@
 from ephysvibe.structures.neuron_data import NeuronData
-from ephysvibe.trials.spikes import firing_rate
-from ephysvibe.trials import align_trials, select_trials
+from ephysvibe.trials import align_trials, select_trials, firing_rate
 import numpy as np
 import h5py
 from pathlib import Path
