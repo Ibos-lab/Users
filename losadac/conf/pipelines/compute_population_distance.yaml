@@ -1,7 +1,7 @@
 _target_: population_distance.__main__.main
 name: "population_distance"
 area: "pfc"
-output_path: ${pipelines.name}/${pipelines.preprocessing.metric}/zscore/percentile_with_nonzero/all_neurons/test_using_1356n_per_it/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
+output_path: ${pipelines.name}/${pipelines.preprocessing.metric}/zscore/percentile_with_nonzero/all_neurons/300n_per_it/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
 
 paths:
   input: "${workspace.data_path}/population/in_out_b1_b2/2025_01_03_12_05_07/${pipelines.area}/population.h5"
@@ -23,7 +23,7 @@ preprocessing:
   min_sp_sec : 1
   norm : False
   zscore : True
-  select_n_neu : 1356
+  select_n_neu : 300
   cerotr: True
   percentile: True
   metric: 'euclidean'
