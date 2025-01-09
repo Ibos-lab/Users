@@ -1,11 +1,11 @@
 _target_: population_distance.__main__.main
 name: "population_distance"
 area: "pfc"
-output_path: ${pipelines.name}/${pipelines.preprocessing.metric}/zscore/percentile_with_nonzero/ns_idx_std1/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
+output_path: ${pipelines.name}/${pipelines.preprocessing.metric}/zscore/percentile_with_nonzero/ns_idx_std2/${now:%Y_%m_%d_%H_%M_%S}/${multiruns.name}/${pipelines.area}
 
 paths:
   input: "${workspace.data_path}/population/in_out_b1_b2/2025_01_03_12_05_07/${pipelines.area}/population.h5"
-  nidpath: '${workspace.data_path}/neutral_space_idx/2025_01_08_16_17_29/${pipelines.area}/out_1st/nid_out_std1.csv'
+  nidpath: '${workspace.data_path}/neutral_space_idx/2025_01_08_16_17_29/${pipelines.area}/out_1st/nid_out_std2.csv'
 preprocessing:
   time_before_son: ${multiruns.time_before_son}
   time_before_t1on: ${multiruns.time_before_t1on}
