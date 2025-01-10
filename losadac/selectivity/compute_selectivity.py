@@ -46,8 +46,8 @@ def check_trials(x, cerotr, percentile):
     if percentile:
         maskper = select_trials_by_percentile(x, masknocero)
     mask = np.logical_and(masknocero, maskper)
-    if np.sum(mask) < 10:
-        mask = np.full(x.shape[0], True)
+    # if np.sum(mask) < 10:
+    #     mask = np.full(x.shape[0], True)
     return mask
 
 
@@ -94,6 +94,9 @@ def get_selectivity_info(
         for isamp in fr_samples.keys():
             if ~np.all((np.isnan(fr_samples[isamp]))):
                 masktr = check_trials(fr_samples[isamp], cerotr, percentile)
+                if np.sum(masktr) < 10:
+                    masktr[:] = False
+
                 fr_samples[isamp] = fr_samples[isamp][masktr]
 
         o1 = np.concatenate((fr_samples["11"], fr_samples["15"]))
