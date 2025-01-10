@@ -4,7 +4,7 @@ area: "lip"
 output_path: ${pipelines.name}/percentile_with_nonzero/${now:%Y_%m_%d_%H_%M_%S}/${pipelines.area}/
 
 paths:
-  input: "${workspace.data_path}/population/${pipelines.area}/2024_08_28_12_23_36/population.h5"
+  input: "${workspace.data_path}/population/in_out_b1/${pipelines.area}/2024_08_28_12_23_36/population.h5"
 preprocessing:
   start_sample: -200
   end_sample: 850
