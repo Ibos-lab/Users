@@ -14,9 +14,11 @@ sessions_path = "/envau/work/invibe/USERS/IBOS/openephys/Riesling/"
 for area in ["pfc", "v4"]:
     subpath = f"/session_struct/{area}/neurons"
     path_list = glob.glob(f"{basepath}{subpath}/*")
+    lenpaths = len(path_list)
+    print(f"{area}: {lenpaths}")
+    for n, path_n in enumerate(path_list):
 
-    for path_n in path_list:
-
+        print(f"{area}: {n}/{lenpaths}")
         neu_n = NeuronData.from_python_hdf5(path_n)
         nid = neu_n.get_neuron_id()
         sp, conv = plot_raster.prepare_data_plotb1(
